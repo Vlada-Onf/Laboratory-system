@@ -28,9 +28,8 @@ const AppRoutes = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
-
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

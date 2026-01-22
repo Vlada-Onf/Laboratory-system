@@ -1,12 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import UsersTable from '../../components/usersTable/UsersTable';
 
 const Users = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight={700}>
-        таблиця юзерів
-      </Typography>
+    <Box p={3}>
+      <UsersTable />
     </Box>
   );
 };
