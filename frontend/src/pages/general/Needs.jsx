@@ -1,12 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import NeedsTable from '../../components/needsTable/NeedsTable'; // <-- імпорт таблиці
 
 const Needs = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight={700}>
-        тут буде таблиця для товарів на закупівлю
-      </Typography>
+    <Box p={3}>
+      <NeedsTable />
     </Box>
   );
 };
