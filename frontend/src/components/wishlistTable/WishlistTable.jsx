@@ -5,22 +5,10 @@ import UserCell from '../general/UserCell';
 import StatusChip from '../general/StatusChip';
 import PriorityChip from '../general/ImportanceChip';
 
+
 const rows = [
   {
     id: 1,
-    componentImage: 'https://store.arduino.cc/cdn/shop/files/A000066_03.front_934x700.jpg?v=1727098250',
-    componentName: 'Arduino Uno',
-    quantity: 3,
-    author: { avatar: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg', name: 'Дарина Дячук', email: 'darina@gmail.com' },
-    createdAt: '2026-01-10',
-    description: 'Для навчальних лабораторних робіт',
-    status: 'В очікуванні',
-    reason: 'Недостатня кількість',
-    approvedAt: '',
-    priority: 'Висока',
-  },
-  {
-    id: 2,
     componentImage: 'https://minicomp.com.ua/image/catalog/upload/3051885-40.jpg',
     componentName: 'Raspberry Pi 4',
     quantity: 2,
@@ -32,23 +20,10 @@ const rows = [
     approvedAt: '2026-01-11',
     priority: 'Середня',
   },
-  {
-    id: 3,
-    componentImage: 'https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375.jpg?v=1679400491',
-    componentName: 'ESP32 Dev Kit',
-    quantity: 5,
-    author: { avatar: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg', name: 'Дарина Дячук', email: 'darina@gmail.com' },
-    createdAt: '2026-01-14',
-    description: 'Для IoT проекту',
-    status: 'В очікуванні',
-    reason: 'Потрібно на лабораторні',
-    approvedAt: '',
-    priority: 'Висока',
-  },
 ];
 
-const NeedsTable = () => {
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+const WishlistTable = () => {
+ const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
   const columns = [
     {
@@ -111,4 +86,5 @@ const NeedsTable = () => {
   );
 };
 
-export default NeedsTable;
+
+export default WishlistTable;

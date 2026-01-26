@@ -1,12 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import WishlistTable from '../../components//wishlistTable/WishlistTable';
 
 const Wishlist = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight={700}>
-        вішліст (бажані товари)
-      </Typography>
+    <Box p={3}>
+      <WishlistTable />
     </Box>
   );
 };
