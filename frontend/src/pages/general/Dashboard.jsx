@@ -1,14 +1,13 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
 
-const Dashboard = () => {
+import { Grid, Box } from '@mui/material';
+import DashboardResponsive  from '../../components/dashboard/DashboardLayoutResponsive';
+
+const DashboardStatistics = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight={700}>
-        дашборд із статистикою
-      </Typography>
+    <Box p={2} >
+      <DashboardResponsive />
     </Box>
   );
 };
 
-export default Dashboard;
+export default DashboardStatistics;
