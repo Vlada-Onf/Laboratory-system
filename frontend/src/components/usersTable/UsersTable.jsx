@@ -48,6 +48,7 @@ const UsersTable = () => {
         email={params.row.email}
       />
     ),
+    minWidth: 270
   },
   {
     field: 'role',
@@ -59,9 +60,10 @@ const UsersTable = () => {
         onChange={(newRole) => console.log(params.row.id, 'new role:', newRole)}
       />
     ),
+    minWidth: 100
   },
-  { field: 'lastActivity', headerName: 'Остання активність', flex: 2 },
-  { field: 'createdAt', headerName: 'Дата реєстрації', flex: 2 },
+  { field: 'lastActivity', headerName: 'Остання активність', flex: 2 ,minWidth: 170},
+  { field: 'createdAt', headerName: 'Дата реєстрації', flex: 2 , minWidth: 150},
   {
     field: 'active',
     headerName: 'Активність',
@@ -72,6 +74,7 @@ const UsersTable = () => {
         onChange={(newValue) => console.log(params.row.id, 'active changed to', newValue)}
       />
     ),
+    minWidth: 100
   },
 ];
 

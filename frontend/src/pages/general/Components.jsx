@@ -1,12 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import ComponentsTable from '../../components/componentsTablePage/componentsTable/ComponentsTable';
 
 const Components = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight={700}>
-        тут компоненти
-      </Typography>
+    <Box p={3}>
+      <ComponentsTable />
     </Box>
   );
 };

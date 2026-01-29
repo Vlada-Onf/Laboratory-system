@@ -33,30 +33,34 @@ const WishlistTable = () => {
       renderCell: (params) => (
         <ComponentCell image={params.row.componentImage} name={params.row.componentName} />
       ),
+      minWidth: 220
     },
-    { field: 'quantity', headerName: 'Кількість', flex: 0.8 },
-    { field: 'description', headerName: 'Опис', flex: 2 },
-    { field: 'reason', headerName: 'Причина', flex: 2 },
+    { field: 'quantity', headerName: 'Кількість', flex: 0.8 ,minWidth: 90},
+    { field: 'description', headerName: 'Опис', flex: 2 ,minWidth: 220},
+    { field: 'reason', headerName: 'Причина', flex: 2 ,minWidth: 220},
     {
       field: 'priority',
       headerName: 'Важливість',
       flex: 1.1,
       renderCell: (params) => <PriorityChip priority={params.row.priority} />,
+      minWidth: 100,
     },
-    { field: 'createdAt', headerName: 'Дата запису', flex: 1.2 },
+    { field: 'createdAt', headerName: 'Дата запису', flex: 1.2 , minWidth: 120},
     {
       field: 'author',
       headerName: 'Хто додав',
       flex: 2.2,
       renderCell: (params) => <UserCell {...params.row.author} />,
+      minWidth: 200,
     },
     {
       field: 'status',
       headerName: 'Статус',
       flex: 1.3,
       renderCell: (params) => <StatusChip status={params.row.status} />,
+      minWidth: 120,
     },
-    { field: 'approvedAt', headerName: 'Затверджено', flex: 1.2 },
+    { field: 'approvedAt', headerName: 'Затверджено', flex: 1.2 , minWidth: 120 },
   ];
 
   return (
