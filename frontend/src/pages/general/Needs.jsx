@@ -5,6 +5,13 @@ import NeedsTable from '../../components/needsTable/NeedsTable'; // <-- імпо
 const Needs = () => {
   return (
     <Box p={3}>
+      <Typography
+              variant="h5"
+              fontWeight={600}
+              sx={{ mb: 2 }}
+            >
+              Заплановані покупки
+            </Typography>
       <NeedsTable />
     </Box>
   );

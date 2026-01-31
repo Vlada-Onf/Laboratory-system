@@ -12,6 +12,7 @@ import SignpostIcon from '@mui/icons-material/Signpost';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import TurnedInIcon from '@mui/icons-material/TurnedIn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import BuildIcon from '@mui/icons-material/Build';
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -29,6 +30,7 @@ export default function Sidebar({ open }) {
     { text: 'Потреби', icon: <TurnedInIcon />, path: '/needs' },
     { text: 'Бажане', icon: <FavoriteIcon />, path: '/wishlist' },
     { text: 'Статистика', icon: <AnalyticsIcon />, path: '/dashboard' },
+    { text: 'Пошкодження', icon: <BuildIcon />, path: '/brokenComponents' },
   ];
 
   return (
