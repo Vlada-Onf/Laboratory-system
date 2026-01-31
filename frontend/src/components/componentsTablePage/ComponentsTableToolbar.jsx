@@ -13,20 +13,24 @@ const ComponentsTableToolbar = ({ onImportExcel, onAddComponent }) => {
         variant="contained"
         onClick={onAddComponent}
         sx={{
-          backgroundColor: '#841a1c',
+          fontSize: 16,
+          background: 'linear-gradient(135deg, #f16731, #f4926c)',
+          color: '#fff',
           '&:hover': {
-            backgroundColor: '#6e1518',
+            background: 'linear-gradient(135deg, #ad4a23, #d07f5e)',
           },
         }}
       >
         Додати компонент
       </Button>
 
+
       <Button
         variant="outlined"
         startIcon={<TableViewIcon />}
         onClick={onImportExcel}
         sx={{
+           fontSize: 16,
           borderColor: '#2e7d32',
           color: '#2e7d32',
           '&:hover': {

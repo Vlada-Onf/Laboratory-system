@@ -37,7 +37,7 @@ const ButtonsCell = function(props) {
             <IconButton
                 size="small"
                 onClick={onDelete}
-                sx={{ color: '#841a1c' }}
+                sx={{ color: '#f16731' }}
             >
                 <DeleteIcon fontSize="small" />
             </IconButton>

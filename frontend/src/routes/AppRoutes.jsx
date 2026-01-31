@@ -11,6 +11,7 @@ import Needs from "../pages/general/Needs";
 import Users from "../pages/general/Users";
 import Wishlist from "../pages/general/Wishlist";
 import Profile from "../pages/general/Profile";
+import Component from '../pages/general/Component';
 import NotFound from "../pages/general/NotFound";
 
 const AppRoutes = () => {
@@ -28,6 +29,7 @@ const AppRoutes = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/components/:id" element={<Component />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
