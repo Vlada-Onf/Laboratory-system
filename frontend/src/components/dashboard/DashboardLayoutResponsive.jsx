@@ -12,7 +12,7 @@ const Item = memo(({ children, sx }) => (
   <Paper
     elevation={3}
     sx={{
-      p: 1.5,
+      p: 1,
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: '#fff',
@@ -56,7 +56,7 @@ const DashboardResponsive = () => {
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
-            gap: 2,
+            gap: 1,
             width: '100%',
           }}
         >

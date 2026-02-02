@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import NeedsTable from '../../components/needsTable/NeedsTable'; // <-- імпорт таблиці
+import NeedsTable from '../../components/needsTable/NeedsTable';
+import { useNeedsStore } from '../../store/useNeedsStore';
 
 const Needs = () => {
+  const needsRows = useNeedsStore((state) => state.needsRows);
+
   return (
     <Box p={3}>
       <Typography
@@ -12,7 +15,7 @@ const Needs = () => {
             >
               Заплановані покупки
             </Typography>
-      <NeedsTable />
+      <NeedsTable rows={needsRows}/>
     </Box>
   );
 };

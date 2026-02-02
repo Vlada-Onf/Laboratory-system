@@ -37,7 +37,7 @@ export default function ComponentsCostByCategoryChart() {
             color: '#841a1c',
           },
         ]}
-        height={350}
+        height={340}
         margin={{ left: 20 }}
         slotProps={{
           axisTickLabel: {

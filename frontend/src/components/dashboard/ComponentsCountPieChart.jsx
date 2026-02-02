@@ -26,8 +26,8 @@ const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
   return (
     <Box sx={{ width: '100%', textAlign: 'center' }}>
       <PieChart
-        width={240}
-        height={240}
+        width={220}
+        height={220}
         series={[
           {
             data: pieData,

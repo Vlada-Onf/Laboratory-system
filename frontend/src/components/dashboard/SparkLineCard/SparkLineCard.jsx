@@ -36,7 +36,7 @@ export default function SparkLineCard({
     length === 0 ? (
       <Typography color="text.secondary">Дані відсутні</Typography>
     ) : (
-      <Stack direction="column" width="100%" maxWidth={450}>
+      <Stack direction="column" width="100%" maxWidth={400}>
         <Typography sx={{ color: '#08273b', fontWeight: 500, fontSize: 18, pt: 1 }}>
           {displayLabel}
         </Typography>

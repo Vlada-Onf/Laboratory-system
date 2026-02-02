@@ -1,16 +1,21 @@
 import React from 'react';
 import { Box, Avatar, Typography } from '@mui/material';
 
-const ClickableComponentCell = ({ row, onClick }) => {
+const ClickableComponentCell = ({ image, name, id, onClick }) => {
   return (
     <Box
       display="flex"
       alignItems="center"
       sx={{ cursor: 'pointer' }}
-      onClick={() => onClick(row.id)}
+      onClick={() => onClick && onClick(id)}
     >
-      <Avatar src={row.image} alt={row.name} variant="rounded" sx={{ width: 60, height: 60, mr: 2 }} />
-      <Typography fontWeight={600}>{row.name}</Typography>
+      <Avatar
+        src={image || 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'}
+        alt={name || '—'}
+        variant="rounded"
+        sx={{ width: 60, height: 60, mr: 2 }}
+      />
+      <Typography fontWeight={600}>{name || '—'}</Typography>
     </Box>
   );
 };

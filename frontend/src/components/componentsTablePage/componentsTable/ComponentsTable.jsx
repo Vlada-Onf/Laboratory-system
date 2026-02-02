@@ -1,17 +1,55 @@
 import React, { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import ClickableComponentCell from './ClickableComponentCell';
 import LinkBadge from './../../component/linksBlock/LinkBadge';
 import TagsCell from './TagsCell';
 import ButtonsCell from './ButtonsCell';
 import ComponentsTableToolbar from './../ComponentsTableToolbar';
-import { useComponentNavigation } from '../../../hooks/useComponentNavigation';
+import AddNeedModal from '../../brokenComponents/AddNeedModal';
 import { componentsMock } from '../../../mock/componentsMock';
+import { useNavigate } from 'react-router-dom';
 
-const ComponentsTable = () => {
+
+const ComponentsTable = ({ onAddNeed }) => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const { goToComponentPage } = useComponentNavigation();
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleOpenModal = (row) => {
+    setSelectedRow(row);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedRow(null);
+  };
+
+  const handleAddNeed = (formData) => {
+    if (!selectedRow){
+        return;
+      }
+
+    const mappedNeed = {
+      id: Date.now(),
+      componentName: selectedRow.name,
+      componentImage: selectedRow.image,
+      category: selectedRow.category,
+      quantity: formData.quantity,
+      price: formData.price,
+      description: formData.description || selectedRow.description,
+      reason: formData.reason,
+      priority: formData.priority,
+      status: 'В очікуванні',
+      approvedAt: '',
+    };
+
+    onAddNeed?.(mappedNeed);
+    handleCloseModal();
+  };
+
+  const navigate = useNavigate();
 
   const columns = [
     {
@@ -22,8 +60,10 @@ const ComponentsTable = () => {
       sortable: false,
       renderCell: (params) => (
         <ClickableComponentCell
-          row={params.row}
-          onClick={(id) => goToComponentPage(id)}
+          image={params.row.image}
+          name={params.row.name}
+          id={params.row.id}
+          onClick={(id) => navigate(`/components/${id}`)}
         />
       ),
     },
@@ -32,9 +72,7 @@ const ComponentsTable = () => {
       headerName: 'Категорія',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => (
-        <Typography variant="body2">{params.value || '—'}</Typography>
-      ),
+      renderCell: (params) => <Typography variant="body2">{params.value || '—'}</Typography>,
     },
     {
       field: 'description',
@@ -47,29 +85,21 @@ const ComponentsTable = () => {
       headerName: 'Документація',
       flex: 1.5,
       minWidth: 180,
-      renderCell: (params) => (
-        <LinkBadge url={params.value} color="#08273b" />
-      ),
+      renderCell: (params) => <LinkBadge url={params.value} color="#08273b" />,
     },
     {
       field: 'quantity',
       headerName: 'К-сть',
       flex: 0.8,
       minWidth: 80,
-      renderCell: (params) => (
-        <Typography fontWeight={600}>{params.value} шт</Typography>
-      ),
+      renderCell: (params) => <Typography fontWeight={600}>{params.value} шт</Typography>,
     },
     {
       field: 'price',
       headerName: 'Ціна',
       flex: 1,
       minWidth: 100,
-      renderCell: (params) => (
-        <Typography fontWeight={600}>
-          {params.value ? `${params.value} ₴` : '—'}
-        </Typography>
-      ),
+      renderCell: (params) => <Typography fontWeight={600}>{params.value ? `${params.value} ₴` : '—'}</Typography>,
     },
     {
       field: 'tags',
@@ -87,7 +117,7 @@ const ComponentsTable = () => {
       renderCell: (params) => (
         <ButtonsCell
           onEdit={() => console.log('edit', params.row.id)}
-          onMoveToNeeds={() => console.log('move to needs', params.row.id)}
+          onMoveToNeeds={() => handleOpenModal(params.row)}
           onDelete={() => console.log('delete', params.row.id)}
         />
       ),
@@ -95,12 +125,10 @@ const ComponentsTable = () => {
   ];
 
   return (
-    <div style={{ width: '100%' }}>
+    <Box>
       <ComponentsTableToolbar
-        onAddComponent={() => console.log('add component')}
-        onImportExcel={() => console.log('import excel')}
       />
-      <div style={{ height: 600, width: '100%' }}>
+      <Box sx={{ height: 520, width: '100%' }}>
         <DataGrid
           rows={componentsMock}
           columns={columns}
@@ -111,20 +139,19 @@ const ComponentsTable = () => {
           disableRowSelectionOnClick
           columnReordering
           sx={{
-            '& .MuiDataGrid-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              lineHeight: 1.4,
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#f5f5f5',
-            },
+            '& .MuiDataGrid-cell': { display: 'flex', alignItems: 'center', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.4 },
+            '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f5f5f5' },
           }}
         />
-      </div>
-    </div>
+      </Box>
+
+      <AddNeedModal
+        open={openModal}
+        onClose={handleCloseModal}
+        onAdd={handleAddNeed}
+        row={selectedRow}
+      />
+    </Box>
   );
 };
 

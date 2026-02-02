@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import WishlistTable from '../../components//wishlistTable/WishlistTable';
+import { useNeedsStore } from '../../store/useNeedsStore';
 
 const Wishlist = () => {
+  const addNeed = useNeedsStore((state) => state.addNeed);
+
   return (
     <Box p={3}>
       <Typography
@@ -12,7 +15,7 @@ const Wishlist = () => {
             >
               Список бажаного
             </Typography>
-      <WishlistTable />
+      <WishlistTable onAddNeed={addNeed} />
     </Box>
   );
 };
