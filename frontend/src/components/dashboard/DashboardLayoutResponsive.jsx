@@ -12,7 +12,7 @@ const Item = memo(({ children, sx }) => (
   <Paper
     elevation={3}
     sx={{
-      p: 1,
+      p: 1.5,
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: '#fff',
