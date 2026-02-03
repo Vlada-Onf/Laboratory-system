@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect } from 'react';
 import { Box, Typography, Button} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import bgImage from "../../assets/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner.jpg";
+import bgImage from "../../assets/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner.webp";
 
 const NotFound = () => {
   const navigate = useNavigate();
