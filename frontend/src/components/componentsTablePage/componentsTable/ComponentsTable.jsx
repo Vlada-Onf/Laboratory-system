@@ -128,7 +128,7 @@ const ComponentsTable = ({ onAddNeed }) => {
     <Box>
       <ComponentsTableToolbar
       />
-      <Box sx={{ height: 520, width: '100%' }}>
+      <Box sx={{ height: 560, width: '100%' }}>
         <DataGrid
           rows={componentsMock}
           columns={columns}

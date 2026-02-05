@@ -34,10 +34,16 @@ export default function SparkLineCard({
 
   const content =
     length === 0 ? (
-      <Typography color="text.secondary">Дані відсутні</Typography>
+      <Typography color="rgba(255, 255, 255, 0.7)">Дані відсутні</Typography>
     ) : (
       <Stack direction="column" width="100%" maxWidth={450}>
-        <Typography sx={{ color: '#08273b', fontWeight: 500, fontSize: 18, pt: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 500,
+            fontSize: 18,
+            pt: 1,
+          }}
+        >
           {displayLabel}
         </Typography>
 
@@ -49,7 +55,10 @@ export default function SparkLineCard({
         >
           <Typography
             aria-live="polite"
-            sx={{ fontSize: '2.6rem', fontWeight: 500, color: '#08273b' }}
+            sx={{
+              fontSize: '2.6rem',
+              fontWeight: 500,
+            }}
           >
             {formattedValue}
           </Typography>

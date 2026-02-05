@@ -11,7 +11,6 @@ const HistoryItem = ({ avatar, name, action, time }) => {
         borderRadius: 2,
         cursor: 'pointer',
         '&:hover': {
-  backgroundColor: 'rgba(8, 39, 59, 0.25)',
   backdropFilter: 'blur(6px)',
 }
 

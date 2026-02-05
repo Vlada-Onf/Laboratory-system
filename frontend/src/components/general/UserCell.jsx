@@ -8,7 +8,7 @@ const UserCell = ({ avatar, name, email }) => {
       <Box>
         <Typography
           variant="body1"
-          sx={{ fontWeight: 700, color: '#08273b' }}
+          sx={{ fontWeight: 700 }}
         >
           {name}
         </Typography>

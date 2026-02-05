@@ -7,7 +7,7 @@ const SectionTitle = ({ children, color }) => (
       mb: 2,
       fontSize: 18,
       fontWeight: 500,
-      color: color || '#333',
+      color: color ,
     }}
   >
     {children}

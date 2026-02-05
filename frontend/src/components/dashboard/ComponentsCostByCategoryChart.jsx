@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
+import Box from '@mui/material/Box';
 
 const componentsCostDataset = [
   { category: 'Транзистори', totalCost: 12400 },
@@ -12,8 +13,9 @@ const valueFormatter = (value) => `${value.toLocaleString()} ₴`;
 
 export default function ComponentsCostByCategoryChart() {
   return (
-    <div style={{ width: '100%' }}>
+    <Box sx={{ width: '100%' }}>
       <BarChart
+      height={390}
         dataset={componentsCostDataset}
         xAxis={[
           {
@@ -21,33 +23,27 @@ export default function ComponentsCostByCategoryChart() {
             scaleType: 'band',
             tickPlacement: 'middle',
             tickLabelPlacement: 'middle',
+            tickLabelStyle: {fontSize: 17 },
           },
+
         ]}
         yAxis={[
           {
             label: 'Загальна вартість (₴)',
-            width: 100,
+            width: 120,
+            labelStyle: { fontSize: 17 },
+            tickLabelStyle: { fontSize: 15 },
           },
         ]}
         series={[
           {
             dataKey: 'totalCost',
-            label: 'Вартість компонентів',
             valueFormatter,
             color: '#841a1c',
           },
         ]}
-        height={372}
-        margin={{ left: 20 }}
-        slotProps={{
-          axisTickLabel: {
-            style: {
-              fontSize: 17,
-              fill: '#333',
-            },
-          },
-        }}
+        legend={{ visible: false }}
       />
-    </div>
+    </Box>
   );
 }

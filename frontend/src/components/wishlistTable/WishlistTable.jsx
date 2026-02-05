@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography } from '@mui/material';
 import ComponentCell from '../general/ComponentCell';
 import PriorityChip from '../general/ImportanceChip';
 import StatusChip from '../general/StatusChip';
 import MoveToNeedsButton from './../brokenComponents/MoveToNeedsButton';
 import AddNeedModal from './../brokenComponents/AddNeedModal';
+import { Typography } from '@mui/material';
+
 
 const rows = [
   {
@@ -39,10 +40,9 @@ const WishlistTable = ({ onAddNeed }) => {
   };
 
   const handleAddNeed = (formData) => {
-    if (!selectedRow) {
-    return;
-}
-
+    if (!selectedRow){
+      return;
+    }
 
     const mappedNeed = {
       id: Date.now(),
@@ -68,87 +68,66 @@ const WishlistTable = ({ onAddNeed }) => {
       headerName: 'Компонент',
       flex: 2.2,
       minWidth: 220,
-      renderCell: (params) => {
-        return <ComponentCell image={params.row.componentImage} name={params.row.componentName} />;
-      },
+      renderCell: (params) => (
+        <ComponentCell image={params.row.componentImage} name={params.row.componentName} />
+      ),
     },
     {
       field: 'category',
       headerName: 'Категорія',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => {
-        return <Typography variant="body2">{params.value || '—'}</Typography>;
-      },
+      renderCell: (params) => <Typography variant="body2">{params.value || '—'}</Typography>,
     },
     {
-      field: 'quantity',
-      headerName: 'Кількість',
-      flex: 0.8,
-      minWidth: 100,
-      renderCell: (params) => {
-        return <Typography fontWeight={600}>{params.value} шт</Typography>;
-      },
-    },
+          field: 'quantity',
+          headerName: 'Кількість',
+          flex: 0.8,
+          minWidth: 100,
+          renderCell: (params) => <Typography fontWeight={600}>{params.value} шт</Typography>,
+        },
     {
       field: 'price',
       headerName: 'Ціна',
       flex: 1,
       minWidth: 100,
-      renderCell: (params) => {
-        return <Typography fontWeight={600}>{params.value ? `${params.value} ₴` : '—'}</Typography>;
-      },
+      renderCell: (params) => (
+        <Typography fontWeight={600}>
+          {params.value ? `${params.value} ₴` : '—'}
+        </Typography>
+      ),
     },
     {
       field: 'priority',
       headerName: 'Важливість',
       flex: 1.1,
       minWidth: 100,
-      renderCell: (params) => {
-        return <PriorityChip priority={params.row.priority} />;
-      },
+      renderCell: (params) => <PriorityChip priority={params.row.priority} />,
     },
-    {
-      field: 'description',
-      headerName: 'Опис',
-      flex: 2,
-      minWidth: 220,
-    },
-    {
-      field: 'reason',
-      headerName: 'Причина',
-      flex: 2,
-      minWidth: 220,
-    },
+    { field: 'description', headerName: 'Опис', flex: 2, minWidth: 220 },
+    { field: 'reason', headerName: 'Причина', flex: 2, minWidth: 220 },
     {
       field: 'status',
       headerName: 'Статус',
       flex: 1.3,
       minWidth: 120,
-      renderCell: (params) => {
-        return <StatusChip status={params.row.status} />;
-      },
+      renderCell: (params) => <StatusChip status={params.row.status} />,
     },
-    {
-      field: 'approvedAt',
-      headerName: 'Затверджено',
-      flex: 1.2,
-      minWidth: 120,
-    },
+    { field: 'approvedAt', headerName: 'Затверджено', flex: 1.2, minWidth: 120 },
     {
       field: 'actions',
       headerName: '',
       width: 60,
       sortable: false,
       filterable: false,
-      renderCell: (params) => {
-        return <MoveToNeedsButton onMoveToNeeds={() => handleOpenModal(params.row)} />;
-      },
+      renderCell: (params) => (
+        <MoveToNeedsButton onMoveToNeeds={() => handleOpenModal(params.row)} />
+      ),
     },
   ];
 
   return (
-    <div style={{ height: 530, width: '100%' }}>
+    <div style={{ height: 580, width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -170,7 +149,13 @@ const WishlistTable = ({ onAddNeed }) => {
           },
         }}
       />
-      <AddNeedModal open={openModal} onClose={handleCloseModal} onAdd={handleAddNeed} row={selectedRow} />
+
+      <AddNeedModal
+        open={openModal}
+        onClose={handleCloseModal}
+        onAdd={handleAddNeed}
+        row={selectedRow}
+      />
     </div>
   );
 };

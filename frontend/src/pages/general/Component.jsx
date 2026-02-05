@@ -1,7 +1,9 @@
+// components/componentPage/ComponentPage.jsx
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
 import { componentsMock } from '../../mock/componentsMock';
+import PageWrapper from '../../components/layout/PaperWrapper';
 
 const ComponentPage = () => {
   const { id } = useParams();
@@ -14,7 +16,8 @@ const ComponentPage = () => {
   }
 
   return (
-    <ComponentLayout
+    <PageWrapper>
+<ComponentLayout
       name={component.name}
       image={component.image}
       description={component.description}
@@ -24,6 +27,8 @@ const ComponentPage = () => {
       category={component.category}
       tags={component.tags}
     />
+    </PageWrapper>
+
   );
 };
 

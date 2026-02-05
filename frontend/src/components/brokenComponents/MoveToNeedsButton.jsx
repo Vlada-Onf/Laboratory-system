@@ -7,7 +7,6 @@ const MoveToNeedsButton = ({ onMoveToNeeds }) => {
         <IconButton
             size="small"
             onClick={onMoveToNeeds}
-            sx={{ color: '#08273b' }}
         >
             <ShoppingCartIcon fontSize="small" />
         </IconButton>

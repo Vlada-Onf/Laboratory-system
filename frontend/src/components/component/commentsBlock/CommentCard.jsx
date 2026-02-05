@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Typography, Avatar, Button, TextField } from '@mui/material';
+import { useTheme } from '../../../context/useTheme';
 
 const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [text, setText] = useState(comment.text);
   const [replyText, setReplyText] = useState('');
+  const { isDarkMode } = useTheme();
 
   const handleSave = () => {
     onUpdate(comment.id, text);
@@ -16,6 +18,7 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
     if (!replyText.trim()) {
       return;
     }
+
     onReply(comment.id, replyText.trim());
     setReplyText('');
     setIsReplying(false);
@@ -59,8 +62,12 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
                   handleSave();
                 }}
                 sx={{
-                  color: '#08273b',
-                  '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.08)' },
+                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
+                  '&:hover': {
+                    backgroundColor: isDarkMode
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : 'rgba(211, 47, 47, 0.08)'
+                  },
                 }}
               >
                 Зберегти
@@ -72,8 +79,12 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
                   setIsEditing(true);
                 }}
                 sx={{
-                  color: '#08273b',
-                  '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.08)' },
+                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
+                  '&:hover': {
+                    backgroundColor: isDarkMode
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : 'rgba(211, 47, 47, 0.08)'
+                  },
                 }}
               >
                 Редагувати
@@ -86,8 +97,12 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
                 setIsReplying(!isReplying);
               }}
               sx={{
-                color: '#08273b',
-                '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.08)' },
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
+                '&:hover': {
+                  backgroundColor: isDarkMode
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(211, 47, 47, 0.08)'
+                },
               }}
             >
               Відповісти
@@ -99,15 +114,19 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
                 handleDelete();
               }}
               sx={{
-                color: '#f16731',
-                '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.08)' },
+                color: isDarkMode ? '#f16731' : '#f16731',
+                '&:hover': {
+                  backgroundColor: isDarkMode
+                    ? 'rgba(241, 103, 49, 0.15)'
+                    : 'rgba(241, 103, 49, 0.15)'
+                },
               }}
             >
               Видалити
             </Button>
           </Box>
 
-          {isReplying ? (
+          {isReplying && (
             <Box sx={{ mt: 1 }}>
               <TextField
                 fullWidth
@@ -115,48 +134,46 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
                 multiline
                 placeholder="Ваша відповідь..."
                 value={replyText}
-                onChange={(e) => {
-                  setReplyText(e.target.value);
-                }}
+                onChange={(e) => setReplyText(e.target.value)}
               />
               <Button
                 size="small"
-                onClick={() => {
-                  handleReply();
+                onClick={handleReply}
+                sx={{
+                  mt: 0.5,
+                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
+                  '&:hover': {
+                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(211, 47, 47, 0.08)'
+                  },
                 }}
-                sx={{ mt: 0.5 }}
               >
                 Надіслати
               </Button>
             </Box>
-          ) : null}
+          )}
         </Box>
       </Box>
 
-      {comment.replies && comment.replies.length > 0 ? (
-        <Box
-          sx={{
-            pl: 6,
-            mt: 1,
-            borderLeft: '1px solid #ccc',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-          }}
-        >
-          {comment.replies.map((reply) => {
-            return (
-              <CommentCard
-                key={reply.id}
-                comment={reply}
-                onUpdate={onUpdate}
-                onReply={onReply}
-                onDelete={onDelete}
-              />
-            );
-          })}
+      {comment.replies?.length > 0 && (
+        <Box sx={{
+          pl: 6,
+          mt: 1,
+          borderLeft: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #ccc',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+        }}>
+          {comment.replies.map((reply) => (
+            <CommentCard
+              key={reply.id}
+              comment={reply}
+              onUpdate={onUpdate}
+              onReply={onReply}
+              onDelete={onDelete}
+            />
+          ))}
         </Box>
-      ) : null}
+      )}
     </Box>
   );
 };

@@ -40,7 +40,6 @@ const ComponentLayout = ({
         gap: 3,
         width: '100%',
         p: 2,
-        bgcolor: '#fff',
       }}
     >
       <Box
@@ -77,7 +76,6 @@ const ComponentLayout = ({
               title="Зламані"
               value={burntValue}
               bgcolor={burntBg}
-              titleColor="#fff"
             />
           </Box>
 

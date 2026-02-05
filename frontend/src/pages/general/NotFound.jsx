@@ -1,13 +1,10 @@
-import React from 'react';
-import { useEffect } from 'react';
-import { Box, Typography, Button} from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import bgImage from "../../assets/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner.webp";
+import PageWrapper from '../../components/layout/PaperWrapper';
 
 const NotFound = () => {
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -17,55 +14,49 @@ const NotFound = () => {
   }, []);
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0b1c2d',
-        backgroundImage: `url(${bgImage})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
+    <PageWrapper>
       <Box
         sx={{
-          textAlign: 'center',
-          color: '#fff',
-          p: 5,
-          borderRadius: 2,
-          maxWidth: 400,
-          transform: 'translateY(-60px)',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        <Typography
-          variant="h1"
-          fontWeight={100}
-          sx={{ fontSize: '120px', lineHeight: 1.05 }}
+        <Box
+          sx={{
+            textAlign: 'center',
+            p: 5,
+            borderRadius: 2,
+            maxWidth: 400,
+            transform: 'translateY(-60px)',
+          }}
         >
-          404
-        </Typography>
+          <Typography
+            variant="h1"
+            fontWeight={100}
+            sx={{ fontSize: '120px', lineHeight: 1.05 }}
+          >
+            404
+          </Typography>
 
-        <Typography
+          <Typography
             sx={{ fontSize: '26px', mb: 4 }}
           >
-          Сторінку не знайдено
-        </Typography>
+            Сторінку не знайдено
+          </Typography>
 
-        <Button
-        variant="contained"
-        sx={{ backgroundColor: '#b33a0b', '&:hover': { backgroundColor: '#9e3208' } }}
-        onClick={() => navigate('/main')}
-        size="large"
-      >
-        На головну
-      </Button>
-
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#b33a0b', '&:hover': { backgroundColor: '#9e3208' } }}
+            onClick={() => navigate('/main')}
+            size="large"
+          >
+            На головну
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </PageWrapper>
   );
 };
 

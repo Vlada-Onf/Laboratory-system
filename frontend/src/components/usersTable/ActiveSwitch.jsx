@@ -18,10 +18,10 @@ const ActiveSwitch = ({ active, onChange }) => {
       onChange={handleChange}
       sx={{
         '& .MuiSwitch-switchBase.Mui-checked': {
-          color: '#08273b',
+          color: '#5bc522',
         },
         '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-          backgroundColor: '#08273b',
+          backgroundColor: '#5bc522',
         },
       }}
     />

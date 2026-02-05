@@ -12,7 +12,6 @@ const SchematicCard = ({ name, image, link }) => (
       flexDirection: 'column',
       alignItems: 'center',
       height: 200,
-      bgcolor: '#fff',
       borderRadius: 2,
       boxShadow: 1,
       overflow: 'hidden',

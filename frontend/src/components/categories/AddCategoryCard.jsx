@@ -1,9 +1,11 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { useTheme } from '../../context/useTheme';
 
 const AddCategoryCard = ({ onClick }) => {
-  const customColor = '#08273b';
+  const { isDarkMode } = useTheme();
+  const textColor = isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b';
 
   return (
     <Card
@@ -20,10 +22,10 @@ const AddCategoryCard = ({ onClick }) => {
       onClick={onClick}
     >
       <Box textAlign="center">
-        <IconButton sx={{ color: customColor }}>
+        <IconButton sx={{ color: textColor }}>
           <AddIcon fontSize="large" sx={{ fontSize: 40 }} />
         </IconButton>
-        <Typography variant="h6" sx={{ color: customColor }}>
+        <Typography variant="h6" sx={{ color: textColor }}>
           Додати категорію
         </Typography>
       </Box>

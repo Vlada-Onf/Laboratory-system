@@ -19,7 +19,7 @@ export default function ComponentsCountSparkLine() {
       data={counts}
       labels={weeks}
       title="Кількість компонентів"
-      lineColor="#08273b"
+      lineColor="#5bc522"
     />
   );
 }

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Tooltip, Typography } from '@mui/material';
+import { Link, Tooltip, Typography, useTheme } from '@mui/material';
 
 const LinkCell = function(props) {
     const url = props.url;
     const [domain, setDomain] = useState('');
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === 'dark';
 
     useEffect(function() {
         if (!url) {
@@ -39,7 +41,8 @@ const LinkCell = function(props) {
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 0.5
+                    gap: 0.5,
+                    color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'inherit',
                 }}
             >
                 <img
@@ -49,7 +52,14 @@ const LinkCell = function(props) {
                     height={16}
                     style={{ borderRadius: 2 }}
                 />
-                <Typography variant="body2" noWrap sx={{ maxWidth: 180 }}>
+                <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                        maxWidth: 180,
+                        color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'inherit',
+                    }}
+                >
                     {domain}
                 </Typography>
             </Link>

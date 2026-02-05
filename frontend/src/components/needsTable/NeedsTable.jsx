@@ -91,7 +91,7 @@ const NeedsTable = ({ rows }) => {
   ];
 
   return (
-    <div style={{ height: 530, width: '100%' }}>
+    <div style={{ height: 580, width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}

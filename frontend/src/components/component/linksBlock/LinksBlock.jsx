@@ -8,9 +8,11 @@ const LinksBlock = ({ componentId = 1 }) => {
     return c.id === componentId;
   });
 
+
   if (!component) {
     return null;
   }
+
 
   return (
     <Box
@@ -24,7 +26,7 @@ const LinksBlock = ({ componentId = 1 }) => {
         <LinksRow
           title="Документація"
           links={[component.docLink]}
-          color="#08273b"
+          color="#76bff4"
         />
       )}
 

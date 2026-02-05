@@ -4,7 +4,7 @@ import { Chip, Menu, MenuItem } from '@mui/material';
 const statuses = ['В очікуванні', 'Затверджено', 'Відмовлено'];
 
 const statusColors = {
-  'В очікуванні': '#08273b',
+  'В очікуванні': '#f16731',
   'Затверджено': '#5bc522',
   'Відмовлено': '#d32f2f',
 };

@@ -21,7 +21,6 @@ const ButtonsCell = function(props) {
             <IconButton
                 size="small"
                 onClick={onEdit}
-                sx={{ color: '#08273b' }}
             >
                 <EditIcon fontSize="small" />
             </IconButton>
@@ -29,7 +28,6 @@ const ButtonsCell = function(props) {
             <IconButton
                 size="small"
                 onClick={onMoveToNeeds}
-                sx={{ color: '#08273b' }}
             >
                 <ShoppingCartIcon fontSize="small" />
             </IconButton>
