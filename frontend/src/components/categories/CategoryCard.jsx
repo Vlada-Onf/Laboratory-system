@@ -1,7 +1,51 @@
-import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Box } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AddCategoryModal from './AddCategoryModal';
 
-const CategoryCard = ({ title, description, image, color }) => {
+const CategoryCard = ({ title, description, image, color, id, onEditCategory, onDeleteCategory }) => {
+  console.log('CategoryCard props', { title, description, image, color, id });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEdit = () => {
+    handleMenuClose();
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+const handleEditSubmit = (updatedCategory) => {
+  console.log('updatedCategory in CategoryCard', updatedCategory);
+  onEditCategory(updatedCategory);
+  handleEditClose();
+};
+
+  const handleDelete = () => {
+    handleMenuClose();
+    if (onDeleteCategory) onDeleteCategory(id);
+  };
+
   return (
     <Card
       sx={{
@@ -11,12 +55,12 @@ const CategoryCard = ({ title, description, image, color }) => {
         flexDirection: 'column',
         color: '#fff',
         overflow: 'hidden',
-
         background: `linear-gradient(
           90deg,
           ${color} 0%,
           ${color}CC 70%
         )`,
+        position: 'relative',
       }}
     >
       <CardMedia
@@ -28,6 +72,34 @@ const CategoryCard = ({ title, description, image, color }) => {
           backgroundPosition: 'center',
         }}
       />
+
+      <IconButton
+        onClick={handleMenuClick}
+        sx={{
+          position: 'absolute',
+          bottom: 8,
+          right: 8,
+          color: '#fff',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          padding: 0.5,
+          width: 28,
+          height: 28,
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        }}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEdit}>Редагувати</MenuItem>
+        <MenuItem onClick={handleDelete}>Видалити</MenuItem>
+      </Menu>
 
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography variant="h6" gutterBottom noWrap>
@@ -45,9 +117,22 @@ const CategoryCard = ({ title, description, image, color }) => {
           {description}
         </Typography>
       </CardContent>
+
+      <AddCategoryModal
+        open={editOpen}
+        onClose={handleEditClose}
+        onAdd={() => {}}
+        onEdit={handleEditSubmit}
+        category={{
+          id,
+          title,
+          description,
+          image,
+          color,
+        }}
+      />
     </Card>
   );
 };
-
 
 export default CategoryCard;

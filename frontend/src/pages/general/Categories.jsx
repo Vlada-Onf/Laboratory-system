@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container } from '@mui/material';
 import CategoriesGrid from '../../components/categories/CategoryGrid';
 import PageWrapper from '../../components/layout/PaperWrapper';
@@ -10,6 +10,22 @@ const mockCategories = [
 ];
 
 const Categories = () => {
+  const [categories, setCategories] = useState(mockCategories);
+
+  const handleAddCategory = (newCategory) => {
+    setCategories((prev) => [...prev, newCategory]);
+  };
+
+  const handleEditCategory = (updatedCategory) => {
+    setCategories((prev) =>
+      prev.map((cat) => (cat.id === updatedCategory.id ? updatedCategory : cat))
+    );
+  };
+
+  const handleDeleteCategory = (id) => {
+    setCategories((prev) => prev.filter((cat) => cat.id !== id));
+  };
+
   return (
     <PageWrapper>
       <Container
@@ -20,7 +36,12 @@ const Categories = () => {
           py: 2,
         }}
       >
-        <CategoriesGrid categories={mockCategories} onAdd={() => console.log('Add category')} />
+        <CategoriesGrid
+          categories={categories}
+          onAdd={handleAddCategory}
+          onEditCategory={handleEditCategory}
+          onDeleteCategory={handleDeleteCategory}
+        />
       </Container>
     </PageWrapper>
   );
