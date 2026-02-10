@@ -1,9 +1,9 @@
 export const componentsMock = [
   {
-    id: 1,
+    id: '1',
     image: 'https://cdn.sparkfun.com/assets/9/1/e/4/8/515b4656ce395f8a38000000.png',
     name: 'Arduino Uno',
-    category: 'Мікроконтролери',
+    categoryId: 1,
     description: 'Плата для навчальних та лабораторних робіт',
     docLink: 'https://www.arduino.cc/en/Guide/ArduinoUno', // документація
     buyLink: 'https://www.sparkfun.com/products/11021',       // де купити
@@ -17,10 +17,10 @@ export const componentsMock = [
     tags: ['max1', 'iot'],
   },
   {
-    id: 2,
+    id: '2',
     image: 'https://res.cloudinary.com/rs-designspark-live/image/upload/c_limit,w_829/f_auto/v1/article/ABX00162_01.iso_df61fb99d01f114220cea433ff1fac9e9211de00',
     name: 'Arduino Uno 2',
-    category: 'Мікроконтролери',
+    categoryId: 2,
     description: 'Плата для навчальних та лабораторних робіт',
     docLink: 'https://www.arduino.cc/en/Tutorial/HomePage',
     buyLink: 'https://www.adafruit.com/product/50',
@@ -34,10 +34,10 @@ export const componentsMock = [
     tags: ['arduino +', 'iotdgg'],
   },
   {
-    id: 3,
+    id: '3',
     image: 'https://thepihut.com/cdn/shop/products/arduino-uno-rev3-arduino-a000066-30394855981251.jpg?v=1646651899&width=2048',
     name: 'Arduino Uno 3',
-    category: 'Мікроконтролери',
+    categoryId: 1,
     description: 'Плата для навчальних та лабораторних робіт',
     docLink: 'https://www.arduino.cc/reference/en/',
     buyLink: 'https://www.robotshop.com/en/arduino-uno-rev3.html',
@@ -51,10 +51,10 @@ export const componentsMock = [
     tags: ['grtb', 'iot'],
   },
   {
-    id: 4,
+    id: '4',
     image: 'https://images.prom.ua/6796592125_w1280_h640_6796592125.jpg',
     name: 'Arduino Uno 4',
-    category: 'Мікроконтролери',
+    categoryId: 2,
     description: 'Плата для навчальних та лабораторних робіт',
     docLink: 'https://www.arduino.cc/en/Main/ArduinoBoardUno',
     buyLink: 'https://www.aliexpress.com/item/32967074321.html',

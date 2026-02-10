@@ -4,12 +4,18 @@ import { Typography } from '@mui/material';
 import ComponentCell from '../general/ComponentCell';
 import StatusChip from '../general/StatusChip';
 import PriorityChip from '../general/ImportanceChip';
+import { useCategoriesMap } from '../../hooks/useCategoriesMap';
+import { useNeedsStore } from '../../store/useNeedsStore';
 
-const NeedsTable = ({ rows }) => {
+const NeedsTable = () => {
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 5,
   });
+
+const needsRows = useNeedsStore((state) => state.needsRows);
+
+const categoriesMap = useCategoriesMap();
 
   const columns = [
     {
@@ -29,6 +35,10 @@ const NeedsTable = ({ rows }) => {
       headerName: 'Категорія',
       flex: 1.2,
       minWidth: 140,
+      renderCell: (params) => (
+    <Typography variant="body2">
+      {categoriesMap.get(params.row.categoryId) || params.row.category || '—'}
+    </Typography>),
     },
     {
       field: 'quantity',
@@ -93,7 +103,7 @@ const NeedsTable = ({ rows }) => {
   return (
     <div style={{ height: 580, width: '100%' }}>
       <DataGrid
-        rows={rows}
+        rows={needsRows}
         columns={columns}
         rowHeight={90}
         paginationModel={paginationModel}

@@ -5,6 +5,7 @@ import ComponentCell from './../general/ComponentCell';
 import { brokenComponentsMock } from '../../mock/brokenComponentsMock';
 import MoveToNeedsButton from './MoveToNeedsButton';
 import AddNeedModal from './AddNeedModal';
+import { useCategoriesMap } from '../../hooks/useCategoriesMap';
 
 const BrokenComponentsTable = ({ onAddNeed }) => {
   const [paginationModel, setPaginationModel] = useState({
@@ -14,6 +15,8 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+
+  const categoriesMap = useCategoriesMap();
 
   const handleOpenModal = (row) => {
     setSelectedRow(row);
@@ -30,6 +33,7 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
     id: Date.now(),
     componentName: data.name,
     componentImage: data.image,
+    categoryId: selectedRow.categoryId,
     category: data.category,
     quantity: data.quantity,
     price: data.price,
@@ -40,10 +44,7 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
     approvedAt: '',
   };
 
-  console.log('NEED READY FOR TABLE:', mappedNeed);
-
   onAddNeed(mappedNeed);
-
   handleCloseModal();
 };
 
@@ -63,7 +64,9 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
       headerName: 'Категорія',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => <Typography variant="body2">{params.value || '—'}</Typography>,
+      renderCell: (params) => <Typography variant="body2">
+      {categoriesMap.get(params.row.categoryId) || params.row.category || '—'}
+    </Typography>,
     },
     {
       field: 'description',

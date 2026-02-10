@@ -1,34 +1,103 @@
-// components/componentPage/ComponentPage.jsx
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
-import { componentsMock } from '../../mock/componentsMock';
+import { useComponentsStore } from '../../store/useComponentsStore';
+import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
+import ComponentModal from '../../components/component/componentBlock/ComponentModal';
+import AddNeedModal from '../../components/brokenComponents/AddNeedModal';
 
 const ComponentPage = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
-  const componentId = Number(id);
+  
+  const {
+    components,
+    openEditModal,
+    editModal,
+    closeEditModal,
+    updateComponent,
+    deleteComponent,
+  } = useComponentsStore();
 
-  const component = componentsMock.find(c => c.id === componentId);
+  const addNeed = useNeedsStore(state => state.addNeed);
+  const [needModalOpen, setNeedModalOpen] = useState(false);
+
+  const component = components.find(c => c.id === id);
 
   if (!component) {
     return <div>Компонент не знайдено</div>;
   }
 
+  const handleEditComponent = () => openEditModal(component);
+
+  const handleDeleteComponent = () => {
+    deleteComponent(component.id);
+    navigate('/components');
+  };
+
+  const handleUpdateLinks = (updatedLinks) => {
+    updateComponent({
+      ...component,
+      docLink: updatedLinks.docLink,
+      buyLink: updatedLinks.buyLink,
+      otherLinks: updatedLinks.otherLinks,
+    });
+  };
+
+  const handleOpenNeedModal = () => setNeedModalOpen(true);
+
+  const handleCloseNeedModal = () => setNeedModalOpen(false);
+
+  const handleAddNeedSubmit = (formData) => {
+    const mappedNeed = {
+      id: crypto.randomUUID(),
+      componentId: component.id,
+      componentName: component.name,
+      componentImage: component.image,
+      categoryId: component.categoryId,
+      category: component.category,
+      quantity: formData.quantity,
+      price: formData.price,
+      description: formData.description || component.description,
+      reason: formData.reason,
+      priority: formData.priority,
+      status: 'В очікуванні',
+      approvedAt: '',
+    };
+
+    addNeed(mappedNeed);
+    handleCloseNeedModal();
+  };
+
   return (
     <PageWrapper>
-<ComponentLayout
-      name={component.name}
-      image={component.image}
-      description={component.description}
-      price={component.price}
-      quantity={component.quantity}
-      burntQuantity={component.burntQuantity}
-      category={component.category}
-      tags={component.tags}
-    />
-    </PageWrapper>
+      <ComponentLayout
+        component={component}
+        onEdit={handleEditComponent}
+        onDelete={handleDeleteComponent}
+        onUpdateLinks={handleUpdateLinks}
+        onAddNeed={handleOpenNeedModal}
+      />
 
+      {editModal.open && (
+        <ComponentModal
+          key={editModal.component?.id || 'add-new'}
+          open={editModal.open}
+          component={editModal.component}
+          isEditing={!!editModal.component}
+          onClose={closeEditModal}
+          onSubmit={updateComponent}
+        />
+      )}
+
+      <AddNeedModal
+        open={needModalOpen}
+        onClose={handleCloseNeedModal}
+        row={component}
+        onAdd={handleAddNeedSubmit}
+      />
+    </PageWrapper>
   );
 };
 

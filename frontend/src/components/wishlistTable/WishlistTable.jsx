@@ -6,6 +6,7 @@ import StatusChip from '../general/StatusChip';
 import MoveToNeedsButton from './../brokenComponents/MoveToNeedsButton';
 import AddNeedModal from './../brokenComponents/AddNeedModal';
 import { Typography } from '@mui/material';
+import { useCategoriesMap } from '../../hooks/useCategoriesMap';
 
 
 const rows = [
@@ -28,6 +29,8 @@ const WishlistTable = ({ onAddNeed }) => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [openModal, setOpenModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+
+  const categoriesMap = useCategoriesMap();
 
   const handleOpenModal = (row) => {
     setSelectedRow(row);
@@ -77,7 +80,9 @@ const WishlistTable = ({ onAddNeed }) => {
       headerName: 'Категорія',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => <Typography variant="body2">{params.value || '—'}</Typography>,
+      renderCell: (params) =>  <Typography variant="body2">
+      {categoriesMap.get(params.row.categoryId) || params.row.category || '—'}
+    </Typography>,
     },
     {
           field: 'quantity',

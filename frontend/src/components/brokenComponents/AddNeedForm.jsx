@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   TextField,
   MenuItem,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
+import { useCategoriesStore } from '../../store/useCategoriesStore';
 
 const PRIORITIES = ['Низька', 'Середня', 'Висока'];
 
 const AddNeedForm = ({ initialData, onSubmit }) => {
+  const categories = useCategoriesStore(state => state.categories);
+  const categoryOptions = React.useMemo(() =>
+    categories.map(cat => ({ value: cat.id, label: cat.title })),
+  [categories]
+  );
+
   const [form, setForm] = useState({
     quantity: 1,
     price: initialData.price || '',
@@ -17,24 +27,23 @@ const AddNeedForm = ({ initialData, onSubmit }) => {
     priority: '',
   });
 
-  const handleChange = (field) => (e) => {
+  const handleChange = useCallback((field) => (e) => {
     setForm((prev) => ({
       ...prev,
       [field]: e.target.value,
     }));
-  };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(form);
+    onSubmit({
+      ...form,
+      categoryId: initialData.categoryId,
+    });
   };
 
   return (
-    <Box
-      component="form"
-      id="add-need-form"
-      onSubmit={handleSubmit}
-    >
+    <Box component="form" id="add-need-form" onSubmit={handleSubmit}>
       <Stack spacing={2} mt={1}>
         <TextField
           label="Компонент"
@@ -42,12 +51,21 @@ const AddNeedForm = ({ initialData, onSubmit }) => {
           disabled
         />
 
-        <TextField
-          label="Категорія"
-          value={initialData.category || '—'}
-          disabled
-        />
+        <FormControl fullWidth disabled>
+          <InputLabel>Категорія</InputLabel>
+          <Select
+            value={initialData.categoryId || ''}
+            label="Категорія"
+          >
+            {categoryOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
+        {/* Решта полів без змін */}
         <TextField
           label="Кількість"
           type="number"

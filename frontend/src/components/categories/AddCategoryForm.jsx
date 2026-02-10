@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -25,13 +25,13 @@ const AddCategoryForm = ({ initialData, onSubmit, onCancel }) => {
     setForm(getInitialForm(initialData));
   }, [initialData]);
 
-  const handleChange = (field) => (e) => {
+  const handleChange = useCallback((field) => (e) => {
     const value = e.target.type === 'file' ? e.target.files[0] : e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
-  };
+  }, [errors]);
 
   const handleColorChange = (color) => {
     setForm((prev) => ({ ...prev, color }));
@@ -57,64 +57,61 @@ const AddCategoryForm = ({ initialData, onSubmit, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()){
-        return;
+      return;
     }
 
-   const data = {
-    name: form.name.trim(),
-    description: form.description.trim(),
-    color: form.color,
-    photo: form.photo,
+    const data = {
+      name: form.name.trim(),
+      description: form.description.trim(),
+      color: form.color,
+      photo: form.photo,
+    };
+    console.log('formData', data);
+    onSubmit(data);
   };
- console.log('formData', data);
-  onSubmit(data);
-};
 
   return (
-    <Box
-      component="form"
-      id="add-category-form"
-      onSubmit={handleSubmit}
-      sx={{ width: '100%' }}
-    >
+    <Box component="form" id="add-category-form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
       <Stack spacing={2} mt={1}>
-        <TextField
-          label="Назва"
-          value={form.name}
-          onChange={handleChange('name')}
-          error={!!errors.name}
-          helperText={errors.name}
-          required
-        />
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Назва
+          </Typography>
+          <TextField
+            value={form.name}
+            onChange={handleChange('name')}
+            error={!!errors.name}
+            helperText={errors.name}
+            fullWidth
+            required
+          />
+        </Box>
 
-        <TextField
-          label="Опис"
-          value={form.description}
-          onChange={handleChange('description')}
-          error={!!errors.description}
-          helperText={errors.description}
-          multiline
-          rows={3}
-          required
-        />
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Опис
+          </Typography>
+          <TextField
+            value={form.description}
+            onChange={handleChange('description')}
+            error={!!errors.description}
+            helperText={errors.description}
+            multiline
+            rows={3}
+            fullWidth
+            required
+          />
+        </Box>
 
-        <FormControl error={!!errors.photo}>
-          <Typography variant="body2" gutterBottom>
-            Фото
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Фото категорії
           </Typography>
           <Button
             variant="outlined"
             component="label"
             fullWidth
-            sx={{
-              textTransform: 'none',
-              color: '#08273b',
-              borderColor: '#08273b',
-              '&:hover': {
-                backgroundColor: '#ffe6dc',
-                borderColor: '#08273b',
-              },
-            }}
+            sx={{ textTransform: 'none', py: 1.5, mb: 1 }}
           >
             {form.photo ? form.photo.name : 'Вибрати фото'}
             <input
@@ -124,20 +121,31 @@ const AddCategoryForm = ({ initialData, onSubmit, onCancel }) => {
               onChange={handleChange('photo')}
             />
           </Button>
-          {errors.photo && (
-            <FormHelperText>{errors.photo}</FormHelperText>
+          {form.photo && (
+            <Box sx={{ mt: 1 }}>
+              <img
+                src={URL.createObjectURL(form.photo)}
+                alt="Preview"
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  objectFit: 'cover',
+                  borderRadius: 4
+                }}
+              />
+            </Box>
           )}
-        </FormControl>
+        </Box>
 
-        <FormControl error={!!errors.color}>
-          <Typography variant="body2" gutterBottom>
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
             Колір
           </Typography>
-          <ColorPicker value={form.color} onChange={handleColorChange} />
-          {errors.color && (
-            <FormHelperText>{errors.color}</FormHelperText>
-          )}
-        </FormControl>
+          <FormControl error={!!errors.color}>
+            <ColorPicker value={form.color} onChange={handleColorChange} />
+            {errors.color && <FormHelperText>{errors.color}</FormHelperText>}
+          </FormControl>
+        </Box>
 
         <Stack direction="row" spacing={1} mt={2}>
           <Button

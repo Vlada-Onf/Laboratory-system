@@ -20,8 +20,6 @@ const handleAdd = (categoryData) => {
   });
 };
 
-
-
   return (
     <>
       <Card

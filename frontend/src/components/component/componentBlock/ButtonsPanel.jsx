@@ -1,13 +1,24 @@
 import React from 'react';
 import { Box, Button } from '@mui/material';
 import { useTheme } from '../../../context/useTheme';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
-const ButtonsPanel = () => {
+const ButtonsPanel = ({ 
+  onEdit, 
+  onDelete, 
+  onAddNeed,
+  isDarkMode: externalDarkMode 
+}) => {
   const { isDarkMode } = useTheme();
+  const darkMode = externalDarkMode ?? isDarkMode;
+  const textColor = darkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b';
 
   return (
     <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
       <Button
+        onClick={onEdit}
+        startIcon={<EditIcon />}
         variant="contained"
         fullWidth
         sx={{
@@ -24,23 +35,18 @@ const ButtonsPanel = () => {
       </Button>
 
       <Button
+      onClick={onAddNeed}
         variant="outlined"
         fullWidth
         sx={{
           fontSize: 16,
           height: 58,
-          color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-          borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : '#08273b',
+          color: textColor,
+          borderColor: darkMode ? 'rgba(255, 255, 255, 0.3)' : '#08273b',
           '&:hover': {
-            backgroundColor: isDarkMode
-              ? 'rgba(255, 255, 255, 0.1)'
-              : 'rgba(10,14,57,0.08)',
-            borderColor: isDarkMode
-              ? 'rgba(255, 255, 255, 0.5)'
-              : '#051926',
-            color: isDarkMode
-              ? 'rgba(255, 255, 255, 1)'
-              : '#051926',
+            backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(10,14,57,0.08)',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : '#051926',
+            color: darkMode ? 'rgba(255, 255, 255, 1)' : '#051926',
           },
         }}
       >
@@ -48,6 +54,8 @@ const ButtonsPanel = () => {
       </Button>
 
       <Button
+        onClick={onDelete}
+        startIcon={<DeleteIcon />}
         variant="contained"
         fullWidth
         sx={{
