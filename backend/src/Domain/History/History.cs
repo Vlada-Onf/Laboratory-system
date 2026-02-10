@@ -1,5 +1,6 @@
 ﻿using Domain.History.Actions;
 using Domain.History.EntityTypes;
+using Domain.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Domain.History
     public class History
     {
         public HistoryId Id { get; }
-        public Guid UserId { get; }
+        public UserId UserId { get; }
         public ActionId ActionId { get; }
         public EntityTypeId EntityTypeId { get; }
         public string EntityId { get; }
@@ -22,7 +23,7 @@ namespace Domain.History
 
         private History(
             HistoryId id,
-            Guid userId,
+            UserId userId,
             ActionId actionId,
             EntityTypeId entityTypeId,
             string entityId,
@@ -41,7 +42,7 @@ namespace Domain.History
         }
 
         public static History Create(
-            Guid userId,
+            UserId userId,
             ActionId actionId,
             EntityTypeId entityTypeId,
             string entityId,

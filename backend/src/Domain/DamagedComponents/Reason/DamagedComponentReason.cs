@@ -8,6 +8,7 @@ namespace Domain.DamagedComponents.Reason
 {
     public class DamagedComponentReason
     {
+        protected DamagedComponentReason() { }
         public DamagedComponentReasonId Id { get; }
         public string Name { get; private set; }
         public string? Description { get; private set; }

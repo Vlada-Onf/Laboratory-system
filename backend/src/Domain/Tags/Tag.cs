@@ -1,20 +1,23 @@
-﻿namespace Domain.Tags;
+﻿using Domain.Users;
+
+namespace Domain.Tags;
 
 public class Tag
 {
+    protected Tag() { }
     public TagId Id { get; }
     public string Name { get; private set; }
     public string Color { get; private set; }
 
     public DateTime CreatedAt { get; }
-    public Guid CreatedBy { get; }
+    public UserId CreatedBy { get; }
 
     private Tag(
         TagId id,
         string name,
         string color,
         DateTime createdAt,
-        Guid createdBy)
+        UserId createdBy)
     {
         Name = string.IsNullOrWhiteSpace(name)
             ? throw new ArgumentException("Назва не може бути порожньою")
@@ -29,7 +32,7 @@ public class Tag
         CreatedBy = createdBy;
     }
 
-    public static Tag Create(string name, string color, Guid createdBy)
+    public static Tag Create(string name, string color, UserId createdBy)
         => new(TagId.New(), name, color, DateTime.UtcNow, createdBy);
 
     public void Rename(string name)

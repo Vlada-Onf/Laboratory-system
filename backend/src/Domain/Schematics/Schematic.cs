@@ -1,5 +1,6 @@
 ﻿using Domain.Components;
 using Domain.Schematics.Schematics;
+using Domain.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,9 @@ namespace Domain.Schematics
         public string? PhotoUrl { get; private set; }
         public string? AdditionalLinks { get; private set; }
 
-        public Guid CreatedBy { get; }
+        public UserId CreatedBy { get; }
         public DateTime CreatedAt { get; }
-        public Guid? UpdatedBy { get; private set; }
+        public UserId? UpdatedBy { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
         private Schematic(
@@ -30,9 +31,9 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? additionalLinks,
-            Guid createdBy,
+            UserId createdBy,
             DateTime createdAt,
-            Guid? updatedBy = null,
+            UserId? updatedBy = null,
             DateTime? updatedAt = null)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -56,7 +57,7 @@ namespace Domain.Schematics
             string? description = null,
             string? photoUrl = null,
             string? additionalLinks = null,
-            Guid? createdBy = null)
+            UserId? createdBy = null)
         {
             return new Schematic(
                 SchematicId.New(),
@@ -74,7 +75,7 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? additionalLinks,
-            Guid updatedBy)
+            UserId updatedBy)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Назва не може бути порожньою");

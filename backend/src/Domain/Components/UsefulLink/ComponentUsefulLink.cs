@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Users;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,19 +13,19 @@ namespace Domain.Components.UsefulLink
         public ComponentId ComponentId { get; }
         public string Title { get; private set; }
         public string Url { get; private set; }
-        public Guid CreatedBy { get; }
+        public UserId CreatedBy { get; }
         public DateTime CreatedAt { get; }
-        public Guid? UpdatedBy { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
+        public UserId? LastUpdatedBy { get; private set; }
+        public DateTime? LastUpdatedAt { get; private set; }
         private ComponentUsefulLink(
             ComponentUsefulLinkId id,
             ComponentId componentId,
             string title,
             string url,
-            Guid createdBy,
+            UserId createdBy,
             DateTime createdAt,
-            Guid? updatedBy,
-            DateTime? updatedAt)
+            UserId? lastUpdatedBy,
+            DateTime? lastUpdatedAt)
         {
             Id = id;
             ComponentId = componentId;
@@ -32,15 +33,15 @@ namespace Domain.Components.UsefulLink
             Url = url;
             CreatedBy = createdBy;
             CreatedAt = createdAt;
-            UpdatedBy = updatedBy;
-            UpdatedAt = updatedAt;
+            LastUpdatedBy = lastUpdatedBy;
+            LastUpdatedAt = lastUpdatedAt;
         }
 
         public static ComponentUsefulLink New(
             ComponentId componentId,
             string title,
             string url,
-            Guid createdBy)
+            UserId createdBy)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Назва не може бути порожнім");
@@ -59,7 +60,7 @@ namespace Domain.Components.UsefulLink
                 null);
         }
 
-        public void Update(string title, string url, Guid updatedBy)
+        public void Update(string title, string url, UserId updatedBy)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Назва не може бути порожнім");
@@ -69,8 +70,8 @@ namespace Domain.Components.UsefulLink
 
             Title = title;
             Url = url;
-            UpdatedBy = updatedBy;
-            UpdatedAt = DateTime.UtcNow;
+            LastUpdatedBy = updatedBy;
+            LastUpdatedAt = DateTime.UtcNow;
         }
     }
 }

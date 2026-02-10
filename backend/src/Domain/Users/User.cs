@@ -10,17 +10,20 @@ namespace Domain.Users
 {
     public class User
     {
-        public UserId Id { get; }
-        public string ClerkId { get; private set; } 
+        protected User() { }
+
+        public UserId Id { get; private set; }
+        public string ClerkId { get; private set; }
         public string Email { get; private set; }
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
         public RoleId RoleId { get; private set; }
         public bool IsActive { get; private set; }
         public string? PhotoUrl { get; private set; }
-        public DateTime CreatedAt { get; }
+        public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? LastActivityAt { get; private set; }
+        public Role Role { get; private set; } = null!;
         private User(
             UserId id,
             string clerkId,

@@ -1,0 +1,15 @@
+﻿using Domain.Roles;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Common.Interfaces.Repositories
+{
+    public interface IRoleRepository
+    {
+        Task<Role> AddAsync(Role role, CancellationToken cancellationToken);
+        Task<Role> UpdateAsync(Role role, CancellationToken cancellationToken);
+    }
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Users;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,30 +12,30 @@ namespace Domain.Components.Comment
         public ComponentCommentId Id { get; }
         public ComponentId ComponentId { get; }
         public string Content { get; private set; }
-        public Guid CreatedBy { get; }
+        public UserId CreatedBy { get; }
         public DateTime CreatedAt { get; }
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTime? LastUpdatedAt { get; private set; }
 
         private ComponentComment(
             ComponentCommentId id,
             ComponentId componentId,
             string content,
-            Guid createdBy,
+            UserId createdBy,
             DateTime createdAt,
-            DateTime? updatedAt)
+            DateTime? lastUpdatedAt)
         {
             Id = id;
             ComponentId = componentId;
             Content = content;
             CreatedBy = createdBy;
             CreatedAt = createdAt;
-            UpdatedAt = updatedAt;
+            LastUpdatedAt = lastUpdatedAt;
         }
 
         public static ComponentComment New(
             ComponentId componentId,
             string content,
-            Guid authorId)
+            UserId authorId)
         {
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentException("Коментар не може бути порожнім");
@@ -54,7 +55,7 @@ namespace Domain.Components.Comment
                 throw new ArgumentException("Коментар не може бути порожнім");
 
             Content = content;
-            UpdatedAt = DateTime.UtcNow;
+            LastUpdatedAt = DateTime.UtcNow;
         }
     }
 }

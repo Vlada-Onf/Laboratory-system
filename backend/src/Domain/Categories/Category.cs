@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Users;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,15 +10,16 @@ namespace Domain.Categories
 {
     public class Category
     {
+        protected Category() { }
         public CategoryId Id { get; }
         public string Name { get; private set; }
         public string? Description { get; private set; }
         public string? PhotoUrl { get; private set; }
         public string? CardColor { get; private set; }
         public DateTime CreatedAt { get; }
-        public Guid CreatedBy { get; }
+        public UserId CreatedBy { get; }
         public DateTime? LastUpdatedAt { get; private set; }
-        public Guid? LastUpdatedBy { get; private set; }
+        public UserId? LastUpdatedBy { get; private set; }
 
         private Category(
             CategoryId id,
@@ -26,9 +28,9 @@ namespace Domain.Categories
             string? photoUrl,
             string? cardColor,
             DateTime createdAt,
-            Guid createdBy,
+            UserId createdBy,
             DateTime? lastUpdatedAt = null,
-            Guid? lastUpdatedBy = null)
+            UserId? lastUpdatedBy = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Назва не може бути порожньою");
@@ -46,7 +48,7 @@ namespace Domain.Categories
 
         public static Category Create(
          string name,
-         Guid createdBy,
+         UserId createdBy,
          string? description = null,
          string? photoUrl = null,
          string? cardColor = null)
@@ -66,7 +68,7 @@ namespace Domain.Categories
             string? description,
             string? photoUrl,
             string? cardColor,
-            Guid lastUpdatedBy)
+            UserId lastUpdatedBy)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Назва не може бути порожньою");

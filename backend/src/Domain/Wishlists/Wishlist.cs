@@ -1,4 +1,7 @@
 ﻿using Domain.Components;
+using Domain.Users;
+using Domain.Wishlists.Importance;
+using Domain.Wishlists.Status;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +19,7 @@ namespace Domain.Wishlists
         public string? Description { get; private set; }
         public int QuantityNeeded { get; private set; }
 
-        public Guid RequestedBy { get; }
+        public UserId RequestedBy { get; }
         public DateTime RequestedAt { get; }
 
         public WishlistImportanceId ImportanceId { get; private set; }
@@ -31,7 +34,7 @@ namespace Domain.Wishlists
             string name,
             string? description,
             int quantityNeeded,
-            Guid requestedBy,
+            UserId requestedBy,
             DateTime requestedAt,
             WishlistImportanceId importanceId,
             WishlistStatusId statusId,
@@ -62,7 +65,7 @@ namespace Domain.Wishlists
             string name,
             string? description,
             int quantityNeeded,
-            Guid requestedBy,
+            UserId requestedBy,
             WishlistImportanceId importanceId,
             WishlistStatusId statusId)
         {

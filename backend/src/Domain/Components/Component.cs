@@ -1,13 +1,15 @@
-﻿using Domain.Components.Comment;
+﻿using Domain.Categories;
+using Domain.Components.Comment;
 using Domain.Components.UsefulLink;
 using Domain.Tags;
+using Domain.Users;
 
 namespace Domain.Components;
 
 public class Component
 {
     public ComponentId Id { get; }
-    public Guid CategoryId { get; private set; }
+    public CategoryId CategoryId { get; private set; }
     public string Name { get; private set; }
     public string? Description { get; private set; }
     public int Quantity { get; private set; }
@@ -17,16 +19,18 @@ public class Component
     public string SupplierLink { get; private set; }
     public string? DocumentationLink { get; private set; }
     public DateTime CreatedAt { get; }
-    public Guid CreatedBy { get; }
+    public UserId CreatedBy { get; }
     public DateTime? LastUpdatedAt { get; private set; }
-    public Guid? LastUpdatedBy { get; private set; }
+    public UserId? LastUpdatedBy { get; private set; }
     public ICollection<ComponentUsefulLink> UsefulLinks { get; private set; } = new List<ComponentUsefulLink>();
     public ICollection<ComponentComment> Comments { get; private set; } = new List<ComponentComment>();
     public ICollection<Tag> Tags { get; private set; } = new List<Tag>();
 
+    protected Component() { }
+
     private Component(
         ComponentId id,
-        Guid categoryId,
+        CategoryId categoryId,
         string name,
         string? description,
         int quantity,
@@ -36,9 +40,9 @@ public class Component
         string supplierLink,
         string? documentationLink,
         DateTime createdAt,
-        Guid createdBy,
+        UserId createdBy,
         DateTime? lastUpdatedAt = null,
-        Guid? lastUpdatedBy = null)
+        UserId? lastUpdatedBy = null)
     {
         Id = id;
         CategoryId = categoryId;
@@ -57,7 +61,7 @@ public class Component
     }
 
     public static Component Create(
-        Guid categoryId,
+        CategoryId categoryId,
         string name,
         string? description,
         int quantity,
@@ -65,7 +69,7 @@ public class Component
         string photoUrl,
         string supplierLink,
         string? documentationLink,
-        Guid createdBy)
+        UserId createdBy)
     {
         var totalCost = quantity * price;
 
@@ -85,7 +89,7 @@ public class Component
     }
 
     public void Update(
-        Guid categoryId,
+        CategoryId categoryId,
         string name,
         string? description,
         int quantity,
@@ -93,7 +97,7 @@ public class Component
         string photoUrl,
         string supplierLink,
         string? documentationLink,
-        Guid lastUpdatedBy)
+        UserId lastUpdatedBy)
     {
         CategoryId = categoryId;
         Name = name;
@@ -108,13 +112,13 @@ public class Component
         LastUpdatedBy = lastUpdatedBy;
     }
 
-    public ComponentUsefulLink AddUsefulLink(string title, string url, Guid userId)
+    public ComponentUsefulLink AddUsefulLink(string title, string url, UserId userId)
     {
         var link = ComponentUsefulLink.New(Id, title, url, userId);
         UsefulLinks.Add(link);
         return link;
     }
-    public void UpdateUsefulLink(ComponentUsefulLinkId linkId, string title, string url, Guid userId)
+    public void UpdateUsefulLink(ComponentUsefulLinkId linkId, string title, string url, UserId userId)
     {
         var link = UsefulLinks.FirstOrDefault(l => l.Id == linkId);
         if (link is null)
@@ -129,7 +133,7 @@ public class Component
             UsefulLinks.Remove(link);
     }
 
-    public ComponentComment AddComment(string content, Guid userId)
+    public ComponentComment AddComment(string content, UserId userId)
     {
         var comment = ComponentComment.New(Id, content, userId);
         Comments.Add(comment);

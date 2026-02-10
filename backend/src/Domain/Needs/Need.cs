@@ -1,5 +1,7 @@
 ﻿using Domain.Components;
 using Domain.Needs.Importance;
+using Domain.Needs.Status;
+using Domain.Users;
 
 namespace Domain.Needs;
 
@@ -7,8 +9,9 @@ public class Need
 {
     public NeedId Id { get; }
     public ComponentId ComponentId { get; private set; }
+    public NeedStatusId StatusId { get; private set; }
     public int QuantityNeeded { get; private set; }
-    public Guid RequestedBy { get; }
+    public UserId RequestedBy { get; }
     public DateTime RequestedAt { get; }
     public string? Description { get; private set; }
     public DateTime? CompletedAt { get; private set; }
@@ -19,7 +22,7 @@ public class Need
         NeedId id,
         ComponentId componentId,
         int quantityNeeded,
-        Guid requestedBy,
+        UserId requestedBy,
         DateTime requestedAt,
         string? description,
         NeedImportanceId importanceId,
@@ -43,7 +46,7 @@ public class Need
     public static Need Create(
         ComponentId componentId,
         int quantityNeeded,
-        Guid requestedBy,
+        UserId requestedBy,
         string? description,
         NeedImportanceId importanceId)
     {

@@ -1,6 +1,7 @@
 ﻿using Domain.Components;
 using Domain.DamagedComponents;
 using Domain.DamagedComponents.Reason;
+using Domain.Users;
 
 public class DamagedComponent
 {
@@ -10,9 +11,9 @@ public class DamagedComponent
     public int Quantity { get; private set; }
 
     public DateTime RecordedAt { get; }
-    public Guid RecordedBy { get; }
+    public UserId RecordedBy { get; }
     public DateTime? LastUpdatedAt { get; private set; }
-    public Guid? LastUpdatedBy { get; private set; }
+    public UserId? LastUpdatedBy { get; private set; }
 
     private DamagedComponent(
         DamagedComponentId id,
@@ -20,9 +21,9 @@ public class DamagedComponent
         DamagedComponentReasonId reasonId,
         int quantity,
         DateTime recordedAt,
-        Guid recordedBy,
+        UserId recordedBy,
         DateTime? lastUpdatedAt = null,
-        Guid? lastUpdatedBy = null)
+        UserId? lastUpdatedBy = null)
     {
         if (quantity < 0)
             throw new ArgumentException("Кількість не може бути негативним");
@@ -41,7 +42,7 @@ public class DamagedComponent
         ComponentId componentId,
         DamagedComponentReasonId reasonId,
         int quantity,
-        Guid recordedBy)
+        UserId recordedBy)
     {
         return new DamagedComponent(
             DamagedComponentId.New(),
@@ -56,7 +57,7 @@ public class DamagedComponent
         ComponentId componentId,
         DamagedComponentReasonId reasonId,
         int quantity,
-        Guid lastUpdatedBy)
+        UserId lastUpdatedBy)
     {
         if (quantity < 0)
             throw new ArgumentException("Кількість не може бути негативним");
