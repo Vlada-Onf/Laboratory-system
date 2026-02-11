@@ -1,4 +1,5 @@
 ﻿using Application.Categories.Exceptions;
+using Domain.Categories;
 using LanguageExt;
 using MediatR;
 using System;
@@ -10,5 +11,6 @@ using System.Threading.Tasks;
 namespace Application.Categories.Commands.Delete
 {
     public record DeleteCategoryCommand(Guid Id)
-    : IRequest<Either<CategoryException, MediatR.Unit>>;
+        : IRequest<Either<CategoryException, Category>>;
+
 }

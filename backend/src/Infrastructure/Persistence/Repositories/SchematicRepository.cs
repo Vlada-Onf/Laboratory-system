@@ -5,11 +5,6 @@ using Domain.Schematics;
 using Domain.Schematics.Schematics;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {

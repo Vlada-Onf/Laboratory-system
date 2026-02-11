@@ -2,7 +2,6 @@
 using Domain.DamagedComponents;
 using Domain.DamagedComponents.Reason;
 using Domain.Users;
-
 public class DamagedComponent
 {
     public DamagedComponentId Id { get; }

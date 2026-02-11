@@ -3,11 +3,6 @@ using Application.Common.Interfaces.Repositories;
 using Domain.Users;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -55,6 +50,12 @@ namespace Infrastructure.Persistence.Repositories
             return entity ?? Option<User>.None;
         }
 
+        public async Task<User> DeleteAsync(User user, CancellationToken cancellationToken)
+        {
+            context.Users.Remove(user);
+            await context.SaveChangesAsync(cancellationToken);
+            return user;
+        }
         public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await context.Users

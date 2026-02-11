@@ -25,6 +25,12 @@ namespace Infrastructure.Persistence.Repositories
                 .OrderByDescending(h => h.Time)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<History> DeleteAsync(History entry, CancellationToken cancellationToken)
+        {
+            context.History.Remove(entry);
+            await context.SaveChangesAsync(cancellationToken);
+            return entry;
+        }
 
         public async Task<IReadOnlyList<History>> GetByEntityAsync(string entityId, CancellationToken cancellationToken)
         {

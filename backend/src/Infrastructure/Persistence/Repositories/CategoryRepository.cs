@@ -3,11 +3,6 @@ using Application.Common.Interfaces.Repositories;
 using Domain.Categories;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -39,7 +34,6 @@ namespace Infrastructure.Persistence.Repositories
         public async Task<Option<Category>> GetByIdAsync(CategoryId id, CancellationToken cancellationToken)
         {
             var category = await _context.Categories
-                .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
             return category ?? Option<Category>.None;
@@ -51,16 +45,26 @@ namespace Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
-        public async Task AddAsync(Category category, CancellationToken cancellationToken = default)
+
+        public async Task<Category> AddAsync(Category category, CancellationToken cancellationToken = default)
         {
             await _context.Categories.AddAsync(category, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            return category;
         }
 
-        public async Task RemoveAsync(Category category, CancellationToken cancellationToken = default)
+        public async Task<Category> UpdateAsync(Category category, CancellationToken cancellationToken = default)
+        {
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync(cancellationToken);
+            return category;
+        }
+
+        public async Task<Category> DeleteAsync(Category category, CancellationToken cancellationToken = default)
         {
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync(cancellationToken);
+            return category;
         }
 
         public async Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default)
@@ -68,6 +72,7 @@ namespace Infrastructure.Persistence.Repositories
             return await _context.Categories
                 .AnyAsync(c => c.Name == name, cancellationToken);
         }
+
         public async Task<Option<Category>> GetByNameAsync(string name, CancellationToken cancellationToken)
         {
             var category = await _context.Categories

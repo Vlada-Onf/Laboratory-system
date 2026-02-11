@@ -1,11 +1,6 @@
 ﻿using Domain.Components;
 using Domain.Schematics.Schematics;
 using Domain.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Schematics
 {

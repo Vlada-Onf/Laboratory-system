@@ -41,7 +41,7 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(dc => dc.RecordedBy)
-                .HasConversion(x => x.Value, x => new UserId(x))   // 👈 конвертер
+                .HasConversion(x => x.Value, x => new UserId(x)) 
                 .HasColumnName("recorded_by")
                 .IsRequired();
 
@@ -50,7 +50,7 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnName("last_updated_at");
 
             builder.Property(dc => dc.LastUpdatedBy)
-                .HasConversion(x => x.Value, x => new UserId(x))   // 👈 конвертер
+                .HasConversion(x => x.Value, x => new UserId(x)) 
                 .HasColumnName("last_updated_by");
 
             builder.HasOne<Component>()

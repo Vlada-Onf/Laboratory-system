@@ -4,6 +4,6 @@ using MediatR;
 using System;
 namespace Application.DamagedComponents.Commands.Delete
 {
-    public record DeleteDamagedComponentCommand(Guid Id)
-        : IRequest<Either<DamagedComponentException, MediatR.Unit>>;
+    public sealed record DeleteDamagedComponentCommand(Guid Id)
+            : IRequest<Either<DamagedComponentException, DamagedComponent>>;
 }

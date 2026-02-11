@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Application.DamagedComponents.Commands.Delete
 {
-    public class DeleteDamagedComponentCommandValidator
-        : AbstractValidator<DeleteDamagedComponentCommand>
+    public sealed class DeleteDamagedComponentCommandValidator
+         : AbstractValidator<DeleteDamagedComponentCommand>
     {
         public DeleteDamagedComponentCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.Id)
+                .NotEmpty().WithMessage("Id є обов'язковим");
         }
     }
 }

@@ -20,11 +20,13 @@ namespace Application.Categories.Commands.Create
             CreateCategoryCommand request,
             CancellationToken cancellationToken)
         {
-            var existingCategory = await categoryRepository.GetByNameAsync(request.Name, cancellationToken);
+            var existingCategory = await categoryRepository.GetByNameAsync(
+                request.Name,
+                cancellationToken);
 
             return await existingCategory.MatchAsync(
-                c => new CategoryAlreadyExistException(c.Id),
-                () => CreateEntity(request, cancellationToken));
+                Some: c => new CategoryAlreadyExistException(c.Id),
+                None: () => CreateEntity(request, cancellationToken));
         }
 
         private async Task<Either<CategoryException, Category>> CreateEntity(
@@ -42,14 +44,14 @@ namespace Application.Categories.Commands.Create
                     photoUrl: request.PhotoUrl,
                     cardColor: request.CardColor);
 
-                await categoryRepository.AddAsync(category, cancellationToken);
+                var created = await categoryRepository.AddAsync(category, cancellationToken);
 
-                return category;
+                return created;
             }
             catch (Exception exception)
             {
-                return new UnhandledCategoryException(CategoryId.Empty, exception);
+                return new UnhandledCategoryException(CategoryId.Empty(), exception);
             }
         }
     }
-}   
+}

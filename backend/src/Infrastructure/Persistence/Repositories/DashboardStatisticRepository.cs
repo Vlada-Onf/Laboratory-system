@@ -3,11 +3,6 @@ using Application.Common.Interfaces.Repositories;
 using Domain.DashboardStatistics;
 using Domain.DashboardStatistics.DashboardStatistics;
 using LanguageExt;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
@@ -50,6 +45,12 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(ds => ds.Id == id, cancellationToken);
 
             return statistic ?? Option<DashboardStatistic>.None;
+        }
+        public async Task<DashboardStatistic> DeleteAsync(DashboardStatistic statistic, CancellationToken cancellationToken)
+        {
+            _context.DashboardStatistics.Remove(statistic);
+            await _context.SaveChangesAsync(cancellationToken);
+            return statistic;
         }
 
         public async Task<IReadOnlyList<DashboardStatistic>> GetAllAsync(CancellationToken cancellationToken)

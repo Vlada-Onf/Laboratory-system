@@ -81,8 +81,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("last_updated_by");
 
-            // тут не використовуємо навігацій, бо їх немає в домені
-
             builder.HasMany(c => c.Comments)
                 .WithOne()
                 .HasForeignKey("ComponentId")

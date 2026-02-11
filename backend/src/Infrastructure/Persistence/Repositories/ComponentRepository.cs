@@ -1,13 +1,9 @@
 ﻿using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
+using Domain.Categories;
 using Domain.Components;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -47,7 +43,6 @@ namespace Infrastructure.Persistence.Repositories
                 .Include(c => c.Tags)
                 .Include(c => c.Comments)
                 .Include(c => c.UsefulLinks)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
             return component ?? Option<Component>.None;
@@ -65,6 +60,14 @@ namespace Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<Component>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await _context.Components
+                .Include(c => c.Tags)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<IReadOnlyList<Component>> GetByCategoryIdAsync(CategoryId categoryId, CancellationToken cancellationToken)
+        {
+            return await _context.Components
+                .Where(c => c.CategoryId == categoryId)
                 .Include(c => c.Tags)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);

@@ -1,15 +1,13 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Queries;
+using Application.Common.Interfaces.Repositories;
+using Domain.Components;
 using Domain.Tags;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
-    public class TagRepository : ITagRepository
+    public class TagRepository : ITagRepository, ITagQueries
     {
         private readonly ApplicationDbContext _context;
 
@@ -20,9 +18,60 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<IReadOnlyList<Tag>> GetByIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken)
         {
+            if (tagIds is null || tagIds.Count == 0)
+                return Array.Empty<Tag>();
+
+            var idSet = tagIds.ToHashSet();
+
+            var all = await _context.Tags
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            return all
+                .Where(t => idSet.Contains(t.Id.Value))
+                .ToList();
+        }
+
+        public async Task<Tag> AddAsync(Tag tag, CancellationToken cancellationToken)
+        {
+            await _context.Tags.AddAsync(tag, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return tag;
+        }
+
+        public async Task<Tag> UpdateAsync(Tag tag, CancellationToken cancellationToken)
+        {
+            _context.Tags.Update(tag);
+            await _context.SaveChangesAsync(cancellationToken);
+            return tag;
+        }
+
+        public async Task<Tag> DeleteAsync(Tag tag, CancellationToken cancellationToken)
+        {
+            _context.Tags.Remove(tag);
+            await _context.SaveChangesAsync(cancellationToken);
+            return tag;
+        }
+
+        public async Task<Option<Tag>> GetByIdAsync(TagId id, CancellationToken cancellationToken)
+        {
+            var tag = await _context.Tags
+                .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+            return tag ?? Option<Tag>.None;
+        }
+        public async Task<IReadOnlyList<Tag>> GetByComponentAsync(ComponentId componentId, CancellationToken cancellationToken)
+        {
+            return await _context.Components
+                .AsNoTracking()
+                .Where(c => c.Id == componentId)
+                .SelectMany(c => c.Tags)
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<IReadOnlyList<Tag>> GetAllAsync(CancellationToken cancellationToken)
+        {
             return await _context.Tags
                 .AsNoTracking()
-                .Where(t => tagIds.Contains(t.Id.Value))
                 .ToListAsync(cancellationToken);
         }
     }

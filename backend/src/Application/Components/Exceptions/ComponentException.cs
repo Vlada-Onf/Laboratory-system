@@ -17,14 +17,14 @@ namespace Application.Components.Exceptions
     }
 
     public class ComponentAlreadyExistException(ComponentId componentId)
-        : ComponentException(componentId, $"Компонент вже існує з ID {componentId}");
+        : ComponentException(componentId, $"Component already exists under id {componentId}");
 
     public class ComponentNotFoundException(ComponentId componentId)
-        : ComponentException(componentId, $"Компонент не знайдено з ID {componentId}");
+        : ComponentException(componentId, $"Component not found under id {componentId}");
 
     public class ComponentCategoryNotFoundException(ComponentId componentId)
-        : ComponentException(componentId, $"Категорію для компонента {componentId} не знайдено");
+        : ComponentException(componentId, $"Category not found for component {componentId}");
 
     public class UnhandledComponentException(ComponentId componentId, Exception? innerException = null)
-        : ComponentException(componentId, "Неочікувана помилка", innerException);
+        : ComponentException(componentId, "Unexpected error occurred", innerException);
 }

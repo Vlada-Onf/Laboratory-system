@@ -12,15 +12,14 @@ using Unit = MediatR.Unit;
 namespace Application.Categories.Commands.Update
 {
     public class UpdateCategoryCommandHandler(
-        ICategoryRepository categoryRepository)
-        : IRequestHandler<UpdateCategoryCommand, Either<CategoryException, Category>>
+          ICategoryRepository categoryRepository)
+          : IRequestHandler<UpdateCategoryCommand, Either<CategoryException, Category>>
     {
         public async Task<Either<CategoryException, Category>> Handle(
             UpdateCategoryCommand request,
             CancellationToken cancellationToken)
         {
             var categoryId = new CategoryId(request.Id);
-
             var option = await categoryRepository.GetByIdAsync(categoryId, cancellationToken);
 
             return await option.MatchAsync(
@@ -44,7 +43,10 @@ namespace Application.Categories.Commands.Update
                     photoUrl: request.PhotoUrl,
                     cardColor: request.CardColor,
                     lastUpdatedBy: lastUpdatedBy);
-                return category;
+
+                var updated = await categoryRepository.UpdateAsync(category, cancellationToken);
+
+                return updated;
             }
             catch (Exception exception)
             {

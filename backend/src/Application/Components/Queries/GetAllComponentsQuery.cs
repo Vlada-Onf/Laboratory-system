@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Components.Queries
 {
-    public record GetAllComponentsQuery : IRequest<IReadOnlyList<Component>>;
+    public sealed record GetAllComponentsQuery : IRequest<IReadOnlyList<Component>>;
 
     public class GetAllComponentsQueryHandler(IComponentQueries queries)
         : IRequestHandler<GetAllComponentsQuery, IReadOnlyList<Component>>

@@ -4,8 +4,8 @@ using MediatR;
 
 namespace Application.DamagedComponents.Commands.Create
 {
-    public record CreateDamagedComponentCommand
-        : IRequest<Either<DamagedComponentException, DamagedComponent>>
+    public sealed record CreateDamagedComponentCommand
+            : IRequest<Either<DamagedComponentException, DamagedComponent>>
     {
         public required Guid ComponentId { get; init; }
         public required Guid ReasonId { get; init; }

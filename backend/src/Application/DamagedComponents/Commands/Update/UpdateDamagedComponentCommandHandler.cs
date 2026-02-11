@@ -14,22 +14,22 @@ using System.Threading.Tasks;
 
 namespace Application.DamagedComponents.Commands.Update
 {
-    public class UpdateDamagedComponentCommandHandler(
+    public sealed class UpdateDamagedComponentCommandHandler(
         IDamagedComponentRepository damagedComponentRepository,
-        IDamagedComponentReasonRepository reasonRepository)
+        IComponentRepository componentRepository)
         : IRequestHandler<UpdateDamagedComponentCommand, Either<DamagedComponentException, DamagedComponent>>
     {
         public async Task<Either<DamagedComponentException, DamagedComponent>> Handle(
             UpdateDamagedComponentCommand request,
             CancellationToken cancellationToken)
         {
-            var id = new DamagedComponentId(request.Id);
-            var damagedOption = await damagedComponentRepository.GetByIdAsync(id, cancellationToken);
+            var damagedId = new DamagedComponentId(request.Id);
+            var option = await damagedComponentRepository.GetByIdAsync(damagedId, cancellationToken);
 
-            return await damagedOption.MatchAsync(
+            return await option.MatchAsync(
                 Some: damaged => UpdateEntity(damaged, request, cancellationToken),
                 None: () => Task.FromResult<Either<DamagedComponentException, DamagedComponent>>(
-                    new DamagedComponentNotFoundException(id)));
+                    new DamagedComponentNotFoundException(damagedId)));
         }
 
         private async Task<Either<DamagedComponentException, DamagedComponent>> UpdateEntity(
@@ -39,29 +39,23 @@ namespace Application.DamagedComponents.Commands.Update
         {
             try
             {
-                var reasonId = new DamagedComponentReasonId(request.ReasonId);
-                var reasonOption = await reasonRepository.GetByIdAsync(reasonId, cancellationToken);
-                if (reasonOption.IsNone)
-                {
-                    return new DamagedComponentReasonNotFoundException(damaged.Id);
-                }
-
                 var componentId = new ComponentId(request.ComponentId);
+                var reasonId = new DamagedComponentReasonId(request.ReasonId);
                 var lastUpdatedBy = new UserId(request.LastUpdatedBy);
 
                 damaged.Update(
-                    componentId,
-                    reasonId,
-                    request.Quantity,
-                    lastUpdatedBy);
+                    componentId: componentId,
+                    reasonId: reasonId,
+                    quantity: request.Quantity,
+                    lastUpdatedBy: lastUpdatedBy);
 
                 var updated = await damagedComponentRepository.UpdateAsync(damaged, cancellationToken);
 
                 return updated;
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                return new UnhandledDamagedComponentException(damaged.Id, exception);
+                return new UnhandledDamagedComponentException(damaged.Id, ex);
             }
         }
     }

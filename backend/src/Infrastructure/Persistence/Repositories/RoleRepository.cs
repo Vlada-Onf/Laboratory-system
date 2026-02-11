@@ -3,11 +3,7 @@ using Application.Common.Interfaces.Repositories;
 using Domain.Roles;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -45,7 +41,12 @@ namespace Infrastructure.Persistence.Repositories
 
             return entity ?? Option<Role>.None;
         }
-
+        public async Task<Role> DeleteAsync(Role role, CancellationToken cancellationToken)
+        {
+            context.Roles.Remove(role);
+            await context.SaveChangesAsync(cancellationToken);
+            return role;
+        }
         public async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await context.Roles

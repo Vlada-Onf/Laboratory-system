@@ -11,32 +11,35 @@ using Unit = MediatR.Unit;
 namespace Application.Categories.Commands.Delete
 {
     public class DeleteCategoryCommandHandler(
-        ICategoryRepository categoryRepository)
-        : IRequestHandler<DeleteCategoryCommand, Either<CategoryException, MediatR.Unit>>
+       ICategoryRepository categoryRepository)
+       : IRequestHandler<DeleteCategoryCommand, Either<CategoryException, Category>>
     {
-        public async Task<Either<CategoryException, MediatR.Unit>> Handle(
+        public async Task<Either<CategoryException, Category>> Handle(
             DeleteCategoryCommand request,
             CancellationToken cancellationToken)
         {
             var categoryId = new CategoryId(request.Id);
-
             var option = await categoryRepository.GetByIdAsync(categoryId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: async category =>
-                {
-                    try
-                    {
-                        await categoryRepository.RemoveAsync(category, cancellationToken);
-                        return MediatR.Unit.Value;
-                    }
-                    catch (Exception exception)
-                    {
-                        return new UnhandledCategoryException(categoryId, exception);
-                    }
-                },
-                None: () => Task.FromResult<Either<CategoryException, MediatR.Unit>>(
+                Some: category => DeleteEntity(category, cancellationToken),
+                None: () => Task.FromResult<Either<CategoryException, Category>>(
                     new CategoryNotFoundException(categoryId)));
+        }
+
+        private async Task<Either<CategoryException, Category>> DeleteEntity(
+            Category category,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var deleted = await categoryRepository.DeleteAsync(category, cancellationToken);
+                return deleted;
+            }
+            catch (Exception exception)
+            {
+                return new UnhandledCategoryException(category.Id, exception);
+            }
         }
     }
 }

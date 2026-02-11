@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Repositories;
 using Domain.Components;
 using Domain.Needs;
 using Domain.Needs.Importance;
+using Domain.Needs.Status;
 using Domain.Users;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,19 @@ namespace Infrastructure.Persistence.Repositories
             return await context.Needs
                 .AsNoTracking()
                 .Where(n => n.ImportanceId == importanceId)
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<IReadOnlyList<Need>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.Needs
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<IReadOnlyList<Need>> GetByStatusAsync(NeedStatusId statusId, CancellationToken cancellationToken)
+        {
+            return await context.Needs
+                .AsNoTracking()
+                .Where(n => n.StatusId == statusId)
                 .ToListAsync(cancellationToken);
         }
     }

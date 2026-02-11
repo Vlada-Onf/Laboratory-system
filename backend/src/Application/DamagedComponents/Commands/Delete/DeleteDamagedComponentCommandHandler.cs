@@ -6,32 +6,36 @@ using MediatR;
 
 namespace Application.DamagedComponents.Commands.Delete
 {
-    public class DeleteDamagedComponentCommandHandler(
+    public sealed class DeleteDamagedComponentCommandHandler(
         IDamagedComponentRepository damagedComponentRepository)
-        : IRequestHandler<DeleteDamagedComponentCommand, Either<DamagedComponentException, MediatR.Unit>>
+        : IRequestHandler<DeleteDamagedComponentCommand, Either<DamagedComponentException, DamagedComponent>>
     {
-        public async Task<Either<DamagedComponentException, MediatR.Unit>> Handle(
+        public async Task<Either<DamagedComponentException, DamagedComponent>> Handle(
             DeleteDamagedComponentCommand request,
             CancellationToken cancellationToken)
         {
-            var id = new DamagedComponentId(request.Id);
-            var option = await damagedComponentRepository.GetByIdAsync(id, cancellationToken);
+            var damagedId = new DamagedComponentId(request.Id);
+            var option = await damagedComponentRepository.GetByIdAsync(damagedId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: async damaged =>
-                {
-                    try
-                    {
-                        await damagedComponentRepository.DeleteAsync(damaged, cancellationToken);
-                        return MediatR.Unit.Value;
-                    }
-                    catch (Exception exception)
-                    {
-                        return new UnhandledDamagedComponentException(id, exception);
-                    }
-                },
-                None: () => Task.FromResult<Either<DamagedComponentException, MediatR.Unit>>(
-                    new DamagedComponentNotFoundException(id)));
+                Some: damaged => DeleteEntity(damaged, cancellationToken),
+                None: () => Task.FromResult<Either<DamagedComponentException, DamagedComponent>>(
+                    new DamagedComponentNotFoundException(damagedId)));
+        }
+
+        private async Task<Either<DamagedComponentException, DamagedComponent>> DeleteEntity(
+            DamagedComponent damaged,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var deleted = await damagedComponentRepository.DeleteAsync(damaged, cancellationToken);
+                return deleted;
+            }
+            catch (Exception ex)
+            {
+                return new UnhandledDamagedComponentException(damaged.Id, ex);
+            }
         }
     }
 }

@@ -35,15 +35,21 @@ namespace Application.Components.Commands.Update
 
             RuleFor(x => x.PhotoUrl)
                 .NotEmpty()
+                .WithMessage("URL фото є обов'язковим")
                 .MaximumLength(500);
 
             RuleFor(x => x.SupplierLink)
                 .NotEmpty()
+                .WithMessage("Посилання на постачальника є обов'язковим")
                 .MaximumLength(500);
 
-            RuleFor(x => x.UpdatedBy)
+            RuleFor(x => x.DocumentationLink)
+                .MaximumLength(500)
+                .When(x => !string.IsNullOrEmpty(x.DocumentationLink));
+
+            RuleFor(x => x.LastUpdatedBy)
                 .NotEmpty()
-                .WithMessage("UpdatedBy є обов'язковим");
+                .WithMessage("LastUpdatedBy є обов'язковим");
         }
     }
 }

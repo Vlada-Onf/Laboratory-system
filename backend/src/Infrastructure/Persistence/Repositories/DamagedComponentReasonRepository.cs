@@ -3,11 +3,6 @@ using Application.Common.Interfaces.Repositories;
 using Domain.DamagedComponents.Reason;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -42,6 +37,12 @@ namespace Infrastructure.Persistence.Repositories
             return await context.DamagedComponentReasons
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+        }
+        public async Task<DamagedComponentReason> DeleteAsync(DamagedComponentReason reason, CancellationToken cancellationToken)
+        {
+            context.DamagedComponentReasons.Remove(reason);
+            await context.SaveChangesAsync(cancellationToken);
+            return reason;
         }
 
         public async Task<bool> ExistsAsync(DamagedComponentReasonId id, CancellationToken cancellationToken)

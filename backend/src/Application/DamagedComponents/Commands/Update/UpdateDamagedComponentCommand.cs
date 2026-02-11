@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace Application.DamagedComponents.Commands.Update
 {
-    public record UpdateDamagedComponentCommand
-    : IRequest<Either<DamagedComponentException, DamagedComponent>>
+    public sealed record UpdateDamagedComponentCommand
+            : IRequest<Either<DamagedComponentException, DamagedComponent>>
     {
         public required Guid Id { get; init; }
         public required Guid ComponentId { get; init; }

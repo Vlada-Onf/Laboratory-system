@@ -1,11 +1,4 @@
-﻿using Domain.Needs.Status;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Needs.Status
+﻿namespace Domain.Needs.Status
 {
     public class NeedStatus
     {

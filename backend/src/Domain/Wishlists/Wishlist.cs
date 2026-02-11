@@ -2,11 +2,6 @@
 using Domain.Users;
 using Domain.Wishlists.Importance;
 using Domain.Wishlists.Status;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Wishlists
 {

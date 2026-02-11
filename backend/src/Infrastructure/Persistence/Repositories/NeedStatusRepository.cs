@@ -2,11 +2,6 @@
 using Domain.Needs.Status;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -33,6 +28,18 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
             return entity ?? Option<NeedStatus>.None;
+        }
+        public async Task<IReadOnlyList<NeedStatus>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.NeedStatuses
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<NeedStatus> DeleteAsync(NeedStatus status, CancellationToken cancellationToken)
+        {
+            context.NeedStatuses.Remove(status);
+            await context.SaveChangesAsync(cancellationToken);
+            return status;
         }
 
         public async Task<Option<NeedStatus>> GetByNameAsync(string name, CancellationToken cancellationToken)

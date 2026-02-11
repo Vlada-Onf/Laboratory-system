@@ -2,11 +2,7 @@
 using Domain.Wishlists.Status;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -34,6 +30,18 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
             return entity ?? Option<WishlistStatus>.None;
+        }
+        public async Task<IReadOnlyList<WishlistStatus>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.WishlistStatuses
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<WishlistStatus> DeleteAsync(WishlistStatus status, CancellationToken cancellationToken)
+        {
+            context.WishlistStatuses.Remove(status);
+            await context.SaveChangesAsync(cancellationToken);
+            return status;
         }
     }
 }

@@ -2,11 +2,6 @@
 using Domain.History.Actions;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -42,6 +37,18 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(a => a.Name == name, cancellationToken);
 
             return entity ?? Option<Action>.None;
+        }
+        public async Task<IReadOnlyList<Action>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.Actions
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+        public async Task<Action> DeleteAsync(Action action, CancellationToken cancellationToken)
+        {
+            context.Actions.Remove(action);
+            await context.SaveChangesAsync(cancellationToken);
+            return action;
         }
     }
 }
