@@ -43,7 +43,9 @@ const handleEditSubmit = (updatedCategory) => {
 
   const handleDelete = () => {
     handleMenuClose();
-    if (onDeleteCategory) onDeleteCategory(id);
+    if (onDeleteCategory){
+      onDeleteCategory(id);
+    }
   };
 
   return (
@@ -61,6 +63,11 @@ const handleEditSubmit = (updatedCategory) => {
           ${color}CC 70%
         )`,
         position: 'relative',
+        borderRadius: 2,
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+        },
       }}
     >
       <CardMedia

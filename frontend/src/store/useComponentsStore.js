@@ -5,6 +5,10 @@ import { useNeedsStore } from './useNeedsStore';
 export const useComponentsStore = create((set) => ({
   components: componentsMock,
 
+  currentComponent: null,
+  setCurrentComponent: (component) => set({ currentComponent: component }),
+  clearCurrentComponent: () => set({ currentComponent: null }),
+
   updateComponent: (updatedComponent) => {
     set((state) => ({
       components: state.components.map(comp =>

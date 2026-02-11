@@ -9,16 +9,14 @@ const AddCategoryCard = ({ onAdd }) => {
   const [openModal, setOpenModal] = useState(false);
   const textColor = isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b';
 
-const handleAdd = (categoryData) => {
-  console.log('handleAdd categoryData', categoryData);
-
-  const uniqueId = Date.now() + Math.random();
-
-  onAdd({
-    ...categoryData,
-    id: uniqueId,
-  });
-};
+  const handleAdd = (categoryData) => {
+    console.log('handleAdd categoryData', categoryData);
+    const uniqueId = Date.now() + Math.random();
+    onAdd({
+      ...categoryData,
+      id: uniqueId,
+    });
+  };
 
   return (
     <>
@@ -30,8 +28,12 @@ const handleAdd = (categoryData) => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          border: '2px dashed #999',
+          borderRadius: 2,
           cursor: 'pointer',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+          },
         }}
         onClick={() => setOpenModal(true)}
       >

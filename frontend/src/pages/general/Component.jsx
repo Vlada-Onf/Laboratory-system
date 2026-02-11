@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
 import { useComponentsStore } from '../../store/useComponentsStore';
+import { useSchematicsStore } from '../../store/useSchematicStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';
+import SchematicModal from '../../components/component/schematicsBlock/SchematicModal';
 import AddNeedModal from '../../components/brokenComponents/AddNeedModal';
 
 const ComponentPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  
+
   const {
     components,
     openEditModal,
@@ -19,6 +21,10 @@ const ComponentPage = () => {
     updateComponent,
     deleteComponent,
   } = useComponentsStore();
+
+  const {
+    openEditModal: openSchematicEditModal,
+   } = useSchematicsStore();
 
   const addNeed = useNeedsStore(state => state.addNeed);
   const [needModalOpen, setNeedModalOpen] = useState(false);
@@ -70,6 +76,10 @@ const ComponentPage = () => {
     handleCloseNeedModal();
   };
 
+  const handleOpenAddSchematicModal = () => {
+    openSchematicEditModal(null);
+  };
+
   return (
     <PageWrapper>
       <ComponentLayout
@@ -78,6 +88,7 @@ const ComponentPage = () => {
         onDelete={handleDeleteComponent}
         onUpdateLinks={handleUpdateLinks}
         onAddNeed={handleOpenNeedModal}
+        onAddSchematic={handleOpenAddSchematicModal}
       />
 
       {editModal.open && (
@@ -90,6 +101,7 @@ const ComponentPage = () => {
           onSubmit={updateComponent}
         />
       )}
+
 
       <AddNeedModal
         open={needModalOpen}

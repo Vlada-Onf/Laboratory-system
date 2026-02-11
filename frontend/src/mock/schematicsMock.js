@@ -1,23 +1,34 @@
 export const schematicsMock = [
   {
     id: 1,
-    name: 'Схема підключення Arduino олдотрипмро мприотльи риолрпо риотлри uino олдотрипмро мприотльи риолрпо риотлри',
-    image: 'https://elstroy.com.ua/img/cms/%D0%B2%D1%8B%D0%BA%D0%BB%D1%8E%D1%87%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%202%D0%BA%D0%BB-%20%D0%BF%D1%80%D0%BE%D1%85%D0%BE%D0%B4%D0%BD%D0%BE%D0%B8%CC%86%20%D1%81%D1%85%D0%B5%D0%BC%D0%B0.jpg',
-
+    componentId: '1',
+    title: 'Схема підключення Arduino Uno',
+    description: 'Повна схема підключення Arduino Uno з усіма датчиками.',
+    photoUrl: 'https://cdn.sparkfun.com/assets/1/e/8/c/c/51cdc629ce395f6b4f000000.png',
+    links: ['https://www.spotify.com/ua-uk/free/']
   },
   {
-    id: 2,
-    name: 'Схема живлення плати',
-    image: 'https://electrica-shop.com.ua/images/.t/.w599_85_1548420711_Shema-podklyucheniya-vvodnoy-avtomat-schetchik-obshchee-uzo-otdelnie-gruppi-uzo.jpg',
+    id: 2, 
+    componentId: '1',
+    title: 'Схема живлення Arduino Uno',
+    description: 'Схема живлення для Arduino Uno.',
+    photoUrl: 'https://cdn.sparkfun.com/assets/1/e/8/c/c/51cdc629ce395f6b4f000000.png',
+    links: []
   },
   {
     id: 3,
-    name: 'Схема сенсорів',
-    image: 'https://arduino.ua/images/art105/image009.jpg',
+    componentId: '2',
+    title: 'Схема сенсорів для Uno 2',
+    description: 'Сенсори для Arduino Uno 2.',
+    photoUrl: 'https://cdn.sparkfun.com/assets/1/e/8/c/c/51cdc629ce395f6b4f000000.png',
+    links: ['https://www.spotify.com/ua-uk/free/', 'https://docs.google.com/document/d/1tZE-2Vmziy0Xr_n8XZ8NKAL_zPcFfB4xgN5yl-Yxqk8/edit?tab=t.0', 'https://docs.google.com/document/d/1tZE-2Vmziy0Xr_n8XZ8NKAL_zPcFfB4xgN5yl-Yxqk8/edit?tab=t.0']
   },
   {
     id: 4,
-    name: 'Схема підключення LED',
-    image: 'https://itmaster.biz.ua/images/arduino-led.jpg',
-  },
+    componentId: '2',
+    title: 'LED схема для Uno 2',
+    description: 'Керування LED на Arduino Uno 2.',
+    photoUrl: 'https://cdn.sparkfun.com/assets/1/e/8/c/c/51cdc629ce395f6b4f000000.png',
+    links: []
+  }
 ];
