@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, Chip, Box, IconButton, Typography
@@ -6,6 +6,8 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import LinkIcon from '@mui/icons-material/Link';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { eventBus } from '../../../utils/eventBus';
+import { useComponentsStore } from '../../../store/useComponentsStore';
 
 const LinksEditModal = ({
   open,
@@ -19,6 +21,13 @@ const LinksEditModal = ({
     buyLink: links.buyLink || '',
     otherLinksInput: '',
   });
+  const { components } = useComponentsStore();
+
+  const componentName = useMemo(() => {
+    const component = components.find(c => c.id === links.componentId);
+    return component?.name || 'Невідомий компонент';
+  }, [components, links.componentId]);
+
   const [otherLinks, setOtherLinks] = useState(links.otherLinks || []);
 
   const handleInputChange = useCallback((field) => (e) => {
@@ -45,14 +54,30 @@ const LinksEditModal = ({
   }, [addOtherLink]);
 
   const handleSubmit = useCallback((e) => {
-    e.preventDefault();
-    onSave({
-      docLink: form.docLink || null,
-      buyLink: form.buyLink || null,
-      otherLinks: otherLinks,
-    });
-    onClose();
-  }, [form, otherLinks, onSave, onClose]);
+  e.preventDefault();
+
+  const newLinks = {
+    docLink: form.docLink || null,
+    buyLink: form.buyLink || null,
+    otherLinks: otherLinks,
+  };
+
+  eventBus.emit('entity:updated', {
+    userId: 'currentUser',
+    userName: 'Дарина',
+    actionName: 'Оновлено',
+    entityTypeId: 4,
+    entityTypeName: 'Посилання компонента',
+    entityId: links.componentId || 'unknown',
+    entityName: `${componentName}`,
+    fieldName: 'посилання',
+    oldValue: JSON.stringify(links),
+    newValue: JSON.stringify(newLinks)
+  });
+
+  onSave(newLinks);
+  onClose();
+}, [form, otherLinks, links, onSave, onClose, componentName]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

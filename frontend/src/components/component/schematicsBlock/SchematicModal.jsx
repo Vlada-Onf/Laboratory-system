@@ -4,9 +4,18 @@ import {
   TextField, Button, Chip, Box, IconButton, Typography
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { eventBus } from '../../../utils/eventBus';
+import { useComponentsStore } from '../../../store/useComponentsStore';
 
 const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
   const isEditing = !!schematic;
+
+  const { components } = useComponentsStore();
+
+  const getComponentName = useCallback((id) => {
+    const component = components.find(c => c.id === id);
+    return component?.name || `компонент ${id}`;
+  }, [components]);
 
   const defaultForm = useMemo(() => ({
     title: isEditing && schematic?.title || '',
@@ -58,20 +67,71 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
   }, [addLink]);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const newSchematic = {
-      id: schematic?.id || crypto.randomUUID(),
-      title: form.title.trim(),
-      description: form.description.trim(),
-      photoUrl: getImageUrl(),
-      links: links,
-      componentId: componentId,
-    };
-
-    onSave(newSchematic);
-    handleCloseModal();
+  const newSchematic = {
+    id: schematic?.id || crypto.randomUUID(),
+    title: form.title.trim(),
+    description: form.description.trim(),
+    photoUrl: getImageUrl(),
+    links: links,
+    componentId: componentId,
   };
+
+
+  const baseEventData = {
+    userId: 'currentUser',
+    userName: 'Іван Петренко',
+    entityTypeId: 5,
+    entityTypeName: 'Схему',
+    entityId: newSchematic.id,
+   entityName: `${form.title} (${getComponentName(componentId)})`
+  };
+
+  if (isEditing) {
+    const oldTitle = schematic?.title || '';
+    const oldDesc = schematic?.description || '';
+
+    if (oldTitle !== form.title.trim()) {
+      eventBus.emit('entity:updated', {
+        ...baseEventData, actionName: 'Оновлено', fieldName: 'назва',
+        oldValue: oldTitle, newValue: form.title.trim()
+      });
+    }
+
+    if (oldDesc !== form.description.trim()) {
+      eventBus.emit('entity:updated', {
+        ...baseEventData, actionName: 'Оновлено', fieldName: 'опис',
+        oldValue: oldDesc, newValue: form.description.trim()
+      });
+    }
+
+    if (form.photo) {
+      eventBus.emit('entity:updated', {
+        ...baseEventData, actionName: 'Оновлено', fieldName: 'фото',
+        oldValue: schematic?.photoUrl || null,
+        newValue: URL.createObjectURL(form.photo)
+      });
+    }
+
+    if (JSON.stringify(schematic?.links || []) !== JSON.stringify(links || [])) {
+    eventBus.emit('entity:updated', {
+      ...baseEventData,
+      actionName: 'Оновлено',
+      fieldName: 'посилання',
+      oldValue: JSON.stringify({ links: schematic?.links || [] }),
+      newValue: JSON.stringify({ links: links || [] })
+    });
+  }
+}
+  else {
+    eventBus.emit('entity:created', { ...baseEventData, actionName: 'Створено' });
+  }
+
+  onSave(newSchematic);
+  handleCloseModal();
+};
+
 
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth>
@@ -147,7 +207,7 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
                 <TextField
-                  placeholder="https://example.com"
+                  placeholder="Введіть посилання"
                   value={form.linkInput || ''}
                   onChange={handleInputChange('linkInput')}
                   onKeyPress={handleKeyPress}

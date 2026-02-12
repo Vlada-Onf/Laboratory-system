@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
-const ButtonsCell = ({ onEdit, onDelete, onMoveToNeeds }) => {
+const ButtonsCell = ({ onEdit, onDelete, onMoveToNeeds, row  }) => {
   return (
     <Box sx={{
       display: 'flex',
@@ -22,7 +22,7 @@ const ButtonsCell = ({ onEdit, onDelete, onMoveToNeeds }) => {
         <ShoppingCartIcon fontSize="small" />
       </IconButton>
 
-      <IconButton size="small" onClick={onDelete} sx={{ color: '#f16731' }}>
+      <IconButton size="small" onClick={() => onDelete(row)} sx={{ color: '#f16731' }}>
         <DeleteIcon fontSize="small" />
       </IconButton>
     </Box>

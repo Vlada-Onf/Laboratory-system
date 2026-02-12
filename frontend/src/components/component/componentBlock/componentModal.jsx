@@ -6,6 +6,8 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
+import { eventBus } from '../../../utils/eventBus';
+import ImagePreview from '../../history/ImagePreview';
 
 const ComponentModal = ({
   open,
@@ -65,6 +67,11 @@ const ComponentModal = ({
     setTags(prev => prev.filter(tag => tag !== tagToRemove));
   }, []);
 
+const getCategoryName = useCallback((categoryId) => {
+  return categories.find(cat => cat.id === categoryId)?.title || 'Не вибрано';
+}, [categories]);
+
+
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -77,19 +84,94 @@ const ComponentModal = ({
     return component?.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEZvdG88L3RleHQ+PC9zdmc+';
   }, [form.photo, component?.image]);
 
-  const handleSubmit = useCallback((e) => {
-    e.preventDefault();
-    onSubmit({
-      id: component?.id || crypto.randomUUID(),
-      image: getImageUrl(),
-      ...form,
-      price: parseFloat(form.price) || 0,
-      quantity: parseInt(form.quantity) || 0,
-      burntQuantity: parseInt(form.burntQuantity) || 0,
-      tags,
+const handleSubmit = useCallback((e) => {
+  e.preventDefault();
+
+  const newComponent = {
+    id: component?.id || crypto.randomUUID(),
+    image: getImageUrl(),
+    ...form,
+    price: parseFloat(form.price) || 0,
+    quantity: parseInt(form.quantity) || 0,
+    burntQuantity: parseInt(form.burntQuantity) || 0,
+    tags,
+  };
+
+  const baseEventData = {
+    userId: 'currentUser', userName: 'Іван Петренко',
+    entityTypeId: 4, entityTypeName: 'Компонент',
+    entityId: newComponent.id, entityName: form.name,
+  };
+
+  if (isEditing) {
+    const oldPrice = component?.price?.toString() || '';
+    const oldQuantity = component?.quantity?.toString() || '';
+    const oldBurnt = component?.burntQuantity?.toString() || '';
+
+  if (component?.name !== form.name) {
+    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'назва', oldValue: component?.name || '', newValue: form.name });
+  }
+
+  if (component?.description !== form.description) {
+    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'опис', oldValue: component?.description || '', newValue: form.description });
+  }
+
+  if (oldPrice !== form.price) {
+    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'ціна', oldValue: oldPrice, newValue: form.price });
+  }
+
+  if (oldQuantity !== form.quantity) {
+    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'кількість', oldValue: oldQuantity, newValue: form.quantity });
+  }
+
+  if (oldBurnt !== form.burntQuantity) {
+    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'спалено', oldValue: oldBurnt, newValue: form.burntQuantity });
+  }
+
+  if (form.photo) {
+    eventBus.emit('entity:updated', {
+      ...baseEventData,
+      actionName: 'Оновлено',
+      fieldName: 'фото',
+      oldValue: component?.image || null,
+      newValue: URL.createObjectURL(form.photo)
     });
-    handleCloseModal();
-  }, [form, tags, component?.id, onSubmit, getImageUrl, handleCloseModal]);
+  }
+
+  if (component?.categoryId != form.categoryId) {
+    eventBus.emit('entity:updated', {
+      ...baseEventData,
+      actionName: 'Оновлено',
+      fieldName: 'категорія',
+      oldValue: getCategoryName(component?.categoryId),
+      newValue: getCategoryName(form.categoryId)
+    });
+  }
+
+  const oldTagsStr = component?.tags?.join(', ') || 'немає';
+  const newTagsStr = tags.join(', ') || 'немає';
+  if (oldTagsStr !== newTagsStr) {
+    eventBus.emit('entity:updated', {
+      ...baseEventData,
+      actionName: 'Оновлено',
+      fieldName: 'теги',
+      oldValue: oldTagsStr,
+      newValue: newTagsStr
+    });
+  }
+}
+
+else {
+    eventBus.emit('entity:created', {
+      ...baseEventData,
+      actionName: 'Створено'
+    });
+  }
+
+  onSubmit(newComponent);
+  handleCloseModal();
+}, [form, tags, component, isEditing, onSubmit, getImageUrl, handleCloseModal, categories, getCategoryName]);
+
 
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth>

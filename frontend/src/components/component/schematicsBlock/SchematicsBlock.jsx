@@ -11,6 +11,8 @@ import SchematicCard from './SchematicCard';
 import AddSchematicCard from './AddSchematicCard.jsx';
 import SchematicModal from './SchematicModal.jsx';
 import { useSchematicsStore } from '../../../store/useSchematicStore';
+import { eventBus } from '../../../utils/eventBus';
+
 
 const SchematicsBlock = ({ componentId }) => {
   const {
@@ -42,13 +44,23 @@ const SchematicsBlock = ({ componentId }) => {
   };
 
   const handleDeleteConfirm = () => {
-    if (deleteItemId) {
-      deleteSchematic(deleteItemId);
-    }
-    setDeleteConfirmOpen(false);
-    setDeleteItemId(null);
-    setDeleteItemTitle('');
-  };
+  if (deleteItemId) {
+    eventBus.emit('entity:deleted', {
+      userId: 'currentUser',
+      userName: 'Дарина',
+      entityTypeId: 5,
+      entityTypeName: 'Схему',
+      entityId: deleteItemId,
+      entityName: deleteItemTitle,
+      actionName: 'Видалено'
+    });
+    deleteSchematic(deleteItemId);
+  }
+  setDeleteConfirmOpen(false);
+  setDeleteItemId(null);
+  setDeleteItemTitle('');
+};
+
 
   const handleDeleteCancel = () => {
     setDeleteConfirmOpen(false);

@@ -18,6 +18,7 @@ const isDarkMode = theme.palette.mode === 'dark';
     docLink: component.docLink,
     buyLink: component.buyLink,
     otherLinks: component.otherLinks || [],
+    componentId: component.id
   };
 
   const handleSaveLinks = (updatedLinks) => {
@@ -93,6 +94,7 @@ const isDarkMode = theme.palette.mode === 'dark';
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         links={links}
+        componentId={component.id}
         onSave={handleSaveLinks}
       />
     </Box>

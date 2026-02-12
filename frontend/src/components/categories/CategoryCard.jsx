@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-} from '@mui/material';
+import {Card, CardContent, CardMedia, Typography, IconButton, Menu, MenuItem,} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { eventBus } from '../../utils/eventBus';
 import AddCategoryModal from './AddCategoryModal';
 
 const CategoryCard = ({ title, description, image, color, id, onEditCategory, onDeleteCategory }) => {
-  console.log('CategoryCard props', { title, description, image, color, id });
   const [anchorEl, setAnchorEl] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const open = Boolean(anchorEl);
@@ -35,19 +26,28 @@ const CategoryCard = ({ title, description, image, color, id, onEditCategory, on
     setEditOpen(false);
   };
 
-const handleEditSubmit = (updatedCategory) => {
-  console.log('updatedCategory in CategoryCard', updatedCategory);
-  onEditCategory(updatedCategory);
-  handleEditClose();
-};
+  const handleEditSubmit = (updatedCategory) => {
+    onEditCategory(updatedCategory);
+    handleEditClose();
+  };
 
   const handleDelete = () => {
     handleMenuClose();
-    if (onDeleteCategory){
+
+    eventBus.emit('entity:deleted', {
+      userId: 'currentUser',
+      userName: 'Дарина',
+      actionName: 'Видалено',
+      entityTypeId: 1,
+      entityTypeName: 'Категорію',
+      entityId: id,
+      entityName: title
+    });
+
+    if (onDeleteCategory) {
       onDeleteCategory(id);
     }
   };
-
   return (
     <Card
       sx={{

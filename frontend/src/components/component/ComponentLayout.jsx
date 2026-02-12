@@ -111,7 +111,7 @@ const ComponentLayout = ({
 
         <Item>
           <SectionTitle>Коментарі</SectionTitle>
-          <CommentsBlock />
+          <CommentsBlock componentId={component.id} /> 
         </Item>
       </Box>
     </Box>

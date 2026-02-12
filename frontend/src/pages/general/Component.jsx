@@ -8,6 +8,7 @@ import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';
 import SchematicModal from '../../components/component/schematicsBlock/SchematicModal';
 import AddNeedModal from '../../components/brokenComponents/AddNeedModal';
+import { eventBus } from '../../utils/eventBus';
 
 const ComponentPage = () => {
   const navigate = useNavigate();
@@ -38,9 +39,19 @@ const ComponentPage = () => {
   const handleEditComponent = () => openEditModal(component);
 
   const handleDeleteComponent = () => {
-    deleteComponent(component.id);
-    navigate('/components');
-  };
+  eventBus.emit('entity:deleted', {
+    userId: 'currentUser',
+    userName: 'Дарина',
+    actionName: 'Видалено',
+    entityTypeId: 4,
+    entityTypeName: 'Компонент',
+    entityId: component.id,
+    entityName: component.name
+  });
+
+  deleteComponent(component.id);
+  navigate('/components');
+};
 
   const handleUpdateLinks = (updatedLinks) => {
     updateComponent({

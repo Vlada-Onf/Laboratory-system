@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState  } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Typography, Box } from '@mui/material';
 import ClickableComponentCell from './ClickableComponentCell';
@@ -11,8 +11,13 @@ import ComponentModal from '../../component/componentBlock/ComponentModal';
 import { useComponentsStore } from '../../../store/useComponentsStore';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
 import { useNavigate } from 'react-router-dom';
+import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const ComponentsTable = ({ onAddNeed }) => {
+
+   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [componentToDelete, setComponentToDelete] = useState(null);
+
   const {
     components,
     updateComponent,
@@ -43,6 +48,12 @@ const isEditing = Boolean(editModal.component);
     setSelectedRow(null);
   }, []);
 
+  const handleDeleteClick = useCallback((row) => {
+  setComponentToDelete(row);
+  setDeleteModalOpen(true);
+}, []);
+
+
   const handleAddNeed = useCallback((formData) => {
   if (!selectedRow){
     return;
@@ -64,7 +75,6 @@ const isEditing = Boolean(editModal.component);
     approvedAt: '',
   };
 
-  console.log('NEED READY FOR TABLE:', mappedNeed);
   onAddNeed?.(mappedNeed);
   handleCloseModal();
 }, [selectedRow, onAddNeed, handleCloseModal]);
@@ -91,11 +101,7 @@ const handleAddComponentSubmit = useCallback((formData) => {
       ...originalComponent,
       ...formData,
     };
-    console.log('🔄 MERGE DATA:', {
-      preservedDocLink: originalComponent?.docLink,
-      updatedName: formData.name,
-      finalData: fullData
-    });
+
     updateComponent(fullData);
     closeEditModal();
   }, [editModal.component, updateComponent, closeEditModal]);
@@ -171,8 +177,9 @@ const handleAddComponentSubmit = useCallback((formData) => {
       filterable: false,
       renderCell: (params) => (
         <ButtonsCell
+        row={params.row}
           onEdit={() => openEditModal(params.row)}
-          onDelete={() => deleteComponent(params.row.id)}
+          onDelete={() => handleDeleteClick(params.row)}
           onMoveToNeeds={() => handleOpenModal(params.row)}
         />
       ),
@@ -224,6 +231,19 @@ const handleAddComponentSubmit = useCallback((formData) => {
         onAdd={handleAddNeed}
         row={selectedRow}
       />
+
+      <ConfirmDeleteModal
+  open={deleteModalOpen}
+  onClose={() => setDeleteModalOpen(false)}
+  onConfirm={() => {
+    if (componentToDelete) {
+      deleteComponent(componentToDelete.id);
+    }
+  }}
+  entityName={componentToDelete?.name}
+  entityTypeId={4}
+  entityTypeName="Компонент"
+/>
     </Box>
   );
 };
