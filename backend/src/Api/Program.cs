@@ -4,13 +4,25 @@ using FluentValidation;
 using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
+const string FrontendCorsPolicy = "FrontendCorsPolicy";
 // Controllers + глобальна валідація
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();  // підключили фільтр
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: FrontendCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173", // Vite
+                "http://localhost:3000"  // CRA
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,7 +40,7 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 }
-
+app.UseCors(FrontendCorsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
