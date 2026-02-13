@@ -98,7 +98,7 @@ const handleSubmit = useCallback((e) => {
   };
 
   const baseEventData = {
-    userId: 'currentUser', userName: 'Іван Петренко',
+    userId: 'currentUser', userName: 'Дарина',
     entityTypeId: 4, entityTypeName: 'Компонент',
     entityId: newComponent.id, entityName: form.name,
   };

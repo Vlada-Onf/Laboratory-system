@@ -78,7 +78,25 @@ const HistoryItem = ({ record }) => {
     if (record.actionName === 'Видалено') {
       return `видалено ${record.entityTypeName.toLowerCase()}`;
     }
-
+if (record.fieldName === 'категорія') {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" fontWeight={500}>
+          змінено категорію
+        </Typography>
+        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+          "{record.oldValue || 'не вибрано'}"
+        </Typography>
+        <TrendingFlatIcon 
+          sx={{ fontSize: 20, color: 'text.secondary', transform: 'translateY(2px)', mx: 0.75 }} 
+        />
+        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+          "{record.newValue || 'не вибрано'}"
+        </Typography>
+      </Box>
+    );
+  }
+  
 if (record.fieldName === 'теги' || record.fieldName?.includes('тег')) {
   const parseTags = (tagsData) => {
     try {
