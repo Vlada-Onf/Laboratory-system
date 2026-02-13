@@ -17,10 +17,15 @@ namespace Application.DamagedComponentReasons.Exceptions
     }
 
     public sealed class DamagedComponentReasonNotFoundException(DamagedComponentReasonId reasonId)
-        : DamagedComponentReasonException(reasonId, $"Damaged component reason not found under id {reasonId}");
+        : DamagedComponentReasonException(
+            reasonId,
+            $"Damaged component reason not found under id {reasonId}");
 
     public sealed class UnhandledDamagedComponentReasonException(
         DamagedComponentReasonId reasonId,
         Exception? innerException = null)
-        : DamagedComponentReasonException(reasonId, "Unexpected error occurred", innerException);
+        : DamagedComponentReasonException(
+            reasonId,
+            "Unexpected error occurred",
+            innerException);
 }

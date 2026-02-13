@@ -1,26 +1,37 @@
+using Api.Filters;
 using Application;
+using FluentValidation;
 using Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
-builder.Services.AddControllers();
+
+// Controllers + глобальна валідація
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();  // підключили фільтр
+});
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// підключаємо Application (там реєструється MediatR, ValidationBehaviour тощо)
+// Application + Infrastructure
 builder.Services.AddApplicationServices();
-
-// підключаємо Infrastructure
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Реєструємо всі FluentValidation-валідатори з цього асемблі
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+public partial class Program { }

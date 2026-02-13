@@ -11,6 +11,6 @@ using System.Threading.Tasks;
 
 namespace Application.Components.Commands.Delete
 {
-    public record DeleteComponentCommand(Guid Id)
-           : IRequest<Either<ComponentException, Component>>;
+    public sealed record DeleteComponentCommand(Guid Id, Guid DeletedBy)
+        : IRequest<Either<ComponentException, Component>>;
 }

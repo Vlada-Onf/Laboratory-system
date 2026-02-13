@@ -18,71 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Comment\Commands\Create\" />
-    <Folder Include="Comment\Commands\Delete\" />
-    <Folder Include="Comment\Commands\Update\" />
-    <Folder Include="Comment\Exceptions\" />
-    <Folder Include="Comment\Queries\" />
-    <Folder Include="EntityTypes\Commands\Create\" />
-    <Folder Include="EntityTypes\Commands\Delete\" />
-    <Folder Include="EntityTypes\Commands\Update\" />
-    <Folder Include="EntityTypes\Exceptions\" />
-    <Folder Include="EntityTypes\Queries\" />
-    <Folder Include="History\Commands\Create\" />
-    <Folder Include="History\Commands\Delete\" />
-    <Folder Include="History\Commands\Update\" />
-    <Folder Include="History\Exceptions\" />
-    <Folder Include="History\Queries\" />
-    <Folder Include="NeedsImportance\Commands\Create\" />
-    <Folder Include="NeedsImportance\Commands\Delete\" />
-    <Folder Include="NeedsImportance\Commands\Update\" />
-    <Folder Include="NeedsImportance\Exceptions\" />
-    <Folder Include="NeedsImportance\Queries\" />
-    <Folder Include="NeedsStatus\Commands\Create\" />
-    <Folder Include="NeedsStatus\Commands\Delete\" />
-    <Folder Include="NeedsStatus\Commands\Update\" />
-    <Folder Include="NeedsStatus\Exceptions\" />
-    <Folder Include="NeedsStatus\Queries\" />
-    <Folder Include="Needs\Commands\Create\" />
-    <Folder Include="Needs\Commands\Delete\" />
-    <Folder Include="Needs\Commands\Update\" />
-    <Folder Include="Needs\Exceptions\" />
-    <Folder Include="Needs\Queries\" />
-    <Folder Include="Roles\Commands\Create\" />
-    <Folder Include="Roles\Commands\Delete\" />
-    <Folder Include="Roles\Commands\Update\" />
-    <Folder Include="Roles\Exceptions\" />
-    <Folder Include="Roles\Queries\" />
-    <Folder Include="Schematics\Commands\Create\" />
-    <Folder Include="Schematics\Commands\Delete\" />
-    <Folder Include="Schematics\Commands\Update\" />
-    <Folder Include="Schematics\Exceptions\" />
-    <Folder Include="Schematics\Queries\" />
-    <Folder Include="UsefulLink\Commands\Create\" />
-    <Folder Include="UsefulLink\Commands\Delete\" />
-    <Folder Include="UsefulLink\Commands\Update\" />
-    <Folder Include="UsefulLink\Exceptions\" />
-    <Folder Include="UsefulLink\Queries\" />
     <Folder Include="Users\Commands\Create\" />
     <Folder Include="Users\Commands\Delete\" />
     <Folder Include="Users\Commands\Update\" />
     <Folder Include="Users\Exceptions\" />
     <Folder Include="Users\Queries\" />
-    <Folder Include="WishlistsImportance\Commands\Create\" />
-    <Folder Include="WishlistsImportance\Commands\Delete\" />
-    <Folder Include="WishlistsImportance\Commands\Update\" />
-    <Folder Include="WishlistsImportance\Exceptions\" />
-    <Folder Include="WishlistsImportance\Queries\" />
-    <Folder Include="WishlistsStatus\Commands\Create\" />
-    <Folder Include="WishlistsStatus\Commands\Delete\" />
-    <Folder Include="WishlistsStatus\Commands\Update\" />
-    <Folder Include="WishlistsStatus\Exceptions\" />
-    <Folder Include="WishlistsStatus\Queries\" />
-    <Folder Include="Wishlists\Commands\Create\" />
-    <Folder Include="Wishlists\Commands\Delete\" />
-    <Folder Include="Wishlists\Commands\Update\" />
-    <Folder Include="Wishlists\Exceptions\" />
-    <Folder Include="Wishlists\Queries\" />
   </ItemGroup>
 
 </Project>

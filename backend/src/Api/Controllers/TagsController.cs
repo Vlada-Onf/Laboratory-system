@@ -76,10 +76,7 @@ namespace Api.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteTagCommand
-            {
-                TagId = id
-            };
+            var input = new DeleteTagCommand(id);
 
             var result = await sender.Send(input, cancellationToken);
 

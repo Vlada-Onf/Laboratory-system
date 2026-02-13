@@ -52,6 +52,5 @@ namespace Api.Dtos
         string PhotoUrl,
         string SupplierLink,
         string? DocumentationLink,
-        List<Guid> TagIds,
-        Guid UpdatedBy);
+        Guid LastUpdatedBy);
 }

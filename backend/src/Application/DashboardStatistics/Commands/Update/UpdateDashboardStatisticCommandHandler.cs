@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Queries;
+using Application.Common.Interfaces.Repositories;
 using Application.DashboardStatistics.Exceptions;
 using Domain.DashboardStatistics;
 using Domain.DashboardStatistics.DashboardStatistics;
@@ -13,8 +14,10 @@ using System.Threading.Tasks;
 namespace Application.DashboardStatistics.Commands.Update
 {
     public sealed class UpdateDashboardStatisticCommandHandler(
-        IDashboardStatisticRepository statisticRepository)
-        : IRequestHandler<UpdateDashboardStatisticCommand, Either<DashboardStatisticException, DashboardStatistic>>
+           IDashboardStatisticRepository statisticRepository,
+           IComponentQueries componentQueries,
+           IDamagedComponentQueries damagedComponentQueries)
+           : IRequestHandler<UpdateDashboardStatisticCommand, Either<DashboardStatisticException, DashboardStatistic>>
     {
         public async Task<Either<DashboardStatisticException, DashboardStatistic>> Handle(
             UpdateDashboardStatisticCommand request,
@@ -24,22 +27,28 @@ namespace Application.DashboardStatistics.Commands.Update
             var option = await statisticRepository.GetByIdAsync(id, cancellationToken);
 
             return await option.MatchAsync(
-                Some: stat => UpdateEntity(stat, request, cancellationToken),
+                Some: stat => UpdateEntity(stat, cancellationToken),
                 None: () => Task.FromResult<Either<DashboardStatisticException, DashboardStatistic>>(
                     new DashboardStatisticNotFoundException(id)));
         }
 
         private async Task<Either<DashboardStatisticException, DashboardStatistic>> UpdateEntity(
             DashboardStatistic statistic,
-            UpdateDashboardStatisticCommand request,
             CancellationToken cancellationToken)
         {
             try
             {
+                var components = await componentQueries.GetAllAsync(cancellationToken);
+                var totalComponentsCount = components.Count;
+                var totalComponentsCost = components.Sum(c => c.TotalCost);
+
+                var damaged = await damagedComponentQueries.GetAllAsync(cancellationToken);
+                var totalDecommissionedCount = damaged.Sum(d => d.Quantity);
+
                 statistic.Update(
-                    totalComponentsCount: request.TotalComponentsCount,
-                    totalComponentsCost: request.TotalComponentsCost,
-                    totalDecommissionedCount: request.TotalDecommissionedCount);
+                    totalComponentsCount: totalComponentsCount,
+                    totalComponentsCost: totalComponentsCost,
+                    totalDecommissionedCount: totalDecommissionedCount);
 
                 var updated = await statisticRepository.UpdateAsync(statistic, cancellationToken);
 

@@ -80,8 +80,7 @@ namespace Api.Controllers
                 PhotoUrl = request.PhotoUrl,
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
-                TagIds = request.TagIds,
-                UpdatedBy = request.UpdatedBy
+                LastUpdatedBy = request.LastUpdatedBy
             };
 
             var result = await sender.Send(input, cancellationToken);

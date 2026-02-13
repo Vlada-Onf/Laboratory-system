@@ -14,8 +14,6 @@ namespace Application.DashboardStatistics.Commands.Create
         : IRequest<Either<DashboardStatisticException, DashboardStatistic>>
     {
         public required DateTime StatisticDate { get; init; }
-        public required int TotalComponentsCount { get; init; }
-        public required decimal TotalComponentsCost { get; init; }
-        public required int TotalDecommissionedCount { get; init; }
     }
+
 }

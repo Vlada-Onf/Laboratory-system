@@ -11,11 +11,8 @@ using System.Threading.Tasks;
 namespace Application.DashboardStatistics.Commands.Update
 {
     public sealed record UpdateDashboardStatisticCommand
-         : IRequest<Either<DashboardStatisticException, DashboardStatistic>>
+        : IRequest<Either<DashboardStatisticException, DashboardStatistic>>
     {
         public required Guid Id { get; init; }
-        public required int TotalComponentsCount { get; init; }
-        public required decimal TotalComponentsCost { get; init; }
-        public required int TotalDecommissionedCount { get; init; }
     }
 }

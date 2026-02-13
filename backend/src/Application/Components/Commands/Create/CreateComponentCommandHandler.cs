@@ -9,10 +9,10 @@ using MediatR;
 namespace Application.Components.Commands.Create
 {
     public class CreateComponentCommandHandler(
-            IComponentRepository componentRepository,
-            ICategoryRepository categoryRepository,
-            ITagRepository tagRepository)
-            : IRequestHandler<CreateComponentCommand, Either<ComponentException, Component>>
+        IComponentRepository componentRepository,
+        ICategoryRepository categoryRepository,
+        ITagRepository tagRepository)
+        : IRequestHandler<CreateComponentCommand, Either<ComponentException, Component>>
     {
         public async Task<Either<ComponentException, Component>> Handle(
             CreateComponentCommand request,
@@ -38,37 +38,36 @@ namespace Application.Components.Commands.Create
             CategoryId categoryId,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var createdBy = new UserId(request.CreatedBy);
+            var createdBy = new UserId(request.CreatedBy);
 
-                var component = Component.Create(
-                    categoryId: categoryId,
-                    name: request.Name,
-                    description: request.Description,
-                    quantity: request.Quantity,
-                    price: request.Price,
-                    photoUrl: request.PhotoUrl,
-                    supplierLink: request.SupplierLink,
-                    documentationLink: request.DocumentationLink,
-                    createdBy: createdBy);
-                if (request.TagIds.Any())
+            var component = Component.Create(
+                categoryId: categoryId,
+                name: request.Name,
+                description: request.Description,
+                quantity: request.Quantity,
+                price: request.Price,
+                photoUrl: request.PhotoUrl,
+                supplierLink: request.SupplierLink,
+                documentationLink: request.DocumentationLink,
+                createdBy: createdBy);
+
+            var tagIds = request.TagIds
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            if (tagIds.Any())
+            {
+                var tags = await tagRepository.GetByIdsAsync(tagIds, cancellationToken);
+
+                foreach (var tag in tags)
                 {
-                    var tags = await tagRepository.GetByIdsAsync(request.TagIds, cancellationToken);
-                    foreach (var tag in tags)
-                    {
-                        component.AddTag(tag);
-                    }
+                    component.AddTag(tag);
                 }
-
-                var created = await componentRepository.AddAsync(component, cancellationToken);
-
-                return created;
             }
-            catch (Exception exception)
-            {
-                return new UnhandledComponentException(ComponentId.Empty(), exception);
-            }
+
+            var created = await componentRepository.AddAsync(component, cancellationToken);
+            return created;
         }
     }
 }

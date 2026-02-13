@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Queries;
+using Application.Common.Interfaces.Repositories;
 using Application.DashboardStatistics.Exceptions;
 using Domain.DashboardStatistics;
 using Domain.DashboardStatistics.DashboardStatistics;
@@ -13,8 +14,10 @@ using System.Threading.Tasks;
 namespace Application.DashboardStatistics.Commands.Create
 {
     public sealed class CreateDashboardStatisticCommandHandler(
-        IDashboardStatisticRepository statisticRepository)
-        : IRequestHandler<CreateDashboardStatisticCommand, Either<DashboardStatisticException, DashboardStatistic>>
+             IDashboardStatisticRepository statisticRepository,
+             IComponentQueries componentQueries,
+             IDamagedComponentQueries damagedComponentQueries)
+             : IRequestHandler<CreateDashboardStatisticCommand, Either<DashboardStatisticException, DashboardStatistic>>
     {
         public async Task<Either<DashboardStatisticException, DashboardStatistic>> Handle(
             CreateDashboardStatisticCommand request,
@@ -38,11 +41,18 @@ namespace Application.DashboardStatistics.Commands.Create
 
             try
             {
+                var components = await componentQueries.GetAllAsync(cancellationToken);
+                var totalComponentsCount = components.Count;
+                var totalComponentsCost = components.Sum(c => c.TotalCost);
+
+                var damaged = await damagedComponentQueries.GetAllAsync(cancellationToken);
+                var totalDecommissionedCount = damaged.Sum(d => d.Quantity);
+
                 var statistic = DashboardStatistic.Create(
                     statisticDate: request.StatisticDate,
-                    totalComponentsCount: request.TotalComponentsCount,
-                    totalComponentsCost: request.TotalComponentsCost,
-                    totalDecommissionedCount: request.TotalDecommissionedCount);
+                    totalComponentsCount: totalComponentsCount,
+                    totalComponentsCost: totalComponentsCost,
+                    totalDecommissionedCount: totalDecommissionedCount);
 
                 id = statistic.Id;
 

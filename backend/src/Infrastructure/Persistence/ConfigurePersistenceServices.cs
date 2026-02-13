@@ -57,7 +57,18 @@ namespace Infrastructure.Persistence
 
             // Tags
             services.AddScoped<TagRepository>();
-            services.AddScoped<ITagRepository>(provider => provider.GetRequiredService<TagRepository>());
+            services.AddScoped<ITagRepository>(p => p.GetRequiredService<TagRepository>());
+            services.AddScoped<ITagQueries>(p => p.GetRequiredService<TagRepository>());
+
+            // Component useful links
+            services.AddScoped<ComponentUsefulLinkRepository>();
+            services.AddScoped<IComponentUsefulLinkRepository>(p => p.GetRequiredService<ComponentUsefulLinkRepository>());
+            services.AddScoped<IComponentUsefulLinkQueries>(p => p.GetRequiredService<ComponentUsefulLinkRepository>());
+
+            // Component comments
+            services.AddScoped<ComponentCommentRepository>();
+            services.AddScoped<IComponentCommentRepository>(p => p.GetRequiredService<ComponentCommentRepository>());
+            services.AddScoped<IComponentCommentQueries>(p => p.GetRequiredService<ComponentCommentRepository>());
 
             // Damaged Components
             services.AddScoped<DamagedComponentRepository>();

@@ -15,20 +15,24 @@ namespace Infrastructure.Persistence.Repositories
         {
             _context = context;
         }
-
-        public async Task<IReadOnlyList<Tag>> GetByIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<Tag>> GetByIdsAsync(
+            List<Guid> tagIds,
+            CancellationToken cancellationToken)
         {
             if (tagIds is null || tagIds.Count == 0)
                 return Array.Empty<Tag>();
 
-            var idSet = tagIds.ToHashSet();
+            var ids = tagIds
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToHashSet();
 
-            var all = await _context.Tags
+            var allTags = await _context.Tags
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            return all
-                .Where(t => idSet.Contains(t.Id.Value))
+            return allTags
+                .Where(t => ids.Contains(t.Id.Value))
                 .ToList();
         }
 

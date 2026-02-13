@@ -7,8 +7,8 @@ using MediatR;
 namespace Application.Actions.Commands.Create
 {
     public sealed class CreateActionCommandHandler(
-        IActionRepository actionRepository)
-        : IRequestHandler<CreateActionCommand, Either<ActionException, Action>>
+    IActionRepository actionRepository)
+    : IRequestHandler<CreateActionCommand, Either<ActionException, Action>>
     {
         public async Task<Either<ActionException, Action>> Handle(
             CreateActionCommand request,
@@ -32,7 +32,7 @@ namespace Application.Actions.Commands.Create
 
             try
             {
-                var action = Domain.History.Actions.Action.Create(
+                var action = Action.Create(
                     name: request.Name,
                     description: request.Description);
 
@@ -50,4 +50,4 @@ namespace Application.Actions.Commands.Create
             }
         }
     }
-}
+}   

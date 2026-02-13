@@ -18,8 +18,11 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<Component> AddAsync(Component component, CancellationToken cancellationToken)
         {
+            _context.AttachRange(component.Tags);
+
             await _context.Components.AddAsync(component, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+
             return component;
         }
 
