@@ -4,14 +4,10 @@ using Application.Common.Interfaces.Repositories;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Persistence
 {
@@ -19,27 +15,37 @@ namespace Infrastructure.Persistence
     {
         public static void AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            // 1. Беремо connection string: спочатку з env, потім з appsettings
+            var connectionString =
+                Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
+                configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("Connection string 'DefaultConnection' is null or empty");
+                throw new InvalidOperationException("Connection string is null or empty");
 
+            // 2. Будуємо NpgsqlDataSource
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             dataSourceBuilder.EnableDynamicJson();
             var dataSource = dataSourceBuilder.Build();
 
+            // 3. Реєструємо DbContext + докручуємо логування помилок
             services.AddDbContext<ApplicationDbContext>(options => options
                 .UseNpgsql(
                     dataSource,
                     builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
                 .UseSnakeCaseNamingConvention()
+                .LogTo(Console.WriteLine, LogLevel.Error)
+                .EnableSensitiveDataLogging()
                 .ConfigureWarnings(w =>
                 {
                     w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning);
                 }));
 
+            // 4. Initialiser + IApplicationDbContext
             services.AddScoped<ApplicationDbContextInitialiser>();
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+            // 5. Репозиторії
             services.AddRepositories();
         }
 
