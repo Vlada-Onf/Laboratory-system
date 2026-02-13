@@ -5,24 +5,28 @@ using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
+
 // Controllers + глобальна вал≥дац≥€
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<ValidationFilter>();  // п≥дключили ф≥льтр
+options.Filters.Add<ValidationFilter>();
 });
+
+// CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: FrontendCorsPolicy, policy =>
-    {
-        policy
-            .WithOrigins(
-                "http://localhost:5173", // Vite
-                "http://localhost:3000"  // CRA
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+options.AddPolicy(name: FrontendCorsPolicy, policy =>
+{
+policy
+    .WithOrigins(
+        "http://localhost:5173",
+        "http://localhost:3000"
+    )
+    .AllowAnyHeader()
+    .AllowAnyMethod();
 });
+});
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -31,15 +35,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// –еЇструЇмо вс≥ FluentValidation-вал≥датори з цього асембл≥
+// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+// ”¬≤ћ Ќ”“» swagger дл€ вс≥х середовищ (у т.ч. Render)
 app.UseSwagger();
 app.UseSwaggerUI();
-}
+
 app.UseCors(FrontendCorsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthorization();
