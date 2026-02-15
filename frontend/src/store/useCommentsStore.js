@@ -1,180 +1,109 @@
 import { create } from 'zustand';
-import { eventBus } from '../utils/eventBus';
+import apiClient from '../api/client';
 
-export const useCommentsStore = create((set, get) => ({
+export const useCommentsStore = create((set) => ({
   commentsByComponent: {},
+  isLoading: false,
 
-  addComment: (componentId, text, componentName = 'компонент') => {
-    if (!text?.trim() || !componentId){
-      return;
+  fetchCommentsByComponent: async (componentId) => {
+    set({ isLoading: true });
+
+    try {
+      const { data } = await apiClient.get(`/component-comments/by-component/${componentId}`);
+
+      set((state) => ({
+        commentsByComponent: {
+          ...state.commentsByComponent,
+          [componentId]: data || []
+        }
+      }));
+
+    } catch (error) {
+      console.error('❌ [COMMENTS] API ERROR:', error);
+      set((state) => ({
+        commentsByComponent: {
+          ...state.commentsByComponent,
+          [componentId]: []
+        }
+      }));
+    } finally {
+      set({ isLoading: false });
     }
-
-    const newComment = {
-      id: crypto.randomUUID(),
-      author: 'Ви',
-      avatar: 'https://media.istockphoto.com/id/1550071750/photo/green-tea-tree-leaves-camellia-sinensis-in-organic-farm-sunlight-fresh-young-tender-bud.jpg?s=612x612&w=0&k=20&c=RC_xD5DY5qPH_hpqeOY1g1pM6bJgGJSssWYjVIvvoLw=',
-      text: text.trim(),
-      replies: [],
-      createdAt: new Date().toISOString()
-    };
-
-    set((state) => ({
-      commentsByComponent: {
-        ...state.commentsByComponent,
-        [componentId]: [newComment, ...(state.commentsByComponent[componentId] || [])]
-      }
-    }));
-
-    eventBus.emit('entity:created', {
-      time: new Date().toISOString(),
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 6,
-      entityTypeName: 'Коментар',
-      entityId: newComment.id,
-      entityName: `Коментар до ${componentName}`,
-      actionName: 'Створено'
-    });
   },
 
-  updateComment: (componentId, commentId, text, componentName = 'компонент') => {
-    if (!text?.trim() || !componentId || !commentId){
-      return;
-    }
+  addComment: async (componentId, content) => {
 
-    const getCurrentCommentText = (items) => {
-      for (const comment of items) {
-        if (comment.id === commentId){
-          return comment.text.slice(0, 30);
-        }
+    const commentData = {
+      componentId,
+      content: content.trim(),
+      createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    };
 
-        if (comment.replies?.length){
-          const replyText = getCurrentCommentText(comment.replies);
-          if (replyText){
-            return replyText;
+    try {
+      const { data } = await apiClient.post('/component-comments', commentData);
+
+      set((state) => {
+        const currentComments = state.commentsByComponent[componentId] || [];
+        return {
+          commentsByComponent: {
+            ...state.commentsByComponent,
+            [componentId]: [data, ...currentComments]
           }
-        }
-      }
-      return 'невідомий текст';
-    };
+        };
+      });
 
-    const currentComments = get().commentsByComponent[componentId] || [];
-    const oldText = getCurrentCommentText(currentComments);
-
-    const updateRecursively = (items) =>
-      items.map((comment) =>
-        comment.id === commentId
-          ? { ...comment, text: text.trim() }
-          : {
-              ...comment,
-              replies: comment.replies?.length
-                ? updateRecursively(comment.replies)
-                : []
-            }
-      );
-
-    set((state) => ({
-      commentsByComponent: {
-        ...state.commentsByComponent,
-        [componentId]: updateRecursively(state.commentsByComponent[componentId] || [])
-      }
-    }));
-
-    eventBus.emit('entity:updated', {
-      time: new Date().toISOString(),
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 6,
-      entityTypeName: 'Коментар',
-      entityId: commentId,
-      entityName: `Коментар до ${componentName}`,
-      fieldName: 'текст',
-      oldValue: oldText,
-      newValue: text.trim().slice(0, 30)
-    });
-  },
-
-  replyToComment: (componentId, commentId, text, componentName = 'компонент') => {
-    if (!text?.trim() || !componentId || !commentId) return;
-
-    const newReply = {
-      id: crypto.randomUUID(),
-      author: 'Ви',
-      avatar: 'https://media.istockphoto.com/id/1550071750/photo/green-tea-tree-leaves-camellia-sinensis-in-organic-farm-sunlight-fresh-young-tender-bud.jpg?s=612x612&w=0&k=20&c=RC_xD5DY5qPH_hpqeOY1g1pM6bJgGJSssWYjVIvvoLw=',
-      text: text.trim(),
-      replies: [],
-      createdAt: new Date().toISOString()
-    };
-
-    const addReplyRecursively = (items) =>
-      items.map((comment) =>
-        comment.id === commentId
-          ? { ...comment, replies: [...(comment.replies || []), newReply] }
-          : {
-              ...comment,
-              replies: comment.replies?.length
-                ? addReplyRecursively(comment.replies)
-                : []
-            }
-      );
-
-    set((state) => ({
-      commentsByComponent: {
-        ...state.commentsByComponent,
-        [componentId]: addReplyRecursively(state.commentsByComponent[componentId] || [])
-      }
-    }));
-
-    eventBus.emit('entity:created', {
-      time: new Date().toISOString(),
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 6,
-      entityTypeName: 'Коментар',
-      entityId: newReply.id,
-      entityName: `Коментар до ${componentName}`,
-      actionName: 'Створено'
-    });
-  },
-
-  deleteComment: (componentId, commentId, componentName = 'компонент') => {
-    if (!componentId || !commentId){
-      return;
+    } catch (error) {
+      console.error('[COMMENTS] ADD ERROR:', error);
     }
+  },
 
-    const deleteRecursively = (items) =>
-      items
-        .filter((comment) => comment.id !== commentId)
-        .map((comment) => ({
-          ...comment,
-          replies: comment.replies?.length
-            ? deleteRecursively(comment.replies)
-            : []
-        }));
+  updateComment: async (componentId, commentId, content) => {
 
-    set((state) => ({
-      commentsByComponent: {
-        ...state.commentsByComponent,
-        [componentId]: deleteRecursively(state.commentsByComponent[componentId] || [])
-      }
-    }));
+    const updateData = {
+      id: commentId,
+      content: content.trim()
+    };
 
-    eventBus.emit('entity:deleted', {
-      time: new Date().toISOString(),
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 6,
-      entityTypeName: 'Коментар',
-      entityId: commentId,
-      entityName: `Коментар до ${componentName}`,
-      actionName: 'Видалено'
-    });
+    try {
+      const { data } = await apiClient.put('/component-comments', updateData);
+
+      set((state) => {
+        const comments = state.commentsByComponent[componentId] || [];
+        const updatedComments = comments.map(c => 
+          c.id === commentId ? data : c
+        );
+        
+        return {
+          commentsByComponent: {
+            ...state.commentsByComponent,
+            [componentId]: updatedComments
+          }
+        };
+      });
+
+    } catch (error) {
+      console.error('[COMMENTS] UPDATE ERROR:', error);
+    }
+  },
+
+  deleteComment: async (componentId, commentId) => {
+
+    try {
+      await apiClient.delete(`/component-comments/${commentId}`);
+
+      set((state) => ({
+        commentsByComponent: {
+          ...state.commentsByComponent,
+          [componentId]: state.commentsByComponent[componentId]?.filter(c => c.id !== commentId) || []
+        }
+      }));
+
+    } catch (error) {
+      console.error('[COMMENTS] DELETE ERROR:', error);
+    }
   },
 
   clearComments: (componentId) => {
-    if (!componentId){
-      return;
-    }
     set((state) => ({
       commentsByComponent: {
         ...state.commentsByComponent,
@@ -183,3 +112,4 @@ export const useCommentsStore = create((set, get) => ({
     }));
   }
 }));
+

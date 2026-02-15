@@ -1,27 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Typography, Avatar, Button, TextField } from '@mui/material';
 import { useTheme } from '../../../context/useTheme';
 
-const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
+const CommentCard = ({ comment, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
-  const [text, setText] = useState(comment.text);
-  const [replyText, setReplyText] = useState('');
+  const [text, setText] = useState(comment.content || comment.text || '');
   const { isDarkMode } = useTheme();
+
+  const authorName = 'Дарина';
+  const avatarSrc = 'https://ui-avatars.com/api/?name=Дарина&size=40&background=1976d2&color=fff';
+
+  const formattedDate = useMemo(() => {
+    const date = comment.createdAt ? new Date(comment.createdAt) : new Date();
+    return date.toLocaleDateString('uk-UA');
+  }, [comment.createdAt]);
 
   const handleSave = () => {
     onUpdate(comment.id, text);
     setIsEditing(false);
   };
 
-  const handleReply = () => {
-    if (!replyText.trim()) {
-      return;
-    }
-
-    onReply(comment.id, replyText.trim());
-    setReplyText('');
-    setIsReplying(false);
+  const handleCancel = () => {
+    setText(comment.content || comment.text || '');
+    setIsEditing(false);
   };
 
   const handleDelete = () => {
@@ -31,149 +32,82 @@ const CommentCard = ({ comment, onUpdate, onReply, onDelete }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Avatar src={comment.avatar} alt={comment.author} />
-        <Box sx={{ flex: 1 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      gap: 2, 
+      p: 2, 
+      mb: 2, 
+      borderRadius: 2, 
+      bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : '#f8f9fa',
+      border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e0e0e0'
+    }}>
+      <Avatar src={avatarSrc} sx={{ width: 44, height: 44 }}>
+        Д
+      </Avatar>
+      
+      <Box sx={{ flex: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="subtitle2" fontWeight={600}>
-            {comment.author}
+            {authorName}
           </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {formattedDate}
+          </Typography>
+        </Box>
 
+        {isEditing ? (
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            size="small"
+            sx={{ mb: 1 }}
+          />
+        ) : (
+          <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.5 }}>
+            {text || ' '}
+          </Typography>
+        )}
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
           {isEditing ? (
-            <TextField
-              fullWidth
-              multiline
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-              }}
-            />
-          ) : (
-            <Typography variant="body2">
-              {comment.text}
-            </Typography>
-          )}
-
-          <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-            {isEditing ? (
-              <Button
-                size="small"
-                onClick={() => {
-                  handleSave();
-                }}
-                sx={{
-                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-                  '&:hover': {
-                    backgroundColor: isDarkMode
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(211, 47, 47, 0.08)'
-                  },
-                }}
+            <>
+              <Button 
+                size="small" 
+                variant="outlined"
+                onClick={handleSave}
+                disabled={!text.trim()}
               >
                 Зберегти
               </Button>
-            ) : (
-              <Button
-                size="small"
-                onClick={() => {
-                  setIsEditing(true);
-                }}
-                sx={{
-                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-                  '&:hover': {
-                    backgroundColor: isDarkMode
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(211, 47, 47, 0.08)'
-                  },
-                }}
+              <Button 
+                size="small" 
+                onClick={handleCancel}
+              >
+                Скасувати
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                size="small" 
+                onClick={() => setIsEditing(true)}
               >
                 Редагувати
               </Button>
-            )}
-
-            <Button
-              size="small"
-              onClick={() => {
-                setIsReplying(!isReplying);
-              }}
-              sx={{
-                color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-                '&:hover': {
-                  backgroundColor: isDarkMode
-                    ? 'rgba(255, 255, 255, 0.08)'
-                    : 'rgba(211, 47, 47, 0.08)'
-                },
-              }}
-            >
-              Відповісти
-            </Button>
-
-            <Button
-              size="small"
-              onClick={() => {
-                handleDelete();
-              }}
-              sx={{
-                color: isDarkMode ? '#f16731' : '#f16731',
-                '&:hover': {
-                  backgroundColor: isDarkMode
-                    ? 'rgba(241, 103, 49, 0.15)'
-                    : 'rgba(241, 103, 49, 0.15)'
-                },
-              }}
-            >
-              Видалити
-            </Button>
-          </Box>
-
-          {isReplying && (
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                placeholder="Ваша відповідь..."
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-              />
-              <Button
-                size="small"
-                onClick={handleReply}
-                sx={{
-                  mt: 0.5,
-                  color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-                  '&:hover': {
-                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(211, 47, 47, 0.08)'
-                  },
-                }}
+              <Button 
+                size="small" 
+                onClick={handleDelete}
+                color="error"
               >
-                Надіслати
+                Видалити
               </Button>
-            </Box>
+            </>
           )}
         </Box>
       </Box>
-
-      {comment.replies?.length > 0 && (
-        <Box sx={{
-          pl: 6,
-          mt: 1,
-          borderLeft: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #ccc',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-        }}>
-          {comment.replies.map((reply) => (
-            <CommentCard
-              key={reply.id}
-              comment={reply}
-              onUpdate={onUpdate}
-              onReply={onReply}
-              onDelete={onDelete}
-            />
-          ))}
-        </Box>
-      )}
     </Box>
   );
 };

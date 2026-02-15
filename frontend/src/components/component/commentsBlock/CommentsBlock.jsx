@@ -1,5 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import React, { useState, useCallback, useEffect } from 'react';
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Typography, 
+  CircularProgress
+} from '@mui/material';
 import { useCommentsStore } from '../../../store/useCommentsStore';
 import { useComponentsStore } from '../../../store/useComponentsStore';
 import CommentCard from './CommentCard';
@@ -8,29 +14,32 @@ const CommentsBlock = ({ componentId }) => {
   const [newComment, setNewComment] = useState('');
   const { components } = useComponentsStore();
   const {
-    commentsByComponent: allComments,
+    commentsByComponent,
+    isLoading,
+    fetchCommentsByComponent,
     addComment,
     updateComment,
-    replyToComment,
     deleteComment
   } = useCommentsStore();
+  
 
-  const getComponentName = useCallback((id) => {
-    if (!id){
-      return 'невідомий компонент';
+  useEffect(() => {
+    if (componentId) {
+      fetchCommentsByComponent(componentId);
     }
+  }, [componentId, fetchCommentsByComponent]);
+
+  const comments = commentsByComponent[componentId] || [];
+  const getComponentName = useCallback((id) => {
+    if (!id) return 'невідомий компонент';
     const component = components.find(c => c.id === id);
     return component?.name || `компонент ${String(id).slice(0, 8)}`;
   }, [components]);
 
   const handleAddComment = useCallback(() => {
-    if (!newComment.trim()){
-      return;
-    }
-
-    const componentName = getComponentName(componentId);
-
-    addComment(componentId, newComment, componentName);
+    if (!newComment.trim()) return;
+    
+    addComment(componentId, newComment.trim());
     setNewComment('');
   }, [newComment, componentId, addComment, getComponentName]);
 
@@ -44,7 +53,13 @@ const CommentsBlock = ({ componentId }) => {
     );
   }
 
-  const comments = allComments[componentId] || [];
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress /> 
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -60,12 +75,12 @@ const CommentsBlock = ({ componentId }) => {
         <Button
           variant="contained"
           onClick={handleAddComment}
-          disabled={!newComment.trim()}
           sx={{
             fontSize: 16,
             height: 58,
-            background: 'linear-gradient(135deg, #08273b, #365468)',
             color: '#fff',
+            background: 'linear-gradient(135deg, #08273b , #365468 )',
+            
             '&:hover': {
               background: 'linear-gradient(135deg, #051926, #20314a)',
             },
@@ -74,7 +89,6 @@ const CommentsBlock = ({ componentId }) => {
           Надіслати
         </Button>
       </Box>
-
       {comments.length === 0 ? (
         <Typography variant="body2" color="text.secondary" align="center">
           Коментарів поки немає. Будьте першим!
@@ -82,16 +96,13 @@ const CommentsBlock = ({ componentId }) => {
       ) : (
         <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
           {comments.map((comment) => (
-            <CommentCard
-              key={comment.id}
-              comment={comment}
-              componentId={componentId}
-              componentName={getComponentName(componentId)}
-              onUpdate={(id, text) => updateComment(componentId, id, text, getComponentName(componentId))}
-              onReply={(id, text) => replyToComment(componentId, id, text, getComponentName(componentId))}
-              onDelete={(id) => deleteComment(componentId, id, getComponentName(componentId))}
-            />
-          ))}
+  <CommentCard
+    key={comment.id}
+    comment={comment}
+    onUpdate={(id, text) => updateComment(componentId, id, text)}
+    onDelete={(id) => deleteComment(componentId, id)}
+  />
+))}
         </Box>
       )}
     </Box>
