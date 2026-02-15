@@ -24,15 +24,17 @@ const ComponentModal = ({
   );
 
   const defaultForm = useMemo(() => ({
-    name: isEditing && component?.name || '',
-    description: isEditing && component?.description || '',
-    price: isEditing && component?.price?.toString() || '',
-    quantity: isEditing && component?.quantity?.toString() || '',
-    burntQuantity: isEditing && component?.burntQuantity?.toString() || '',
-    categoryId: isEditing && component?.categoryId || '',
-    tagInput: '',
-    photo: null,
-  }), [isEditing, component]);
+  name: isEditing && component?.name || '',
+  description: isEditing && component?.description || '',
+  price: isEditing && component?.price?.toString() || '',
+  quantity: isEditing && component?.quantity?.toString() || '',
+  burntQuantity: isEditing && component?.burntQuantity?.toString() || '',
+  categoryId: isEditing && component?.categoryId || '',
+  documentationLink: isEditing && (component?.documentationLink || component?.docLink) || '',
+  supplierLink: isEditing && (component?.supplierLink || component?.buyLink) || '',
+  tagInput: '',
+  photo: null,
+}), [isEditing, component]);
 
   const defaultTags = useMemo(() =>
     isEditing && component?.tags ? 
@@ -104,15 +106,15 @@ const handleSubmit = useCallback(async (e) => {
 
     const formData = {
       categoryId: form.categoryId,
-      name: form.name,
-      description: form.description,
-      quantity: parseInt(form.quantity) || 0,
-      price: parseFloat(form.price) || 0,
-      photoUrl: form.photo ? URL.createObjectURL(form.photo) : '',
-      supplierLink: '',
-      documentationLink: '',
-      tagIds: tagIds,
-      createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  name: form.name,
+  description: form.description,
+  quantity: parseInt(form.quantity) || 0,
+  price: parseFloat(form.price) || 0,
+  photoUrl: form.photo ? URL.createObjectURL(form.photo) : '',
+  supplierLink: form.supplierLink || "string",
+  documentationLink: form.documentationLink || "string",
+  tagIds: tagIds,
+  createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     };
 
 
@@ -332,6 +334,30 @@ const handleSubmit = useCallback(async (e) => {
                 fullWidth
               />
             </Box>
+
+<Box>
+  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+    Посилання на документацію
+  </Typography>
+  <TextField
+    value={form.documentationLink || ''}
+    onChange={handleInputChange('documentationLink')}
+    fullWidth
+    placeholder="Вставте посилання"
+  />
+</Box>
+
+<Box>
+  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+    Посилання на магазин
+  </Typography>
+  <TextField
+    value={form.supplierLink || ''}
+    onChange={handleInputChange('supplierLink')}
+    fullWidth
+    placeholder="Вставте посилання"
+  />
+</Box>
 
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>

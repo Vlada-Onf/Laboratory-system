@@ -49,8 +49,6 @@ export const useComponentsStore = create((set) => ({
         ...newComponent,
         createdBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         photoUrl: "віапб",
-        supplierLink: "https://example.com/supplier", 
-        documentationLink: "https://example.com/docs",
        
         categoryId: newComponent.categoryId || null,
         quantity: parseInt(newComponent.quantity) || 0,

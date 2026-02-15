@@ -1,164 +1,123 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, Chip, Box, IconButton, Typography
+  TextField, Button, IconButton, Box, Typography
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import LinkIcon from '@mui/icons-material/Link';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { eventBus } from '../../../utils/eventBus';
-import { useComponentsStore } from '../../../store/useComponentsStore';
+import CloseIcon from '@mui/icons-material/Close';
+import { useUsefulLinksStore } from '../../../store/useUsefulLinksStore';
 
-const LinksEditModal = ({
-  open,
-  onClose,
-  links,
-  onSave,
-  title = "Редагувати інформацію про посилання"
-}) => {
-  const [form, setForm] = useState({
-    docLink: links.docLink || '',
-    buyLink: links.buyLink || '',
-    otherLinksInput: '',
-  });
-  const { components } = useComponentsStore();
+const LinkEditModal = ({ open, onClose, componentId, usefulLinks = [] }) => {
+ 
+  const [newLinkTitle, setNewLinkTitle] = useState('');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
+  
+  const { addUsefulLink, updateUsefulLink, deleteUsefulLink } = useUsefulLinksStore();
 
-  const componentName = useMemo(() => {
-    const component = components.find(c => c.id === links.componentId);
-    return component?.name || 'Невідомий компонент';
-  }, [components, links.componentId]);
-
-  const [otherLinks, setOtherLinks] = useState(links.otherLinks || []);
-
-  const handleInputChange = useCallback((field) => (e) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
-  }, []);
-
-  const addOtherLink = useCallback(() => {
-    const newLink = form.otherLinksInput?.trim();
-    if (newLink && !otherLinks.includes(newLink)) {
-      setOtherLinks(prev => [...prev, newLink]);
-      setForm(prev => ({ ...prev, otherLinksInput: '' }));
+  const handleAddLink = async () => {
+    if (!newLinkTitle.trim() || !newLinkUrl.trim()) return;
+    
+    try {
+      await addUsefulLink({
+        componentId,
+        title: newLinkTitle,
+        url: newLinkUrl
+      });
+      
+      setNewLinkTitle('');
+      setNewLinkUrl('');
+    } catch (error) {
+      console.error('Помилка додавання лінка:', error);
     }
-  }, [form.otherLinksInput, otherLinks]);
-
-  const removeOtherLink = useCallback((linkToRemove) => {
-    setOtherLinks(prev => prev.filter(link => link !== linkToRemove));
-  }, []);
-
-  const handleKeyPress = useCallback((e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addOtherLink();
-    }
-  }, [addOtherLink]);
-
-  const handleSubmit = useCallback((e) => {
-  e.preventDefault();
-
-  const newLinks = {
-    docLink: form.docLink || null,
-    buyLink: form.buyLink || null,
-    otherLinks: otherLinks,
   };
 
-  eventBus.emit('entity:updated', {
-    userId: 'currentUser',
-    userName: 'Дарина',
-    actionName: 'Оновлено',
-    entityTypeId: 4,
-    entityTypeName: 'Посилання компонента',
-    entityId: links.componentId || 'unknown',
-    entityName: `${componentName}`,
-    fieldName: 'посилання',
-    oldValue: JSON.stringify(links),
-    newValue: JSON.stringify(newLinks)
-  });
+  const handleUpdateLink = async (linkId, title, url) => {
+    try {
+      await updateUsefulLink(linkId, { title, url });
+    } catch (error) {
+      console.error('Помилка оновлення лінка:', error);
+    }
+  };
 
-  onSave(newLinks);
-  onClose();
-}, [form, otherLinks, links, onSave, onClose, componentName]);
+  const handleDeleteLink = async (linkId) => {
+    try {
+      await deleteUsefulLink(linkId);
+    } catch (error) {
+      console.error('Помилка видалення лінка:', error);
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <form onSubmit={handleSubmit}>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <Box>
-              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                Документація
-              </Typography>
-              <TextField
-                value={form.docLink}
-                onChange={handleInputChange('docLink')}
-                placeholder="Введіть посилання"
-                fullWidth
-                InputProps={{ startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} /> }}
-              />
-            </Box>
+      <DialogTitle>
+        Корисні посилання
+        <IconButton
+          onClick={onClose}
+          sx={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-            <Box>
-              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                Магазин
-              </Typography>
-              <TextField
-                value={form.buyLink}
-                onChange={handleInputChange('buyLink')}
-                placeholder="Введіть посилання"
-                fullWidth
-                InputProps={{ startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} /> }}
-              />
-            </Box>
+      <DialogContent>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'end' }}>
+            <TextField
+              label="Введіть назву"
+              value={newLinkTitle}
+              onChange={(e) => setNewLinkTitle(e.target.value)}
+              size="small"
+              fullWidth
+            />
+            <TextField
+              label="Введіть посилання"
+              value={newLinkUrl}
+              onChange={(e) => setNewLinkUrl(e.target.value)}
+              size="small"
+              fullWidth
+            />
+            <IconButton
+              onClick={handleAddLink}
+              disabled={!newLinkTitle.trim() || !newLinkUrl.trim()}
+              sx={{ alignSelf: 'end', height: '40px', width: '40px' }}
+            >
+              <AddCircleIcon />
+            </IconButton>
+          </Box>
 
-            <Box>
-              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                Інші посилання
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+          <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+            {usefulLinks.map((link) => (
+              <Box key={link.id} sx={{ display: 'flex', gap: 1, alignItems: 'center', p: 1, border: '1px solid #e0e0e0', borderRadius: 1, mb: 1 }}>
                 <TextField
-                  value={form.otherLinksInput}
-                  onChange={handleInputChange('otherLinksInput')}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Введіть посилання"
-                  fullWidth
+                  value={link.title}
+                  onChange={(e) => handleUpdateLink(link.id, e.target.value, link.url)}
                   size="small"
-                  InputProps={{ startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} /> }}
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  value={link.url}
+                  onChange={(e) => handleUpdateLink(link.id, link.title, e.target.value)}
+                  size="small"
+                  sx={{ flex: 2 }}
                 />
                 <IconButton
-                  onClick={addOtherLink}
-                  sx={{
-                    alignSelf: 'flex-end',
-                    height: '40px',
-                    width: '40px',
-                    p: 0
-                  }}
-                  disabled={!form.otherLinksInput?.trim()}
+                  onClick={() => handleDeleteLink(link.id)}
+                  size="small"
+                  color="error"
                 >
-                  <AddCircleIcon />
+                  <CloseIcon />
                 </IconButton>
               </Box>
-              <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {otherLinks.map((link, index) => (
-                  <Chip
-                    key={`${link}-${index}`}
-                    label={link.slice(0, 30) + (link.length > 30 ? '...' : '')}
-                    onDelete={() => removeOtherLink(link)}
-                    size="small"
-                    sx={{ maxWidth: 200 }}
-                  />
-                ))}
-              </Box>
-            </Box>
+            ))}
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Скасувати</Button>
-          <Button type="submit" variant="contained">Зберегти</Button>
-        </DialogActions>
-      </form>
+        </Box>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onClose}>Зберегти</Button>
+      </DialogActions>
     </Dialog>
   );
 };
 
-export default LinksEditModal;
+export default LinkEditModal;

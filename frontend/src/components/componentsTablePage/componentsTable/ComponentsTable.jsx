@@ -89,8 +89,8 @@ const ComponentsTable = ({ onAddNeed }) => {
         quantity: parseInt(formData.quantity) || 0,
         price: parseFloat(formData.price) || 0,
         photoUrl: formData.photoUrl,
-        supplierLink: '',
-        documentationLink: '',
+        supplierLink: formData.supplierLink || "string",
+documentationLink: formData.documentationLink || "string",
       });
       closeEditModal();
     } catch (error) {
