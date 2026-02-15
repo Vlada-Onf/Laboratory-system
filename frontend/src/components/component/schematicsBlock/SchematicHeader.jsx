@@ -10,7 +10,7 @@ const SchematicHeader = ({ schematic, currentComponent, navigate }) => {
     <Box sx={{ mb: 4 }}>
       <Button
         variant="outlined"
-        onClick={() => navigate(`/components/${currentComponent?.id}`)}
+        onClick={() => navigate(`/front-components/${currentComponent?.id}`)}
         sx={{
           mb: 3,
           borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : undefined,

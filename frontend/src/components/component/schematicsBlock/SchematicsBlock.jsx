@@ -1,22 +1,15 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import SchematicCard from './SchematicCard';
-import AddSchematicCard from './AddSchematicCard.jsx';
-import SchematicModal from './SchematicModal.jsx';
-import { useSchematicsStore } from '../../../store/useSchematicStore';
-import { eventBus } from '../../../utils/eventBus';
+import AddSchematicCard from './AddSchematicCard';
+import SchematicModal from './SchematicModal';
+import { useSchematicsStore } from '../../../store/useSchematicsStore';
 
-
-const SchematicsBlock = ({ componentId }) => {
+const SchematicsBlock = ({ componentId, onAddSchematic }) => {
   const {
     schematics,
+    isLoading,
+    fetchSchematicsByComponent,
     editModal,
     openEditModal,
     closeEditModal,
@@ -29,9 +22,15 @@ const SchematicsBlock = ({ componentId }) => {
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [deleteItemTitle, setDeleteItemTitle] = useState('');
 
-  const componentSchematics = schematics.filter(s => {
-    return String(s.componentId) === String(componentId);
-  });
+  useEffect(() => {
+    if (componentId) {
+      fetchSchematicsByComponent(componentId);
+    }
+  }, [componentId, fetchSchematicsByComponent]);
+
+  const componentSchematics = schematics.filter(s => 
+    String(s.componentId) === String(componentId)
+  );
 
   const handleEditSchematic = (schematic) => {
     openEditModal(schematic);
@@ -44,25 +43,9 @@ const SchematicsBlock = ({ componentId }) => {
   };
 
   const handleDeleteConfirm = () => {
-  if (deleteItemId) {
-    eventBus.emit('entity:deleted', {
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 5,
-      entityTypeName: 'Схему',
-      entityId: deleteItemId,
-      entityName: deleteItemTitle,
-      actionName: 'Видалено'
-    });
-    deleteSchematic(deleteItemId);
-  }
-  setDeleteConfirmOpen(false);
-  setDeleteItemId(null);
-  setDeleteItemTitle('');
-};
-
-
-  const handleDeleteCancel = () => {
+    if (deleteItemId) {
+      deleteSchematic(deleteItemId);
+    }
     setDeleteConfirmOpen(false);
     setDeleteItemId(null);
     setDeleteItemTitle('');
@@ -70,17 +53,26 @@ const SchematicsBlock = ({ componentId }) => {
 
   const handleAddSchematic = () => {
     openEditModal(null);
+    onAddSchematic?.();
   };
 
-  const handleSaveSchematic = (schematicData) => {
-    if (editModal.schematic) {
-      updateSchematic(schematicData);
-    } else {
-      schematicData.componentId = String(componentId);
-      addSchematic(schematicData);
+  const handleSaveSchematic = async (schematicData) => {
+    try {
+      if (editModal.schematic) {
+        await updateSchematic(schematicData);
+      } else {
+        schematicData.componentId = String(componentId);
+        await addSchematic(schematicData);
+      }
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка збереження схеми:', error);
     }
-    closeEditModal();
   };
+
+  if (isLoading) {
+    return <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>Завантаження...</Box>;
+  }
 
   return (
     <>
@@ -103,7 +95,6 @@ const SchematicsBlock = ({ componentId }) => {
                 id={schematic.id}
                 title={schematic.title}
                 photoUrl={schematic.photoUrl}
-                links={schematic.links}
                 schematic={schematic}
                 onEdit={handleEditSchematic}
                 onDelete={handleOpenDeleteConfirm}
@@ -122,36 +113,26 @@ const SchematicsBlock = ({ componentId }) => {
           </Box>
         )}
       </Box>
+
       {editModal.open && (
-        <>
-          <SchematicModal
-            key={editModal.schematic?.id || `add-${componentId}`}
-            open={editModal.open}
-            schematic={editModal.schematic}
-            componentId={componentId}
-            onClose={closeEditModal}
-            onSave={handleSaveSchematic}
-          />
-        </>
+        <SchematicModal
+          key={editModal.schematic?.id || `add-${componentId}`}
+          open={editModal.open}
+          schematic={editModal.schematic}
+          componentId={componentId}
+          onClose={closeEditModal}
+          onSave={handleSaveSchematic}
+        />
       )}
 
-      <Dialog
-        open={deleteConfirmOpen}
-        onClose={handleDeleteCancel}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
         <DialogTitle>Підтвердити видалення</DialogTitle>
         <DialogContent>
           Ви впевнені, що хочете видалити схему "<strong>{deleteItemTitle}</strong>"?
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel}>Скасувати</Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            variant="contained"
-            color="error"
-          >
+          <Button onClick={() => setDeleteConfirmOpen(false)}>Скасувати</Button>
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error">
             Видалити
           </Button>
         </DialogActions>

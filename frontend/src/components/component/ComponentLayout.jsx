@@ -8,7 +8,7 @@ import LinksBlock from './linksBlock/LinksBlock';
 import SchematicsBlock from './schematicsBlock/SchematicsBlock';
 import CommentsBlock from './commentsBlock/CommentsBlock';
 import { useComponentsStore } from '../../store/useComponentsStore';
-import { useSchematicsStore } from '../../store/useSchematicStore';
+import { useSchematicsStore } from '../../store/useSchematicsStore';
 
 const ComponentLayout = ({
   component,

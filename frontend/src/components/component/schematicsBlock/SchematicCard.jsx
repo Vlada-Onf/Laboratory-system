@@ -42,7 +42,7 @@ const SchematicCard = ({ id, title, photoUrl, schematic, onEdit, onDelete }) => 
       handleMenuClose();
       return;
     }
-    navigate(`/schematics/${id}`);
+    navigate(`/front-schematics/${id}`);
   }, [open, handleMenuClose, navigate, id]);
 
   return (

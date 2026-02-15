@@ -3,8 +3,22 @@ import { Box, Typography } from '@mui/material';
 import LinksRow from '../linksBlock/LinksRow';
 
 const SchematicLinksBlock = ({ schematic }) => {
-  const links = schematic.links || schematic.additionalLinks || [];
-  const hasLinks = Array.isArray(links) && links.length > 0;
+  let links = [];
+  
+  if (schematic.additionalLinks) {
+    if (Array.isArray(schematic.additionalLinks)) {
+      links = schematic.additionalLinks;
+    } else if (typeof schematic.additionalLinks === 'string') {
+      links = schematic.additionalLinks
+        .split(',')
+        .map(link => link.trim())
+        .filter(Boolean);
+    }
+  } else if (schematic.links && Array.isArray(schematic.links)) {
+    links = schematic.links;
+  }
+  
+  const hasLinks = links.length > 0;
 
   if (!hasLinks) {
     return (
@@ -18,7 +32,6 @@ const SchematicLinksBlock = ({ schematic }) => {
 
   return (
     <Box sx={{ mt: 3 }}>
-
       <LinksRow
         title="Корисні посилання"
         links={links}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
 import { useComponentsStore } from '../../store/useComponentsStore';
-import { useSchematicsStore } from '../../store/useSchematicStore';
+import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';

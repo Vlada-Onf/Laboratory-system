@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useComponentsStore } from '../../store/useComponentsStore';
-import { useSchematicsStore } from '../../store/useSchematicStore';
+import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import PageWrapper from '../../components/layout/PaperWrapper';
 

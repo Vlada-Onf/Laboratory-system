@@ -9,13 +9,39 @@ import { useComponentsStore } from '../../../store/useComponentsStore';
 
 const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
   const isEditing = !!schematic;
-
   const { components } = useComponentsStore();
 
   const getComponentName = useCallback((id) => {
     const component = components.find(c => c.id === id);
     return component?.name || `компонент ${id}`;
   }, [components]);
+
+  const parseLinksFromDb = useCallback((schematicData) => {
+    if (schematicData?.links && Array.isArray(schematicData.links)) {
+      return schematicData.links;
+    }
+    
+    if (schematicData?.additionalLinks) {
+      if (Array.isArray(schematicData.additionalLinks)) {
+        return schematicData.additionalLinks;
+      }
+      
+      const linksArray = schematicData.additionalLinks
+        .split(',')
+        .map(link => link.trim())
+        .filter(Boolean);
+      
+      return linksArray;
+    }
+    
+    return []; 
+  }, []);
+  const defaultLinks = useMemo(() => {
+    if (isEditing) {
+      return parseLinksFromDb(schematic);
+    }
+    return [];
+  }, [isEditing, schematic, parseLinksFromDb]);
 
   const defaultForm = useMemo(() => ({
     title: isEditing && schematic?.title || '',
@@ -24,12 +50,13 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
     linkInput: '',
   }), [isEditing, schematic]);
 
-  const defaultLinks = useMemo(() =>
-    isEditing && schematic?.links ? [...schematic.links] : [],
-  [isEditing, schematic]);
-
   const [form, setForm] = useState(defaultForm);
   const [links, setLinks] = useState(defaultLinks);
+
+  React.useEffect(() => {
+    setForm(defaultForm);
+    setLinks(defaultLinks);
+  }, [defaultForm, defaultLinks]);
 
   const handleCloseModal = () => {
     setForm(defaultForm);
@@ -66,72 +93,80 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
     }
   }, [addLink]);
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const newSchematic = {
-    id: schematic?.id || crypto.randomUUID(),
-    title: form.title.trim(),
-    description: form.description.trim(),
-    photoUrl: getImageUrl(),
-    links: links,
-    componentId: componentId,
+    const additionalLinksString = links.join(',');
+    
+    const apiData = {
+      id: schematic?.id || crypto.randomUUID(),
+      title: form.title.trim(),
+      description: form.description.trim() || "string",
+      photoUrl: getImageUrl() || "string",
+      links: links, 
+      additionalLinks: additionalLinksString,
+      componentId: componentId,
+    };
+
+    const baseEventData = {
+      userId: 'currentUser',
+      userName: 'Дарина',
+      entityTypeId: 5,
+      entityTypeName: 'Схему',
+      entityId: apiData.id,
+      entityName: `${form.title.trim()} (${getComponentName(componentId)})`
+    };
+
+    if (isEditing) {
+      const oldTitle = schematic?.title || '';
+      const oldDesc = schematic?.description || '';
+
+      if (oldTitle !== form.title.trim()) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'назва',
+          oldValue: oldTitle,
+          newValue: form.title.trim()
+        });
+      }
+
+      if (oldDesc !== form.description.trim()) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'опис',
+          oldValue: oldDesc,
+          newValue: form.description.trim()
+        });
+      }
+
+      if (form.photo) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'фото',
+          oldValue: schematic?.photoUrl || null,
+          newValue: URL.createObjectURL(form.photo)
+        });
+      }
+
+      if (JSON.stringify(schematic?.links || schematic?.additionalLinks || []) !== JSON.stringify(links)) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'посилання',
+          oldValue: JSON.stringify({ links: parseLinksFromDb(schematic) }),
+          newValue: JSON.stringify({ links })
+        });
+      }
+    } else {
+      eventBus.emit('entity:created', { ...baseEventData, actionName: 'Створено' });
+    }
+
+    onSave(apiData);
+    handleCloseModal();
   };
-
-
-  const baseEventData = {
-    userId: 'currentUser',
-    userName: 'Іван Петренко',
-    entityTypeId: 5,
-    entityTypeName: 'Схему',
-    entityId: newSchematic.id,
-   entityName: `${form.title} (${getComponentName(componentId)})`
-  };
-
-  if (isEditing) {
-    const oldTitle = schematic?.title || '';
-    const oldDesc = schematic?.description || '';
-
-    if (oldTitle !== form.title.trim()) {
-      eventBus.emit('entity:updated', {
-        ...baseEventData, actionName: 'Оновлено', fieldName: 'назва',
-        oldValue: oldTitle, newValue: form.title.trim()
-      });
-    }
-
-    if (oldDesc !== form.description.trim()) {
-      eventBus.emit('entity:updated', {
-        ...baseEventData, actionName: 'Оновлено', fieldName: 'опис',
-        oldValue: oldDesc, newValue: form.description.trim()
-      });
-    }
-
-    if (form.photo) {
-      eventBus.emit('entity:updated', {
-        ...baseEventData, actionName: 'Оновлено', fieldName: 'фото',
-        oldValue: schematic?.photoUrl || null,
-        newValue: URL.createObjectURL(form.photo)
-      });
-    }
-
-    if (JSON.stringify(schematic?.links || []) !== JSON.stringify(links || [])) {
-    eventBus.emit('entity:updated', {
-      ...baseEventData,
-      actionName: 'Оновлено',
-      fieldName: 'посилання',
-      oldValue: JSON.stringify({ links: schematic?.links || [] }),
-      newValue: JSON.stringify({ links: links || [] })
-    });
-  }
-}
-  else {
-    eventBus.emit('entity:created', { ...baseEventData, actionName: 'Створено' });
-  }
-
-  onSave(newSchematic);
-  handleCloseModal();
-};
-
 
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth>
@@ -140,38 +175,17 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
 
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Фото схеми
               </Typography>
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                sx={{ textTransform: 'none', py: 1.5 }}
-              >
+              <Button variant="outlined" component="label" fullWidth sx={{ textTransform: 'none', py: 1.5 }}>
                 {form.photo ? form.photo.name : 'Вибрати фото'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleInputChange('photo')}
-                />
+                <input type="file" accept="image/*" hidden onChange={handleInputChange('photo')} />
               </Button>
               {form.photo && (
                 <Box sx={{ mt: 1 }}>
-                  <img
-                    src={getImageUrl()}
-                    alt="Preview"
-                    style={{
-                      width: '150px',
-                      height: '120px',
-                      objectFit: 'cover',
-                      borderRadius: 4,
-                      border: '1px solid #ddd'
-                    }}
-                  />
+                  <img src={getImageUrl()} alt="Preview" style={{ width: '150px', height: '120px', objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
                 </Box>
               )}
             </Box>
@@ -180,30 +194,19 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Назва схеми *
               </Typography>
-              <TextField
-                value={form.title || ''}
-                onChange={handleInputChange('title')}
-                fullWidth
-                required
-              />
+              <TextField value={form.title || ''} onChange={handleInputChange('title')} fullWidth required />
             </Box>
 
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Опис
               </Typography>
-              <TextField
-                value={form.description || ''}
-                onChange={handleInputChange('description')}
-                multiline
-                rows={3}
-                fullWidth
-              />
+              <TextField value={form.description || ''} onChange={handleInputChange('description')} multiline rows={3} fullWidth />
             </Box>
 
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                Посилання
+                Посилання ({links.length})
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
                 <TextField
@@ -216,12 +219,7 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
                 />
                 <IconButton
                   onClick={addLink}
-                  sx={{
-                    alignSelf: 'flex-end',
-                    height: '40px',
-                    width: '40px',
-                    p: 0
-                  }}
+                  sx={{ alignSelf: 'flex-end', height: '40px', width: '40px', p: 0 }}
                   disabled={!form.linkInput?.trim()}
                 >
                   <AddCircleIcon />
@@ -229,12 +227,7 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
               </Box>
               <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {links.map((link) => (
-                  <Chip
-                    key={link}
-                    label={link}
-                    onDelete={() => removeLink(link)}
-                    size="small"
-                  />
+                  <Chip key={link} label={link} onDelete={() => removeLink(link)} size="small" />
                 ))}
               </Box>
             </Box>
@@ -243,11 +236,7 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
 
         <DialogActions>
           <Button onClick={handleCloseModal}>Скасувати</Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!form.title?.trim()}
-          >
+          <Button type="submit" variant="contained" disabled={!form.title?.trim()}>
             {isEditing ? 'Зберегти зміни' : 'Додати схему'}
           </Button>
         </DialogActions>
