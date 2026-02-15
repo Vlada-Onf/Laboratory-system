@@ -8,20 +8,9 @@ import Item from './../Item';
 import ButtonsPanel from './ButtonsPanel';
 
 const ComponentCard = ({
-  sx,
-  id,
-  name,
-  image,
-  description,
-  price,
-  quantity,
-  burntQuantity,
-  categoryId,
-  category,
-  tags,
-  onEdit,
-  onDelete,
-   onAddNeed
+   sx, id, name, image, description, price, quantity, 
+  burntQuantity, categoryId, category, tagIds,
+  onEdit, onDelete, onAddNeed
 }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -35,7 +24,6 @@ const ComponentCard = ({
     burntQuantity,
     categoryId,
     category,
-    tags,
   };
 
   const handleEdit = () => {
@@ -43,12 +31,10 @@ const ComponentCard = ({
   };
 
   const handleDeleteClick = () => {
-    console.log('✅ handleDeleteClick clicked!');
     setDeleteConfirmOpen(true);
   };
 
   const handleDeleteConfirm = () => {
-    console.log('✅ handleDeleteConfirm, calling onDelete:', id);
     onDelete(id);
     setDeleteConfirmOpen(false);
   };
@@ -92,7 +78,7 @@ const ComponentCard = ({
               burntQuantity={burntQuantity}
               categoryId={categoryId}
               category={category}
-              tags={tags}
+              tagIds={tagIds}
             />
           </Box>
         </Box>

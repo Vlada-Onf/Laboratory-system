@@ -18,11 +18,12 @@ const AddCategoryModal = ({ open, onClose, onAdd, onEdit, category }) => {
 
   const data = {
     id: category?.id,
-    title: name,
+    name: name,
     description,
-    image: imageUrl,
-    color,
+    photoUrl: imageUrl,
+    cardColor: color
   };
+
 
   if (isEditing && onEdit) {
     const baseEventData = {

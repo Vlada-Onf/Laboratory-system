@@ -12,7 +12,7 @@ export default function HeaderProfileButton() {
       edge="end"
       aria-label="Profile"
       color="inherit"
-      onClick={() => navigate('/profile')}
+      onClick={() => navigate('/front-profile')}
     >
       <AccountCircle />
     </IconButton>

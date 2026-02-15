@@ -24,13 +24,13 @@ export default function Sidebar({ open }) {
   const location = useLocation();
 
   const menuItems = [
-    { text: 'Головна', icon: <HomeIcon />, path: '/main' },
-    { text: 'Категорії', icon: <SignpostIcon />, path: '/categories' },
-    { text: 'Компоненти', icon: <WidgetsIcon />, path: '/components' },
-    { text: 'Потреби', icon: <TurnedInIcon />, path: '/needs' },
-    { text: 'Бажане', icon: <FavoriteIcon />, path: '/wishlist' },
-    { text: 'Статистика', icon: <AnalyticsIcon />, path: '/dashboard' },
-    { text: 'Пошкодження', icon: <BuildIcon />, path: '/brokenComponents' },
+    { text: 'Головна', icon: <HomeIcon />, path: '/front-main' },
+    { text: 'Категорії', icon: <SignpostIcon />, path: '/front-сategories' },
+    { text: 'Компоненти', icon: <WidgetsIcon />, path: '/front-components' },
+    { text: 'Потреби', icon: <TurnedInIcon />, path: '/front-needs' },
+    { text: 'Бажане', icon: <FavoriteIcon />, path: '/front-wishlist' },
+    { text: 'Статистика', icon: <AnalyticsIcon />, path: '/front-dashboard' },
+    { text: 'Пошкодження', icon: <BuildIcon />, path: '/front-brokenComponents' },
   ];
 
   return (

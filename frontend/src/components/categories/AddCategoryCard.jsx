@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Box, IconButton } from '@mui/material';
+import { Card, Typography, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useTheme } from '../../context/useTheme';
 import AddCategoryModal from './AddCategoryModal';
+import { useCategoriesStore } from '../../store/useCategoriesStore';
 
-const AddCategoryCard = ({ onAdd }) => {
+const AddCategoryCard = () => {
+  const { addCategory } = useCategoriesStore();
   const { isDarkMode } = useTheme();
   const [openModal, setOpenModal] = useState(false);
   const textColor = isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b';
 
-  const handleAdd = (categoryData) => {
-    console.log('handleAdd categoryData', categoryData);
-    const uniqueId = Date.now() + Math.random();
-    onAdd({
-      ...categoryData,
-      id: uniqueId,
-    });
+  const handleAdd = async (categoryData) => {
+    
+    try {
+      await addCategory(categoryData);
+      
+      setOpenModal(false);
+    } catch (error) {
+      console.error('Помилка створення:', error);
+    }
   };
 
   return (

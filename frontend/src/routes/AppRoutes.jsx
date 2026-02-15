@@ -19,24 +19,25 @@ import NotFound from "../pages/general/NotFound";
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Navigate to="/main" />} />
+  <Route element={<Layout />}>
+    <Route path="/" element={<Navigate to="/front-main" />} />
 
-        <Route path="/main" element={<Main />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/components" element={<Components />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/needs" element={<Needs />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/components/:id" element={<Component />} />
-        <Route path="/schematics/:id" element={<SchematicDetail />} />
-        <Route path="/brokenComponents" element={<BrokenComponents />} />
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
+    <Route path="/front-main" element={<Main />} />
+    <Route path="/front-dashboard" element={<Dashboard />} />
+    <Route path="/front-сategories" element={<Categories />} />
+    <Route path="/front-components" element={<Components />} />
+    <Route path="/front-history" element={<History />} />
+    <Route path="/front-needs" element={<Needs />} />
+    <Route path="/front-users" element={<Users />} />
+    <Route path="/front-wishlist" element={<Wishlist />} />
+    <Route path="/front-profile" element={<Profile />} />
+    <Route path="/front-components/:id" element={<Component />} />
+    <Route path="/front-schematics/:id" element={<SchematicDetail />} />
+    <Route path="/front-brokenComponents" element={<BrokenComponents />} />
+    <Route path="*" element={<NotFound />} />
+  </Route>
+</Routes>
+
   );
 };
 

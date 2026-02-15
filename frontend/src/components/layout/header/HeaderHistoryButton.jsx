@@ -11,7 +11,7 @@ export default function HeaderHistoryButton() {
       size="large"
       aria-label="History"
       color="inherit"
-      onClick={() => navigate('/history')}
+      onClick={() => navigate('/front-history')}
     >
       <Badge
         badgeContent={17}

@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import React, { useMemo, useEffect } from 'react';
+import { Box, Typography } from '@mui/material';
 import ComponentCard from './componentBlock/ComponentCard';
 import Item from './Item';
 import SectionTitle from './SectionTitle';
@@ -18,7 +18,6 @@ const ComponentLayout = ({
   onAddNeed
 }) => {
   const { setCurrentComponent } = useComponentsStore();
-
   const { openEditModal } = useSchematicsStore();
 
   useEffect(() => {
@@ -27,16 +26,19 @@ const ComponentLayout = ({
     }
   }, [component?.id, setCurrentComponent]);
 
-
-  const handleOpenAddSchematicModal = useCallback(() => {
+  const handleOpenAddSchematicModal = () => {
     openEditModal(null);
-  }, [openEditModal]);
+  };
 
 
-  const {
-    quantity,
-    burntQuantity,
-  } = component;
+  const componentForCard = {
+    ...component,
+    image: component.photoUrl,
+    tags: component.tagIds || [],
+    categoryId: component.categoryId
+  };
+
+  const { quantity, burntQuantity } = component;
 
   const totalValue = useMemo(() => `${quantity} шт`, [quantity]);
   const burntValue = useMemo(() => `${burntQuantity || 0} шт`, [burntQuantity]);
@@ -58,7 +60,7 @@ const ComponentLayout = ({
         <Box sx={{ flex: 1 }}>
           <ComponentCard
             sx={{ height: '100%' }}
-            {...component}
+            {...componentForCard}
             onEdit={onEdit}
             onDelete={onDelete}
             onAddNeed={onAddNeed}
@@ -86,6 +88,7 @@ const ComponentLayout = ({
             />
           </Box>
 
+
           <Item sx={{
             flex: 1,
             display: 'flex',
@@ -111,7 +114,7 @@ const ComponentLayout = ({
 
         <Item>
           <SectionTitle>Коментарі</SectionTitle>
-          <CommentsBlock componentId={component.id} /> 
+          <CommentsBlock componentId={component.id} />
         </Item>
       </Box>
     </Box>

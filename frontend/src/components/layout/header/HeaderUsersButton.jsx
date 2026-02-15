@@ -11,7 +11,7 @@ export default function HeaderUsersButton() {
       size="large"
       aria-label="Users"
       color="inherit"
-      onClick={() => navigate('/users')}
+      onClick={() => navigate('/front-users')}
     >
       <Badge
         badgeContent={4}

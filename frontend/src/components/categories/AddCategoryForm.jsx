@@ -11,7 +11,7 @@ import {
 import ColorPicker from './ColorPicker';
 
 const getInitialForm = (initialData) => ({
-  name: initialData?.title || '',
+  name: initialData?.name || initialData?.title || '',
   description: initialData?.description || '',
   photo: null,
   color: initialData?.color || '#08273b',

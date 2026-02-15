@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, Chip, Box, IconButton, Typography,
@@ -7,7 +7,7 @@ import {
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
 import { eventBus } from '../../../utils/eventBus';
-import ImagePreview from '../../history/ImagePreview';
+import { useTagsStore } from '../../../store/useTagsStore';
 
 const ComponentModal = ({
   open,
@@ -17,8 +17,9 @@ const ComponentModal = ({
   isEditing = false
 }) => {
   const categories = useCategoriesStore(state => state.categories);
+  const tagsStore = useTagsStore();
   const categoryOptions = useMemo(() => 
-    categories.map(cat => ({ value: cat.id, label: cat.title })), 
+    categories.map(cat => ({ value: cat.id, label: cat.title || cat.name })), 
   [categories]
   );
 
@@ -34,11 +35,25 @@ const ComponentModal = ({
   }), [isEditing, component]);
 
   const defaultTags = useMemo(() =>
-    isEditing && component?.tags ? [...component.tags] : [],
+    isEditing && component?.tags ? 
+      typeof component.tags === 'string' 
+        ? component.tags.split(',').filter(Boolean) 
+        : Array.isArray(component.tags) 
+          ? component.tags 
+          : [] 
+    : [],
   [isEditing, component]);
 
   const [form, setForm] = useState(defaultForm);
   const [tags, setTags] = useState(defaultTags);
+
+  useEffect(() => {
+    setForm(defaultForm);
+  }, [defaultForm]);
+
+  useEffect(() => {
+    setTags(defaultTags);
+  }, [defaultTags]);
 
   const handleCloseModal = useCallback(() => {
     setForm(defaultForm);
@@ -67,10 +82,6 @@ const ComponentModal = ({
     setTags(prev => prev.filter(tag => tag !== tagToRemove));
   }, []);
 
-const getCategoryName = useCallback((categoryId) => {
-  return categories.find(cat => cat.id === categoryId)?.title || 'Не вибрано';
-}, [categories]);
-
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
@@ -79,100 +90,145 @@ const getCategoryName = useCallback((categoryId) => {
     }
   }, [addTag]);
 
-  const getImageUrl = useCallback(() => {
-    if (form.photo) return URL.createObjectURL(form.photo);
-    return component?.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEZvdG88L3RleHQ+PC9zdmc+';
-  }, [form.photo, component?.image]);
-
-const handleSubmit = useCallback((e) => {
+ 
+const handleSubmit = useCallback(async (e) => {
   e.preventDefault();
 
-  const newComponent = {
-    id: component?.id || crypto.randomUUID(),
-    image: getImageUrl(),
-    ...form,
-    price: parseFloat(form.price) || 0,
-    quantity: parseInt(form.quantity) || 0,
-    burntQuantity: parseInt(form.burntQuantity) || 0,
-    tags,
-  };
+  try {
+    const tagIds = await Promise.all(
+      tags.map(async (tagName) => {
+        const tag = await tagsStore.createTag(tagName);
+        return tag.id;
+      })
+    );
 
-  const baseEventData = {
-    userId: 'currentUser', userName: 'Дарина',
-    entityTypeId: 4, entityTypeName: 'Компонент',
-    entityId: newComponent.id, entityName: form.name,
-  };
+    const formData = {
+      categoryId: form.categoryId,
+      name: form.name,
+      description: form.description,
+      quantity: parseInt(form.quantity) || 0,
+      price: parseFloat(form.price) || 0,
+      photoUrl: form.photo ? URL.createObjectURL(form.photo) : '',
+      supplierLink: '',
+      documentationLink: '',
+      tagIds: tagIds,
+      createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    };
 
-  if (isEditing) {
-    const oldPrice = component?.price?.toString() || '';
-    const oldQuantity = component?.quantity?.toString() || '';
-    const oldBurnt = component?.burntQuantity?.toString() || '';
 
-  if (component?.name !== form.name) {
-    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'назва', oldValue: component?.name || '', newValue: form.name });
+    const baseEventData = {
+      userId: 'currentUser',
+      userName: 'Дарина',
+      entityTypeId: 4,
+      entityTypeName: 'Компонент',
+      entityId: component?.id || crypto.randomUUID(),
+      entityName: form.name,
+    };
+
+    if (isEditing) {
+      const oldPrice = component?.price?.toString() || '';
+      const oldQuantity = component?.quantity?.toString() || '';
+      const oldBurnt = component?.burntQuantity?.toString() || '';
+
+      if (component?.name !== form.name) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'назва',
+          oldValue: component?.name || '',
+          newValue: form.name
+        });
+      }
+
+      if (component?.description !== form.description) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'опис',
+          oldValue: component?.description || '',
+          newValue: form.description
+        });
+      }
+
+      if (oldPrice !== form.price) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'ціна',
+          oldValue: oldPrice,
+          newValue: form.price
+        });
+      }
+
+      if (oldQuantity !== form.quantity) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'кількість',
+          oldValue: oldQuantity,
+          newValue: form.quantity
+        });
+      }
+
+      if (oldBurnt !== form.burntQuantity) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'спалено',
+          oldValue: oldBurnt,
+          newValue: form.burntQuantity
+        });
+      }
+
+      if (form.photo) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'фото',
+          oldValue: component?.photoUrl || null,
+          newValue: URL.createObjectURL(form.photo)
+        });
+      }
+
+      if (component?.categoryId !== form.categoryId) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'категорія',
+          oldValue: categories.find(cat => cat.id === component?.categoryId)?.title || 'Не вибрано',
+          newValue: categories.find(cat => cat.id === form.categoryId)?.title || 'Не вибрано'
+        });
+      }
+
+      const oldTagsStr = Array.isArray(component?.tags) 
+        ? component.tags.join(', ') 
+        : (component?.tags || '').toString();
+      const newTagsStr = tags.join(', ');
+      
+      if (oldTagsStr !== newTagsStr) {
+        eventBus.emit('entity:updated', {
+          ...baseEventData,
+          actionName: 'Оновлено',
+          fieldName: 'теги',
+          oldValue: oldTagsStr || 'немає',
+          newValue: newTagsStr || 'немає'
+        });
+      }
+    } else {
+      eventBus.emit('entity:created', {
+        ...baseEventData,
+        actionName: 'Створено'
+      });
+    }
+
+    onSubmit(formData);
+    handleCloseModal();
+  } catch (error) {
+    console.error('💥 Помилка збереження:', error);
   }
+}, [form, tags, component, isEditing, onSubmit, handleCloseModal, categories, tagsStore]);
 
-  if (component?.description !== form.description) {
-    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'опис', oldValue: component?.description || '', newValue: form.description });
-  }
-
-  if (oldPrice !== form.price) {
-    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'ціна', oldValue: oldPrice, newValue: form.price });
-  }
-
-  if (oldQuantity !== form.quantity) {
-    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'кількість', oldValue: oldQuantity, newValue: form.quantity });
-  }
-
-  if (oldBurnt !== form.burntQuantity) {
-    eventBus.emit('entity:updated', { ...baseEventData, actionName: 'Оновлено', fieldName: 'спалено', oldValue: oldBurnt, newValue: form.burntQuantity });
-  }
-
-  if (form.photo) {
-    eventBus.emit('entity:updated', {
-      ...baseEventData,
-      actionName: 'Оновлено',
-      fieldName: 'фото',
-      oldValue: component?.image || null,
-      newValue: URL.createObjectURL(form.photo)
-    });
-  }
-
-  if (component?.categoryId != form.categoryId) {
-    eventBus.emit('entity:updated', {
-      ...baseEventData,
-      actionName: 'Оновлено',
-      fieldName: 'категорія',
-      oldValue: getCategoryName(component?.categoryId),
-      newValue: getCategoryName(form.categoryId)
-    });
-  }
-
-  const oldTagsStr = component?.tags?.join(', ') || 'немає';
-  const newTagsStr = tags.join(', ') || 'немає';
-  if (oldTagsStr !== newTagsStr) {
-    eventBus.emit('entity:updated', {
-      ...baseEventData,
-      actionName: 'Оновлено',
-      fieldName: 'теги',
-      oldValue: oldTagsStr,
-      newValue: newTagsStr
-    });
-  }
-}
-
-else {
-    eventBus.emit('entity:created', {
-      ...baseEventData,
-      actionName: 'Створено'
-    });
-  }
-
-  onSubmit(newComponent);
-  handleCloseModal();
-}, [form, tags, component, isEditing, onSubmit, getImageUrl, handleCloseModal, categories, getCategoryName]);
-
-
+  
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth>
       <form onSubmit={handleSubmit}>
@@ -180,6 +236,7 @@ else {
 
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+        
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Фото
@@ -198,7 +255,6 @@ else {
                 </Box>
               )}
             </Box>
-
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Категорія
@@ -216,7 +272,6 @@ else {
                 </Select>
               </FormControl>
             </Box>
-
             <Box>
               <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
                 Назва

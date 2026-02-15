@@ -6,7 +6,6 @@ import { useSchematicsStore } from '../../store/useSchematicStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';
-import SchematicModal from '../../components/component/schematicsBlock/SchematicModal';
 import AddNeedModal from '../../components/brokenComponents/AddNeedModal';
 import { eventBus } from '../../utils/eventBus';
 
@@ -23,10 +22,7 @@ const ComponentPage = () => {
     deleteComponent,
   } = useComponentsStore();
 
-  const {
-    openEditModal: openSchematicEditModal,
-   } = useSchematicsStore();
-
+  const { openEditModal: openSchematicEditModal } = useSchematicsStore();
   const addNeed = useNeedsStore(state => state.addNeed);
   const [needModalOpen, setNeedModalOpen] = useState(false);
 
@@ -36,34 +32,37 @@ const ComponentPage = () => {
     return <div>Компонент не знайдено</div>;
   }
 
+  const handleComponentSubmit = (formData) => {
+    const componentId = editModal.component?.id || id;
+    updateComponent(componentId, formData);
+    closeEditModal();
+  };
+
   const handleEditComponent = () => openEditModal(component);
 
   const handleDeleteComponent = () => {
-  eventBus.emit('entity:deleted', {
-    userId: 'currentUser',
-    userName: 'Дарина',
-    actionName: 'Видалено',
-    entityTypeId: 4,
-    entityTypeName: 'Компонент',
-    entityId: component.id,
-    entityName: component.name
-  });
+    eventBus.emit('entity:deleted', {
+      userId: 'currentUser',
+      userName: 'Дарина',
+      actionName: 'Видалено',
+      entityTypeId: 4,
+      entityTypeName: 'Компонент',
+      entityId: component.id,
+      entityName: component.name
+    });
 
-  deleteComponent(component.id);
-  navigate('/components');
-};
+    deleteComponent(component.id);
+    navigate('/front-components');
+  };
 
   const handleUpdateLinks = (updatedLinks) => {
-    updateComponent({
-      ...component,
-      docLink: updatedLinks.docLink,
-      buyLink: updatedLinks.buyLink,
-      otherLinks: updatedLinks.otherLinks,
+    updateComponent(component.id, {
+      supplierLink: updatedLinks.buyLink || "string",
+      documentationLink: updatedLinks.docLink || "string",
     });
   };
 
   const handleOpenNeedModal = () => setNeedModalOpen(true);
-
   const handleCloseNeedModal = () => setNeedModalOpen(false);
 
   const handleAddNeedSubmit = (formData) => {
@@ -71,7 +70,7 @@ const ComponentPage = () => {
       id: crypto.randomUUID(),
       componentId: component.id,
       componentName: component.name,
-      componentImage: component.image,
+      componentImage: component.photoUrl,
       categoryId: component.categoryId,
       category: component.category,
       quantity: formData.quantity,
@@ -104,15 +103,14 @@ const ComponentPage = () => {
 
       {editModal.open && (
         <ComponentModal
-          key={editModal.component?.id || 'add-new'}
+          key={editModal.component?.id || 'edit'}
           open={editModal.open}
           component={editModal.component}
           isEditing={!!editModal.component}
           onClose={closeEditModal}
-          onSubmit={updateComponent}
+          onSubmit={handleComponentSubmit}
         />
       )}
-
 
       <AddNeedModal
         open={needModalOpen}

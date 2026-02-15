@@ -1,4 +1,4 @@
-import React, { useCallback, useState  } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Typography, Box } from '@mui/material';
 import ClickableComponentCell from './ClickableComponentCell';
@@ -14,29 +14,33 @@ import { useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const ComponentsTable = ({ onAddNeed }) => {
-
-   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [componentToDelete, setComponentToDelete] = useState(null);
 
   const {
     components,
+    isLoading,
+    fetchComponents,
+    addComponent,
     updateComponent,
     deleteComponent,
-    addComponent,
     editModal,
     openEditModal,
     closeEditModal,
   } = useComponentsStore();
 
-
   const categories = useCategoriesStore(state => state.categories);
 
-  const [paginationModel, setPaginationModel] = React.useState({ page: 0, pageSize: 5 });
-  const [openModal, setOpenModal] = React.useState(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const navigate = useNavigate();
-const isEditing = Boolean(editModal.component);
+  const isEditing = Boolean(editModal.component);
+
+  useEffect(() => {
+    fetchComponents();
+  }, []);
 
   const handleOpenModal = useCallback((row) => {
     setSelectedRow(row);
@@ -49,61 +53,68 @@ const isEditing = Boolean(editModal.component);
   }, []);
 
   const handleDeleteClick = useCallback((row) => {
-  setComponentToDelete(row);
-  setDeleteModalOpen(true);
-}, []);
-
+    setComponentToDelete(row);
+    setDeleteModalOpen(true);
+  }, []);
 
   const handleAddNeed = useCallback((formData) => {
-  if (!selectedRow){
-    return;
-  }
+    if (!selectedRow) return;
 
-  const mappedNeed = {
-    id: Date.now(),
-    componentId: selectedRow.id,
-    componentName: selectedRow.name,
-    componentImage: selectedRow.image,
-    categoryId: selectedRow.categoryId,
-    category: selectedRow.category,
-    quantity: formData.quantity,
-    price: formData.price,
-    description: formData.description || selectedRow.description,
-    reason: formData.reason,
-    priority: formData.priority,
-    status: 'В очікуванні',
-    approvedAt: '',
-  };
-
-  onAddNeed?.(mappedNeed);
-  handleCloseModal();
-}, [selectedRow, onAddNeed, handleCloseModal]);
-
-const handleAddComponentSubmit = useCallback((formData) => {
-  addComponent({
-    ...formData,
-
-    id: crypto.randomUUID(),
-    docLink: '',
-    buyLink: '',
-    otherLinks: [],
-
-    schemes: [],
-  });
-
-  closeEditModal();
-}, [addComponent, closeEditModal]);
-
-
-  const handleComponentSubmit = useCallback((formData) => {
-    const originalComponent = editModal.component;
-    const fullData = {
-      ...originalComponent,
-      ...formData,
+    const mappedNeed = {
+      id: Date.now(),
+      componentId: selectedRow.id,
+      componentName: selectedRow.name,
+      componentImage: selectedRow.photoUrl,
+      categoryId: selectedRow.categoryId,
+      category: selectedRow.category,
+      quantity: formData.quantity,
+      price: formData.price,
+      description: formData.description || selectedRow.description,
+      reason: formData.reason,
+      priority: formData.priority,
+      status: 'В очікуванні',
+      approvedAt: '',
     };
 
-    updateComponent(fullData);
-    closeEditModal();
+    onAddNeed?.(mappedNeed);
+    handleCloseModal();
+  }, [selectedRow, onAddNeed, handleCloseModal]);
+
+  const handleAddComponentSubmit = useCallback(async (formData) => {
+    try {
+      await addComponent({
+        categoryId: formData.categoryId,
+        name: formData.name,
+        description: formData.description,
+        quantity: parseInt(formData.quantity) || 0,
+        price: parseFloat(formData.price) || 0,
+        photoUrl: formData.photoUrl,
+        supplierLink: '',
+        documentationLink: '',
+      });
+      closeEditModal();
+    } catch (error) {
+      console.error('💥 Помилка додавання:', error);
+    }
+  }, [addComponent, closeEditModal]);
+
+  const handleComponentSubmit = useCallback(async (formData) => {
+    try {
+      const componentId = editModal.component.id;
+      await updateComponent(componentId, {
+        categoryId: formData.categoryId,
+        name: formData.name,
+        description: formData.description,
+        quantity: parseInt(formData.quantity) || 0,
+        price: parseFloat(formData.price) || 0,
+        photoUrl: formData.photoUrl,
+        supplierLink: formData.supplierLink || '',
+        documentationLink: formData.documentationLink || '',
+      });
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка оновлення:', error);
+    }
   }, [editModal.component, updateComponent, closeEditModal]);
 
   const columns = [
@@ -115,10 +126,10 @@ const handleAddComponentSubmit = useCallback((formData) => {
       sortable: false,
       renderCell: (params) => (
         <ClickableComponentCell
-          image={params.row.image}
+          image={params.row.photoUrl}
           name={params.row.name}
           id={params.row.id}
-          onClick={(id) => navigate(`/components/${id}`)}
+          onClick={(id) => navigate(`/front-components/${id}`)}
         />
       ),
     },
@@ -128,9 +139,7 @@ const handleAddComponentSubmit = useCallback((formData) => {
   flex: 1,
   minWidth: 150,
   renderCell: (params) => {
-    const categoryName = categories?.find(c => c.id === params.row.categoryId)?.title
-                       || params.row.category
-                       || '—';
+    const categoryName = categories?.find(c => c.id === params.row.categoryId)?.name || '—';
     return <Typography variant="body2">{categoryName}</Typography>;
   },
 },
@@ -142,7 +151,7 @@ const handleAddComponentSubmit = useCallback((formData) => {
       minWidth: 220,
     },
     {
-      field: 'docLink',
+      field: 'documentationLink',
       headerName: 'Документація',
       flex: 1.5,
       minWidth: 180,
@@ -167,7 +176,7 @@ const handleAddComponentSubmit = useCallback((formData) => {
       headerName: 'Теги',
       flex: 1.5,
       minWidth: 150,
-      renderCell: (params) => <TagsCell value={params.value} />,
+      renderCell: (params) => <TagsCell value={params.row.tags || ''} />,
     },
     {
       field: 'rowActions',
@@ -177,7 +186,7 @@ const handleAddComponentSubmit = useCallback((formData) => {
       filterable: false,
       renderCell: (params) => (
         <ButtonsCell
-        row={params.row}
+          row={params.row}
           onEdit={() => openEditModal(params.row)}
           onDelete={() => handleDeleteClick(params.row)}
           onMoveToNeeds={() => handleOpenModal(params.row)}
@@ -192,11 +201,13 @@ const handleAddComponentSubmit = useCallback((formData) => {
         onAddComponent={() => openEditModal(null)}
         onImportExcel={() => console.log('import excel')}
       />
+      
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={components}
           columns={columns}
           rowHeight={100}
+          loading={isLoading}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[5, 10]}
@@ -222,7 +233,6 @@ const handleAddComponentSubmit = useCallback((formData) => {
         onSubmit={isEditing ? handleComponentSubmit : handleAddComponentSubmit}
         component={editModal.component}
         isEditing={isEditing}
-
       />
 
       <AddNeedModal
@@ -233,17 +243,19 @@ const handleAddComponentSubmit = useCallback((formData) => {
       />
 
       <ConfirmDeleteModal
-  open={deleteModalOpen}
-  onClose={() => setDeleteModalOpen(false)}
-  onConfirm={() => {
-    if (componentToDelete) {
-      deleteComponent(componentToDelete.id);
-    }
-  }}
-  entityName={componentToDelete?.name}
-  entityTypeId={4}
-  entityTypeName="Компонент"
-/>
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => {
+          if (componentToDelete) {
+            deleteComponent(componentToDelete.id);
+          }
+          setDeleteModalOpen(false);
+          setComponentToDelete(null);
+        }}
+        entityName={componentToDelete?.name}
+        entityTypeId={4}
+        entityTypeName="Компонент"
+      />
     </Box>
   );
 };
