@@ -323,18 +323,6 @@ const handleSubmit = useCallback(async (e) => {
               />
             </Box>
 
-            <Box>
-              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-                Спалено
-              </Typography>
-              <TextField
-                type="number"
-                value={form.burntQuantity || ''}
-                onChange={handleInputChange('burntQuantity')}
-                fullWidth
-              />
-            </Box>
-
 <Box>
   <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
     Посилання на документацію

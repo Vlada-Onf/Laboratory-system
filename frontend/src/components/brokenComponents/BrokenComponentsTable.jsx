@@ -1,52 +1,89 @@
-import React, { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { Typography } from '@mui/material';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { DataGrid} from '@mui/x-data-grid';
+import { Typography} from '@mui/material';
 import ComponentCell from './../general/ComponentCell';
-import { brokenComponentsMock } from '../../mock/brokenComponentsMock';
 import MoveToNeedsButton from './MoveToNeedsButton';
 import AddNeedModal from './AddNeedModal';
+import { useCategoriesStore } from '../../store/useCategoriesStore';
 import { useCategoriesMap } from '../../hooks/useCategoriesMap';
+import { useComponentsStore } from '../../store/useComponentsStore';
+import { useDamagedComponentsStore } from '../../store/useDamagedComponentsStore';
 
 const BrokenComponentsTable = ({ onAddNeed }) => {
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0,
-    pageSize: 5,
-  });
+  const { damagedComponents, isLoading, fetchDamagedComponents } = useDamagedComponentsStore();
+  const { components, fetchComponents } = useComponentsStore();
+  const { fetchCategories } = useCategoriesStore();
+  const categoriesMap = useCategoriesMap();
 
+  useEffect(() => {
+    fetchDamagedComponents();
+    fetchComponents();
+    fetchCategories();
+  }, [fetchDamagedComponents, fetchComponents, fetchCategories]);
+
+  const getComponentById = useCallback((componentId) => {
+    return components.find(comp => comp.id === componentId) || null;
+  }, [components]);
+
+  const enrichedRows = useMemo(() => {
+    console.log('ENRICH:', { 
+      damaged: damagedComponents.length, 
+      components: components.length,
+      categoriesMapSize: categoriesMap.size 
+    });
+    
+    return damagedComponents.map(row => {
+      const component = getComponentById(row.componentId);
+      const categoryName = categoriesMap.get(component?.categoryId) || '—';
+      
+      console.log('ROW:', {
+        componentName: component?.name,
+        categoryId: component?.categoryId,
+        categoryName
+      });
+      
+      return {
+        ...row,
+        component,
+        categoryName
+      };
+    });
+  }, [damagedComponents, components, categoriesMap, getComponentById]);
+
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [openModal, setOpenModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const categoriesMap = useCategoriesMap();
-
-  const handleOpenModal = (row) => {
+  const handleOpenModal = useCallback((row) => {
     setSelectedRow(row);
     setOpenModal(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setOpenModal(false);
     setSelectedRow(null);
-  };
+  }, []);
 
-  const handleAddNeed = (data) => {
-  const mappedNeed = {
-    id: Date.now(),
-    componentName: data.name,
-    componentImage: data.image,
-    categoryId: selectedRow.categoryId,
-    category: data.category,
-    quantity: data.quantity,
-    price: data.price,
-    description: data.description,
-    reason: data.reason,
-    priority: data.priority,
-    status: 'В очікуванні',
-    approvedAt: '',
-  };
-
-  onAddNeed(mappedNeed);
-  handleCloseModal();
-};
+  const handleAddNeed = useCallback((data) => {
+    const row = selectedRow;
+    const component = getComponentById(row?.componentId);
+    
+    onAddNeed({
+      id: Date.now(),
+      componentName: component?.name || '—',
+      componentImage: component?.photoUrl,
+      categoryId: component?.categoryId,
+      category: categoriesMap.get(component?.categoryId),
+      quantity: data.quantity,
+      price: data.price,
+      description: data.description,
+      reason: data.reason,
+      priority: data.priority,
+      status: 'В очікуванні',
+      approvedAt: '',
+    });
+    handleCloseModal();
+  }, [selectedRow, getComponentById, categoriesMap, onAddNeed, handleCloseModal]);
 
   const columns = [
     {
@@ -56,35 +93,20 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
       minWidth: 250,
       sortable: false,
       renderCell: (params) => (
-        <ComponentCell image={params.row.image} name={params.row.name} />
+        <ComponentCell 
+          image={params.row.component?.photoUrl} 
+          name={params.row.component?.name || '—'} 
+        />
       ),
     },
     {
-      field: 'category',
+      field: 'categoryName',
       headerName: 'Категорія',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => <Typography variant="body2">
-      {categoriesMap.get(params.row.categoryId) || params.row.category || '—'}
-    </Typography>,
-    },
-    {
-      field: 'description',
-      headerName: 'Опис',
-      flex: 2,
-      minWidth: 220,
-    },
-    {
-      field: 'reason',
-      headerName: 'Причина',
-      flex: 2,
-      minWidth: 220,
       renderCell: (params) => (
-        <Typography
-          variant="body2"
-          sx={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.4 }}
-        >
-          {params.value || '—'}
+        <Typography variant="body2" fontWeight={500} color="primary">
+          {params.row.categoryName || '—'}
         </Typography>
       ),
     },
@@ -93,45 +115,70 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
       headerName: 'Кількість',
       flex: 0.8,
       minWidth: 100,
-      renderCell: (params) => <Typography fontWeight={600}>{params.value} шт</Typography>,
-    },
-    {
-      field: 'price',
-      headerName: 'Ціна',
-      flex: 1,
-      minWidth: 100,
       renderCell: (params) => (
-        <Typography fontWeight={600}>{params.value ? `${params.value} ₴` : '—'}</Typography>
+        <Typography fontWeight={600}>
+          {params.value} шт
+        </Typography>
       ),
     },
     {
-  field: 'actions',
-  headerName: '',
-  width: 60,
-  sortable: false,
-  filterable: false,
-  renderCell: (params) => (
-    <MoveToNeedsButton
-      onMoveToNeeds={() => handleOpenModal(params.row)}
-    />
-  ),
-}
-
+      field: 'reason',
+      headerName: 'Причина',
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: () => (
+        <Typography variant="body2" fontWeight={500}>
+          d1f539e7-c137-42e3-81d9-920b1fb8ecd7
+        </Typography>
+      ),
+    },
+    {
+      field: 'lastUpdatedAt',
+      headerName: 'Дата оновлення',
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        const dateValue = params.row.lastUpdatedAt || params.row.recordedAt;
+        if (!dateValue) return <Typography>—</Typography>;
+        const date = new Date(dateValue);
+        return (
+          <Typography variant="body2" fontWeight={500}>
+            {date.toLocaleDateString('uk-UA')} {date.toLocaleTimeString('uk-UA', { 
+              hour: '2-digit', minute: '2-digit' 
+            })}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 140,
+      sortable: false,
+      renderCell: (params) => (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <MoveToNeedsButton 
+            onMoveToNeeds={() => handleOpenModal(params.row)}
+            label="До потреб"
+          />
+        </div>
+      ),
+    },
   ];
 
-    return (
+  return (
     <>
       <div style={{ width: '100%' }}>
-        <div style={{ height: 550, width: '100%' }}>
+        <div style={{ height: 650, width: '100%' }}>
           <DataGrid
-            rows={brokenComponentsMock}
+            rows={enrichedRows}
             columns={columns}
-            rowHeight={100}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10]}
+            pageSizeOptions={[5, 10, 20]}
+            loading={isLoading}
             disableRowSelectionOnClick
-            columnReordering
+            rowHeight={80}
             sx={{
               '& .MuiDataGrid-cell': {
                 display: 'flex',
@@ -142,6 +189,10 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
               },
               '& .MuiDataGrid-columnHeaders': {
                 backgroundColor: '#f5f5f5',
+                fontWeight: 600,
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: '#f8f9ff',
               },
             }}
           />
