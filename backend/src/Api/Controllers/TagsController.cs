@@ -84,5 +84,13 @@ namespace Api.Controllers
                 _ => NoContent(),
                 e => e.ToObjectResult());
         }
+        [HttpGet("by-component/{componentId:guid}")]
+        public async Task<ActionResult<IReadOnlyList<TagDto>>> GetTagsByComponentId(
+            [FromRoute] Guid componentId,
+            CancellationToken cancellationToken)
+        {
+            var tags = await sender.Send(new GetTagsByComponentIdQuery(componentId), cancellationToken);
+            return tags.Select(TagDto.FromDomainModel).ToList();
+        }
     }
 }
