@@ -56,7 +56,7 @@ export default function SparkLineCard({
           <Typography
             aria-live="polite"
             sx={{
-              fontSize: '2.6rem',
+              fontSize: '2rem',
               fontWeight: 500,
             }}
           >

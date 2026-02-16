@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { DataGrid} from '@mui/x-data-grid';
-import { Typography} from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { Typography } from '@mui/material';
 import ComponentCell from './../general/ComponentCell';
 import MoveToNeedsButton from './MoveToNeedsButton';
 import AddNeedModal from './AddNeedModal';
@@ -8,18 +8,25 @@ import { useCategoriesStore } from '../../store/useCategoriesStore';
 import { useCategoriesMap } from '../../hooks/useCategoriesMap';
 import { useComponentsStore } from '../../store/useComponentsStore';
 import { useDamagedComponentsStore } from '../../store/useDamagedComponentsStore';
+import { useDamagedComponentReasonsStore } from '../../store/useDamagedComponentReasonsStore';
 
 const BrokenComponentsTable = ({ onAddNeed }) => {
   const { damagedComponents, isLoading, fetchDamagedComponents } = useDamagedComponentsStore();
   const { components, fetchComponents } = useComponentsStore();
   const { fetchCategories } = useCategoriesStore();
+  const { reasons: damagedReasons, fetchReasons } = useDamagedComponentReasonsStore();
   const categoriesMap = useCategoriesMap();
+
+  const reasonsMap = useMemo(() => {
+    return new Map(damagedReasons.map(reason => [reason.id, reason.name]));
+  }, [damagedReasons]);
 
   useEffect(() => {
     fetchDamagedComponents();
     fetchComponents();
     fetchCategories();
-  }, [fetchDamagedComponents, fetchComponents, fetchCategories]);
+    fetchReasons();
+  }, [fetchDamagedComponents, fetchComponents, fetchCategories, fetchReasons]);
 
   const getComponentById = useCallback((componentId) => {
     return components.find(comp => comp.id === componentId) || null;
@@ -29,26 +36,31 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
     console.log('ENRICH:', { 
       damaged: damagedComponents.length, 
       components: components.length,
-      categoriesMapSize: categoriesMap.size 
+      categoriesMapSize: categoriesMap.size,
+      reasonsMapSize: reasonsMap.size
     });
     
     return damagedComponents.map(row => {
       const component = getComponentById(row.componentId);
       const categoryName = categoriesMap.get(component?.categoryId) || '—';
+      const reasonName = reasonsMap.get(row.reasonId) || row.reasonId || '—';
       
       console.log('ROW:', {
         componentName: component?.name,
         categoryId: component?.categoryId,
-        categoryName
+        categoryName,
+        reasonId: row.reasonId,
+        reasonName
       });
       
       return {
         ...row,
         component,
-        categoryName
+        categoryName,
+        reasonName
       };
     });
-  }, [damagedComponents, components, categoriesMap, getComponentById]);
+  }, [damagedComponents, components, categoriesMap, getComponentById, reasonsMap]);
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [openModal, setOpenModal] = useState(false);
@@ -105,7 +117,7 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
       flex: 1,
       minWidth: 150,
       renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500} color="primary">
+        <Typography variant="body2" fontWeight={500}>
           {params.row.categoryName || '—'}
         </Typography>
       ),
@@ -126,9 +138,9 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
       headerName: 'Причина',
       flex: 1.5,
       minWidth: 180,
-      renderCell: () => (
+      renderCell: (params) => (
         <Typography variant="body2" fontWeight={500}>
-          d1f539e7-c137-42e3-81d9-920b1fb8ecd7
+          {params.row.reasonName || '—'}
         </Typography>
       ),
     },

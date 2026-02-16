@@ -1,25 +1,38 @@
-import React from 'react';
 import SparkLineCard from './SparkLineCard';
+import { useDashboardStore } from '../../../store/useDashboardStore';
+import { useMemo } from 'react';
+import { useEffect } from 'react';
 
-const componentCosts = [
-  { week: '01-07 Січня', value: 1200 },
-  { week: '08-14 Січня', value: 1450 },
-  { week: '15-21 Січня', value: 1320 },
-  { week: '22-28 Січня', value: 1600 },
-  { week: '29 Січня-04 Лютого', value: 1750 },
-];
+const ComponentsCostSparkLine = () => {
+  const { statistics, fetchDashboardStatistics, isLoading } = useDashboardStore();
+  
+  useEffect(() => {
+    fetchDashboardStatistics();
+  }, [fetchDashboardStatistics]);
 
-const weeks = componentCosts.map((item) => item.week);
-const costs = componentCosts.map((item) => item.value);
+  const data = useMemo(() => 
+    statistics.map(stat => stat.totalComponentsCost || 0).reverse(), 
+    [statistics]
+  );
+  
+  const labels = useMemo(() => 
+    statistics.map(stat => {
+      const date = new Date(stat.statisticDate);
+      return date.toLocaleDateString('uk-UA', { month: 'short', day: 'numeric' });
+    }).reverse(), 
+    [statistics]
+  );
 
-export default function ComponentsCostSparkLine() {
   return (
     <SparkLineCard
-      data={costs}
-      labels={weeks}
-      title="Вартість компонентів"
-      lineColor="#f16731"
+      data={data}
+      labels={labels}
+      title="Загальна вартість"
+      lineColor="#841a1c"
       valueType="currency"
+      loading={isLoading}
     />
   );
-}
+};
+
+export default ComponentsCostSparkLine;

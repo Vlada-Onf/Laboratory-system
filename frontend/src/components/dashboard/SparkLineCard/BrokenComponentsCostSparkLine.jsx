@@ -1,22 +1,32 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import SparkLineCard from './SparkLineCard';
-
-const brokenCostsData = [
-  { week: '01-07 Січня', value: 50 },
-  { week: '08-14 Січня', value: 80 },
-  { week: '15-21 Січня', value: 60 },
-  { week: '22-28 Січня', value: 70 },
-  { week: '29 Січня-04 Лютого', value: 90 },
-];
-
-const weeks = brokenCostsData.map(item => item.week);
-const costs = brokenCostsData.map(item => item.value);
+import { useDashboardStore } from '../../../store/useDashboardStore';
 
 export default function BrokenComponentsCostSparkLine() {
+  const { statistics } = useDashboardStore();
+  
+  const data = useMemo(() => 
+    statistics.map(stat => 
+      Math.round((stat.totalComponentsCost || 0) * 0.1)
+    ).reverse(), 
+    [statistics]
+  );
+  
+  const labels = useMemo(() => 
+    statistics.map(stat => {
+      const date = new Date(stat.statisticDate);
+      return date.toLocaleDateString('uk-UA', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
+    }).reverse(), 
+    [statistics]
+  );
+
   return (
     <SparkLineCard
-      data={costs}
-      labels={weeks}
+      data={data}
+      labels={labels}
       title="Вартість браку"
       lineColor="#f8f53b"
       valueType="currency"

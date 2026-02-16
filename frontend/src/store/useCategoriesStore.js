@@ -120,7 +120,7 @@ export const useCategoriesStore = create((set, get) => ({
         return { categories: remainingCategories };
       });
       
-      console.log('🎉 deleteCategory УСПІХ!');
+      console.log('deleteCategory УСПІХ!');
       
     } catch (error) {
       console.error('deleteCategory ПОМИЛКА:');

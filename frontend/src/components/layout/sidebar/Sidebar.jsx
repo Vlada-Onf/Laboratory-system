@@ -14,6 +14,7 @@ import TurnedInIcon from '@mui/icons-material/TurnedIn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BuildIcon from '@mui/icons-material/Build';
 import HomeIcon from '@mui/icons-material/Home';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Link, useLocation } from 'react-router-dom';
 
 const DRAWER_WIDTH = 240;
@@ -31,6 +32,7 @@ export default function Sidebar({ open }) {
     { text: 'Бажане', icon: <FavoriteIcon />, path: '/front-wishlist' },
     { text: 'Статистика', icon: <AnalyticsIcon />, path: '/front-dashboard' },
     { text: 'Пошкодження', icon: <BuildIcon />, path: '/front-brokenComponents' },
+    { text: 'Налаштування', icon: <SettingsIcon />, path: '/front-settings' },
   ];
 
   return (

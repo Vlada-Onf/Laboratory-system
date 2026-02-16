@@ -14,6 +14,7 @@ import Profile from "../pages/general/Profile";
 import Component from '../pages/general/Component';
 import SchematicDetail from '../pages/general/SchematicDetail';
 import BrokenComponents from '../pages/general/BrokenComponents';
+import Settings from "../pages/general/Settings";
 import NotFound from "../pages/general/NotFound";
 
 const AppRoutes = () => {
@@ -23,6 +24,7 @@ const AppRoutes = () => {
     <Route path="/" element={<Navigate to="/front-main" />} />
 
     <Route path="/front-main" element={<Main />} />
+     <Route path="/front-settings" element={<Settings />} />
     <Route path="/front-dashboard" element={<Dashboard />} />
     <Route path="/front-сategories" element={<Categories />} />
     <Route path="/front-components" element={<Components />} />

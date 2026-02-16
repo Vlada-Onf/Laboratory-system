@@ -3,27 +3,51 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { PieChart } from '@mui/x-charts/PieChart';
-
-const componentsCountDataset = [
-  { category: 'Транзистори', count: 24 },
-  { category: 'Мікросхеми', count: 57 },
-  { category: 'Модулі', count: 39 },
-  { category: 'Двигуни', count: 18 },
-];
-
-const COLORS = ['#5bc522', '#f16731', '#f8f53b', '#d32f2f'];
+import { useComponentsStore } from '../../store/useComponentsStore';
+import { useCategoriesMap } from '../../hooks/useCategoriesMap';
+import { useCategoriesStore } from '../../store/useCategoriesStore';
 
 const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
-  const pieData = React.useMemo(
-    () =>
-      componentsCountDataset.map((item, index) => ({
-        id: index,
-        label: item.category,
-        value: item.count,
-        color: COLORS[index % COLORS.length],
-      })),
-    []
-  );
+  const { components } = useComponentsStore();
+  const categoriesMap = useCategoriesMap();
+  const { categories } = useCategoriesStore();
+
+  console.log('PieChart:', { 
+    componentsCount: components.length, 
+    categoriesMapSize: categoriesMap.size,
+    categoriesCount: categories.length 
+  });
+
+  const categoryCounts = React.useMemo(() => {
+    const counts = components.reduce((acc, component) => {
+      const categoryId = component.categoryId;
+      acc[categoryId] = (acc[categoryId] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(counts)
+      .map(([categoryId, count], index) => {
+        const category = categories.find(cat => cat.id === categoryId);
+        const categoryName = categoriesMap.get(categoryId) || 'Без категорії';
+        
+        return {
+          id: index,
+          label: categoryName,
+          value: count,
+          color: category?.cardColor
+        };
+      })
+      .slice(0, 8);
+  }, [components, categoriesMap, categories]);
+
+  if (components.length === 0) {
+    console.log(' Компоненти завантажуються...');
+    return (
+      <Box sx={{ /*...*/ }}>
+        <Typography color="rgba(255, 255, 255, 0.7)">Завантаження...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -32,7 +56,7 @@ const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
         height={200}
         series={[
           {
-            data: pieData,
+            data: categoryCounts,
             valueFormatter: (datum) => `${datum.value} шт.`,
             highlightScope: { fade: 'global', highlight: 'item' },
             faded: {
@@ -50,7 +74,7 @@ const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
       />
 
       <Stack direction="column" spacing={1}>
-        {pieData.map((item) => (
+        {categoryCounts.map((item) => (
           <Stack key={item.id} direction="row" alignItems="center" spacing={1}>
             <Box
               sx={{
@@ -60,12 +84,7 @@ const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
                 borderRadius: 0.5,
               }}
             />
-            <Typography
-              sx={{
-                fontSize: 14,
-                fontWeight: 500,
-              }}
-            >
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
               {item.label} ({item.value})
             </Typography>
           </Stack>
