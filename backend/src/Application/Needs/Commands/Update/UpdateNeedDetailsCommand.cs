@@ -17,5 +17,6 @@ namespace Application.Needs.Commands.Update
         public required int QuantityNeeded { get; init; }
         public string? Description { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

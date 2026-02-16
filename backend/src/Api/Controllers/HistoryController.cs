@@ -75,5 +75,29 @@ namespace Api.Controllers
                 h => HistoryEntryDto.FromDomainModel(h),
                 e => e.ToObjectResult());
         }
+        // GET /history/all
+        [HttpGet("all")]
+        public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetAll(
+        CancellationToken cancellationToken)
+        {
+            var entries = await sender.Send(new GetAllHistoryQuery(), cancellationToken);
+
+            return entries
+                .Select(HistoryEntryDto.FromDomainModel)
+                .ToList();
+        }
+
+        // GET /history/my?userId={guid}
+        [HttpGet("my")]
+        public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetMyHistory(
+            [FromQuery] Guid userId,
+            CancellationToken cancellationToken)
+        {
+            var entries = await sender.Send(new GetHistoryByUserQuery(userId), cancellationToken);
+
+            return entries
+                .Select(HistoryEntryDto.FromDomainModel)
+                .ToList();
+        }
     }
 }

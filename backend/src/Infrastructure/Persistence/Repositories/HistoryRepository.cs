@@ -49,5 +49,12 @@ namespace Infrastructure.Persistence.Repositories
                 .OrderByDescending(h => h.Time)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<IReadOnlyList<History>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.History
+                .AsNoTracking()
+                .OrderByDescending(h => h.Time)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

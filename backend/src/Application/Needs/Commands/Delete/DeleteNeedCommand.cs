@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.Needs.Commands.Delete
 {
-    public sealed record DeleteNeedCommand(Guid Id)
+    public sealed record DeleteNeedCommand(Guid Id, Guid PerformedBy)
         : IRequest<Either<NeedException, Need>>;
 }

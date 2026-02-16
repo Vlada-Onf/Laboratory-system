@@ -13,7 +13,8 @@ namespace Api.Dtos
         string SupplierLink,
         string? DocumentationLink,
         DateTime CreatedAt,
-        DateTime? LastUpdatedAt)
+        DateTime? LastUpdatedAt,
+        IReadOnlyList<TagDto> Tags)
     {
         public static ComponentDto FromDomainModel(Component component)
             => new(
@@ -27,7 +28,9 @@ namespace Api.Dtos
                 component.SupplierLink,
                 component.DocumentationLink,
                 component.CreatedAt,
-                component.LastUpdatedAt);
+                component.LastUpdatedAt,
+                component.Tags.Select(TagDto.FromDomainModel).ToList());
+
     }
 
     public record CreateComponentDto(
@@ -52,5 +55,6 @@ namespace Api.Dtos
         string PhotoUrl,
         string SupplierLink,
         string? DocumentationLink,
+        List<Guid> TagIds,
         Guid LastUpdatedBy);
 }

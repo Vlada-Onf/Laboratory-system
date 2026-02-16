@@ -8,5 +8,8 @@ namespace Application.Common.Interfaces.Queries
     {
         Task<Option<Tag>> GetByIdAsync(TagId id, CancellationToken cancellationToken);
         Task<IReadOnlyList<Tag>> GetAllAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyList<Tag>> GetByComponentIdAsync(
+            ComponentId componentId,
+            CancellationToken cancellationToken);
     }
 }

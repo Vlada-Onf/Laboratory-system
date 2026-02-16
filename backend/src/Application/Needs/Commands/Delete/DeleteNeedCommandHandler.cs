@@ -1,18 +1,15 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Needs;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Needs.Commands.Delete
 {
     public sealed class DeleteNeedCommandHandler(
-        INeedRepository needRepository)
+        INeedRepository needRepository,
+        ISender sender)
         : IRequestHandler<DeleteNeedCommand, Either<NeedException, Need>>
     {
         public async Task<Either<NeedException, Need>> Handle(
@@ -23,18 +20,37 @@ namespace Application.Needs.Commands.Delete
             var option = await needRepository.GetByIdAsync(needId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: need => DeleteEntity(need, cancellationToken),
+                Some: need => DeleteEntity(need, request.PerformedBy, cancellationToken),
                 None: () => Task.FromResult<Either<NeedException, Need>>(
                     new NeedNotFoundException(needId)));
         }
 
         private async Task<Either<NeedException, Need>> DeleteEntity(
             Need need,
+            Guid performedBy,
             CancellationToken cancellationToken)
         {
             try
             {
+                var oldValues =
+                    $"NeedId={need.Id.Value}, ComponentId={need.ComponentId.Value}, " +
+                    $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}";
+
                 var deleted = await needRepository.DeleteAsync(need, cancellationToken);
+                var historyCommand = new CreateHistoryCommand
+                {
+                    UserId = performedBy,
+                    ActionId = Guid.Parse("PUT-HERE-ActionId-FOR-DELETE"),
+                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-FOR-NEED"),
+
+                    EntityId = need.Id.Value.ToString(),
+
+                    OldValues = oldValues,
+                    NewValues = null
+                };
+
+                await sender.Send(historyCommand, cancellationToken);
+
                 return deleted;
             }
             catch (Exception ex)

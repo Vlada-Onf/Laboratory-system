@@ -10,5 +10,6 @@ namespace Application.Common.Interfaces.Queries
         Task<Option<Wishlist>> GetByIdAsync(WishlistId id, CancellationToken cancellationToken);
         Task<IReadOnlyList<Wishlist>> GetByComponentIdAsync(ComponentId componentId, CancellationToken cancellationToken);
         Task<IReadOnlyList<Wishlist>> GetByUserAsync(UserId userId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<Wishlist>> GetAllAsync(CancellationToken cancellationToken);
     }
 }

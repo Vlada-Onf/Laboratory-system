@@ -13,6 +13,9 @@ namespace Application.Common.Interfaces.Repositories
         Task<Option<Tag>> GetByIdAsync(TagId id, CancellationToken cancellationToken);
         Task<IReadOnlyList<Tag>> GetByIdsAsync(List<Guid> tagIds, CancellationToken cancellationToken);
         Task<IReadOnlyList<Tag>> GetAllAsync(CancellationToken cancellationToken);
-        Task<IReadOnlyList<Tag>> GetByComponentAsync(ComponentId componentId, CancellationToken cancellationToken);
+
+        Task<IReadOnlyList<Tag>> GetByComponentAsync(
+            ComponentId componentId,
+            CancellationToken cancellationToken);
     }
 }

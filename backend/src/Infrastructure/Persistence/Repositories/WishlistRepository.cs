@@ -57,5 +57,11 @@ namespace Infrastructure.Persistence.Repositories
                 .OrderByDescending(w => w.RequestedAt)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<IReadOnlyList<Wishlist>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return await context.Wishlists
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

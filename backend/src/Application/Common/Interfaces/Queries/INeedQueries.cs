@@ -12,5 +12,6 @@ namespace Application.Common.Interfaces.Queries
         Task<IReadOnlyList<Need>> GetByComponentIdAsync(ComponentId componentId, CancellationToken cancellationToken);
         Task<IReadOnlyList<Need>> GetByUserAsync(UserId userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<Need>> GetByImportanceAsync(NeedImportanceId importanceId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<Need>> GetAllAsync(CancellationToken cancellationToken);
     }
 }

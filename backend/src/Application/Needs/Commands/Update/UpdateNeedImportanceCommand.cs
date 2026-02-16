@@ -15,5 +15,6 @@ namespace Application.Needs.Commands.Update
     {
         public required Guid Id { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

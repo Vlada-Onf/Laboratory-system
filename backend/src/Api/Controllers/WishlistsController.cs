@@ -134,5 +134,17 @@ namespace Api.Controllers
                 _ => NoContent(),
                 e => e.ToObjectResult());
         }
+
+        // GET /wishlists
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<WishlistDto>>> GetAll(
+            CancellationToken cancellationToken)
+        {
+            var wishlists = await sender.Send(new GetAllWishlistsQuery(), cancellationToken);
+
+            return wishlists
+                .Select(WishlistDto.FromDomainModel)
+                .ToList();
+        }
     }
 }

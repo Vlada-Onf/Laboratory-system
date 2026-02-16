@@ -15,6 +15,7 @@ namespace Infrastructure.Persistence.Repositories
         {
             _context = context;
         }
+
         public async Task<IReadOnlyList<Tag>> GetByIdsAsync(
             List<Guid> tagIds,
             CancellationToken cancellationToken)
@@ -64,7 +65,10 @@ namespace Infrastructure.Persistence.Repositories
 
             return tag ?? Option<Tag>.None;
         }
-        public async Task<IReadOnlyList<Tag>> GetByComponentAsync(ComponentId componentId, CancellationToken cancellationToken)
+
+        public async Task<IReadOnlyList<Tag>> GetByComponentIdAsync(
+            ComponentId componentId,
+            CancellationToken cancellationToken)
         {
             return await _context.Components
                 .AsNoTracking()
@@ -72,11 +76,19 @@ namespace Infrastructure.Persistence.Repositories
                 .SelectMany(c => c.Tags)
                 .ToListAsync(cancellationToken);
         }
+
         public async Task<IReadOnlyList<Tag>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await _context.Tags
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Tag>> GetByComponentAsync(
+            ComponentId componentId,
+            CancellationToken cancellationToken)
+        {
+            return await GetByComponentIdAsync(componentId, cancellationToken);
         }
     }
 }

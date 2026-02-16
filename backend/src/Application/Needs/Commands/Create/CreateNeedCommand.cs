@@ -18,5 +18,7 @@ namespace Application.Needs.Commands.Create
         public required Guid RequestedBy { get; init; }
         public string? Description { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
+
 }

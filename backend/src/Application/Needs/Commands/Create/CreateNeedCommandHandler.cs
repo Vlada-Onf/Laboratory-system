@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Components;
 using Domain.Needs;
@@ -6,17 +7,13 @@ using Domain.Needs.Importance;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Needs.Commands.Create
 {
     public sealed class CreateNeedCommandHandler(
             INeedRepository needRepository,
-            IComponentRepository componentRepository)
+            IComponentRepository componentRepository,
+            ISender sender) 
             : IRequestHandler<CreateNeedCommand, Either<NeedException, Need>>
     {
         public async Task<Either<NeedException, Need>> Handle(
@@ -46,6 +43,19 @@ namespace Application.Needs.Commands.Create
                 needId = need.Id;
 
                 var created = await needRepository.AddAsync(need, cancellationToken);
+
+                var historyCommand = new CreateHistoryCommand
+                {
+                    UserId = request.PerformedBy,
+                    ActionId = Guid.Parse("PUT-HERE-ActionId-GUID"),
+                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-GUID"),
+                    EntityId = created.Id.Value.ToString(),
+                    OldValues = null,
+                    NewValues = $"Need for component {need.ComponentId.Value} " +
+                                $"(quantity {need.QuantityNeeded}) created."
+                };
+
+                await sender.Send(historyCommand, cancellationToken);
 
                 return created;
             }

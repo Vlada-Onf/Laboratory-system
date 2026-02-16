@@ -61,6 +61,18 @@ namespace Api.Controllers
                 .ToList();
         }
 
+        // GET /needs
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<NeedDto>>> GetAll(
+            CancellationToken cancellationToken)
+        {
+            var needs = await sender.Send(new GetAllNeedsQuery(), cancellationToken);
+
+            return needs
+                .Select(NeedDto.FromDomainModel)
+                .ToList();
+        }
+
         [HttpPost]
         public async Task<ActionResult<NeedDto>> Create(
             [FromBody] CreateNeedDto request,
@@ -72,7 +84,8 @@ namespace Api.Controllers
                 QuantityNeeded = request.QuantityNeeded,
                 RequestedBy = request.RequestedBy,
                 Description = request.Description,
-                ImportanceId = request.ImportanceId
+                ImportanceId = request.ImportanceId,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -92,7 +105,8 @@ namespace Api.Controllers
                 Id = request.Id,
                 QuantityNeeded = request.QuantityNeeded,
                 Description = request.Description,
-                ImportanceId = request.ImportanceId
+                ImportanceId = request.ImportanceId,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -110,7 +124,8 @@ namespace Api.Controllers
             var input = new UpdateNeedImportanceCommand
             {
                 Id = request.Id,
-                ImportanceId = request.ImportanceId
+                ImportanceId = request.ImportanceId,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -123,9 +138,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy, 
             CancellationToken cancellationToken)
         {
-            var input = new DeleteNeedCommand(id);
+            var input = new DeleteNeedCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

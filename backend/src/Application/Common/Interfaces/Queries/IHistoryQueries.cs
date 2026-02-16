@@ -1,6 +1,7 @@
 ﻿using Domain.History;
 using Domain.History.EntityTypes;
 using Domain.Users;
+using System.Threading.Tasks;
 
 namespace Application.Common.Interfaces.Queries
 {
@@ -9,5 +10,6 @@ namespace Application.Common.Interfaces.Queries
         Task<IReadOnlyList<History>> GetByUserAsync(UserId userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<History>> GetByEntityAsync(string entityId, CancellationToken cancellationToken);
         Task<IReadOnlyList<History>> GetByEntityAndTypeAsync(EntityTypeId entityTypeId, string entityId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<History>> GetAllAsync(CancellationToken cancellationToken);
     }
 }

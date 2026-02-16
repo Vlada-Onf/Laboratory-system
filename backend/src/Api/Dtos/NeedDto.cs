@@ -35,6 +35,7 @@ namespace Api.Dtos
         public required Guid RequestedBy { get; init; }
         public string? Description { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 
     public record UpdateNeedDetailsDto
@@ -43,11 +44,14 @@ namespace Api.Dtos
         public required int QuantityNeeded { get; init; }
         public string? Description { get; init; }
         public required Guid ImportanceId { get; init; }
+
+        public required Guid PerformedBy { get; init; }
     }
 
     public record UpdateNeedImportanceDto
     {
         public required Guid Id { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }
