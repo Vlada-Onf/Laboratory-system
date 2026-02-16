@@ -34,17 +34,17 @@ namespace Application.Needs.Commands.Delete
             {
                 var oldValues =
                     $"NeedId={need.Id.Value}, ComponentId={need.ComponentId.Value}, " +
-                    $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}";
+                    $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}, " +
+                    $"StatusId={need.StatusId.Value}";
 
                 var deleted = await needRepository.DeleteAsync(need, cancellationToken);
+
                 var historyCommand = new CreateHistoryCommand
                 {
                     UserId = performedBy,
-                    ActionId = Guid.Parse("PUT-HERE-ActionId-FOR-DELETE"),
-                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-FOR-NEED"),
-
+                    ActionId = Guid.Parse("PUT-HERE-ActionId-DELETE-NEED"),
+                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-NEED"),
                     EntityId = need.Id.Value.ToString(),
-
                     OldValues = oldValues,
                     NewValues = null
                 };

@@ -11,12 +11,15 @@ using System.Threading.Tasks;
 namespace Application.Needs.Commands.Create
 {
     public sealed record CreateNeedCommand
-        : IRequest<Either<NeedException, Need>>
+            : IRequest<Either<NeedException, Need>>
     {
         public required Guid ComponentId { get; init; }
         public required int QuantityNeeded { get; init; }
         public required Guid RequestedBy { get; init; }
         public string? Description { get; init; }
+
+        public required Guid StatusId { get; init; }
+
         public required Guid ImportanceId { get; init; }
         public required Guid PerformedBy { get; init; }
     }

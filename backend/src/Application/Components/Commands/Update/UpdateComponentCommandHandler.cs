@@ -2,20 +2,17 @@
 using Application.Components.Exceptions;
 using Domain.Categories;
 using Domain.Components;
+using Domain.Tags;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Components.Commands.Update
 {
     public class UpdateComponentCommandHandler(
         IComponentRepository componentRepository,
-        ICategoryRepository categoryRepository)
+        ICategoryRepository categoryRepository,
+        ITagRepository tagRepository)
         : IRequestHandler<UpdateComponentCommand, Either<ComponentException, Component>>
     {
         public async Task<Either<ComponentException, Component>> Handle(
@@ -29,10 +26,12 @@ namespace Application.Components.Commands.Update
             if (!categoryExists)
                 return new ComponentCategoryNotFoundException(componentId);
 
+            // важливо: тут бажано підтягнути теги, але припустимо,
+            // що репозиторій вже це робить
             var option = await componentRepository.GetByIdAsync(componentId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: component => UpdateEntity(component, request, categoryId, cancellationToken),
+                Some: component => UpdateEntity(component, request, categoryId, tagRepository, cancellationToken),
                 None: () => Task.FromResult<Either<ComponentException, Component>>(
                     new ComponentNotFoundException(componentId)));
         }
@@ -41,6 +40,7 @@ namespace Application.Components.Commands.Update
             Component component,
             UpdateComponentCommand request,
             CategoryId categoryId,
+            ITagRepository tagRepository,
             CancellationToken cancellationToken)
         {
             try
@@ -57,6 +57,13 @@ namespace Application.Components.Commands.Update
                     supplierLink: request.SupplierLink,
                     documentationLink: request.DocumentationLink,
                     lastUpdatedBy: lastUpdatedBy);
+
+                var tags = await tagRepository.GetByIdsAsync(request.TagIds, cancellationToken);
+                component.Tags.Clear();
+                foreach (var tag in tags)
+                {
+                    component.AddTag(tag);
+                }
 
                 var updated = await componentRepository.UpdateAsync(component, cancellationToken);
 

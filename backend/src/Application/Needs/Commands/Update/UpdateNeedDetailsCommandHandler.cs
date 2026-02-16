@@ -3,6 +3,7 @@ using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Needs;
 using Domain.Needs.Importance;
+using Domain.Needs.Status;
 using LanguageExt;
 using MediatR;
 
@@ -36,12 +37,16 @@ namespace Application.Needs.Commands.Update
                 var oldQuantity = need.QuantityNeeded;
                 var oldDescription = need.Description;
                 var oldImportanceId = need.ImportanceId;
+                var oldStatusId = need.StatusId;
+
                 var importanceId = new NeedImportanceId(request.ImportanceId);
+                var statusId = new NeedStatusId(request.StatusId);
 
                 need.UpdateDetails(
                     quantityNeeded: request.QuantityNeeded,
                     description: request.Description,
-                    importanceId: importanceId);
+                    importanceId: importanceId,
+                    statusId: statusId);
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
 
@@ -49,15 +54,17 @@ namespace Application.Needs.Commands.Update
                 {
                     UserId = request.PerformedBy,
 
-                    ActionId = Guid.Parse("PUT-HERE-ActionId-FOR-UPDATE"),
-                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-FOR-NEED"),
+                    ActionId = Guid.Parse("PUT-HERE-ActionId-UPDATE-NEED"),
+                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-NEED"),
 
                     EntityId = need.Id.Value.ToString(),
 
                     OldValues =
-                        $"Quantity={oldQuantity}, Description={oldDescription}, ImportanceId={oldImportanceId.Value}",
+                        $"Quantity={oldQuantity}, Description={oldDescription}, " +
+                        $"ImportanceId={oldImportanceId.Value}, StatusId={oldStatusId.Value}",
                     NewValues =
-                        $"Quantity={need.QuantityNeeded}, Description={need.Description}, ImportanceId={need.ImportanceId.Value}"
+                        $"Quantity={need.QuantityNeeded}, Description={need.Description}, " +
+                        $"ImportanceId={need.ImportanceId.Value}, StatusId={need.StatusId.Value}"
                 };
 
                 await sender.Send(historyCommand, cancellationToken);

@@ -61,6 +61,18 @@ namespace Api.Controllers
                 .ToList();
         }
 
+        [HttpGet("by-status/{statusId:guid}")]
+        public async Task<ActionResult<IReadOnlyList<NeedDto>>> GetByStatus(
+            [FromRoute] Guid statusId,
+            CancellationToken cancellationToken)
+        {
+            var needs = await sender.Send(new GetNeedsByStatusQuery(statusId), cancellationToken);
+
+            return needs
+                .Select(NeedDto.FromDomainModel)
+                .ToList();
+        }
+
         // GET /needs
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<NeedDto>>> GetAll(
@@ -84,6 +96,7 @@ namespace Api.Controllers
                 QuantityNeeded = request.QuantityNeeded,
                 RequestedBy = request.RequestedBy,
                 Description = request.Description,
+                StatusId = request.StatusId,
                 ImportanceId = request.ImportanceId,
                 PerformedBy = request.PerformedBy
             };
@@ -106,6 +119,7 @@ namespace Api.Controllers
                 QuantityNeeded = request.QuantityNeeded,
                 Description = request.Description,
                 ImportanceId = request.ImportanceId,
+                StatusId = request.StatusId,
                 PerformedBy = request.PerformedBy
             };
 
@@ -138,7 +152,7 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
-            [FromQuery] Guid performedBy, 
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
             var input = new DeleteNeedCommand(id, performedBy);

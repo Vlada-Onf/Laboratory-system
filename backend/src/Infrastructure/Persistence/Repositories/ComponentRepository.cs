@@ -44,8 +44,7 @@ namespace Infrastructure.Persistence.Repositories
         {
             var component = await _context.Components
                 .Include(c => c.Tags)
-                .Include(c => c.Comments)
-                .Include(c => c.UsefulLinks)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
             return component ?? Option<Component>.None;

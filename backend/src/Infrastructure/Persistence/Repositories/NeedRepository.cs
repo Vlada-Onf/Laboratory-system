@@ -43,7 +43,9 @@ namespace Infrastructure.Persistence.Repositories
             return entity ?? Option<Need>.None;
         }
 
-        public async Task<IReadOnlyList<Need>> GetByComponentIdAsync(ComponentId componentId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<Need>> GetByComponentIdAsync(
+            ComponentId componentId,
+            CancellationToken cancellationToken)
         {
             return await context.Needs
                 .AsNoTracking()
@@ -51,7 +53,9 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Need>> GetByUserAsync(UserId userId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<Need>> GetByUserAsync(
+            UserId userId,
+            CancellationToken cancellationToken)
         {
             return await context.Needs
                 .AsNoTracking()
@@ -60,20 +64,27 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Need>> GetByImportanceAsync(NeedImportanceId importanceId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<Need>> GetByImportanceAsync(
+            NeedImportanceId importanceId,
+            CancellationToken cancellationToken)
         {
             return await context.Needs
                 .AsNoTracking()
                 .Where(n => n.ImportanceId == importanceId)
                 .ToListAsync(cancellationToken);
         }
-        public async Task<IReadOnlyList<Need>> GetAllAsync(CancellationToken cancellationToken)
+
+        public async Task<IReadOnlyList<Need>> GetAllAsync(
+            CancellationToken cancellationToken)
         {
             return await context.Needs
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
-        public async Task<IReadOnlyList<Need>> GetByStatusAsync(NeedStatusId statusId, CancellationToken cancellationToken)
+
+        public async Task<IReadOnlyList<Need>> GetByStatusAsync(
+            NeedStatusId statusId,
+            CancellationToken cancellationToken)
         {
             return await context.Needs
                 .AsNoTracking()

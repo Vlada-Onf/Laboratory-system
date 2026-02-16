@@ -38,11 +38,6 @@ namespace Application.Components.Commands.Update
                 .WithMessage("URL фото є обов'язковим")
                 .MaximumLength(500);
 
-            RuleFor(x => x.SupplierLink)
-                .NotEmpty()
-                .WithMessage("Посилання на постачальника є обов'язковим")
-                .MaximumLength(500);
-
             RuleFor(x => x.DocumentationLink)
                 .MaximumLength(500)
                 .When(x => !string.IsNullOrEmpty(x.DocumentationLink));

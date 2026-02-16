@@ -1,6 +1,7 @@
 ﻿using Domain.Components;
 using Domain.Needs;
 using Domain.Needs.Importance;
+using Domain.Needs.Status;
 using Domain.Users;
 using LanguageExt;
 
@@ -13,5 +14,8 @@ namespace Application.Common.Interfaces.Queries
         Task<IReadOnlyList<Need>> GetByUserAsync(UserId userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<Need>> GetByImportanceAsync(NeedImportanceId importanceId, CancellationToken cancellationToken);
         Task<IReadOnlyList<Need>> GetAllAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyList<Need>> GetByStatusAsync(
+            NeedStatusId statusId,
+            CancellationToken cancellationToken);
     }
 }

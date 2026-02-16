@@ -80,7 +80,8 @@ namespace Api.Controllers
                 PhotoUrl = request.PhotoUrl,
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
-                LastUpdatedBy = request.LastUpdatedBy
+                LastUpdatedBy = request.LastUpdatedBy,
+                TagIds = request.TagIds
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -89,6 +90,7 @@ namespace Api.Controllers
                 c => ComponentDto.FromDomainModel(c),
                 e => e.ToObjectResult());
         }
+
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteComponent(

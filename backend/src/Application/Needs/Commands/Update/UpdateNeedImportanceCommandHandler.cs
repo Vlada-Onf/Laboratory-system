@@ -35,17 +35,17 @@ namespace Application.Needs.Commands.Update
             {
                 var oldImportanceId = need.ImportanceId;
                 var importanceId = new NeedImportanceId(request.ImportanceId);
+
                 need.UpdateImportance(importanceId);
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
+
                 var historyCommand = new CreateHistoryCommand
                 {
                     UserId = request.PerformedBy,
-                    ActionId = Guid.Parse("PUT-HERE-ActionId-FOR-UPDATE-IMPORTANCE"),
-                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-FOR-NEED"),
-
+                    ActionId = Guid.Parse("PUT-HERE-ActionId-UPDATE-NEED-IMPORTANCE"),
+                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-NEED"),
                     EntityId = need.Id.Value.ToString(),
-
                     OldValues = $"ImportanceId={oldImportanceId.Value}",
                     NewValues = $"ImportanceId={need.ImportanceId.Value}"
                 };
