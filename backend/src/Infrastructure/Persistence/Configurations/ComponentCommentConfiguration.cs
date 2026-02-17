@@ -45,6 +45,11 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.HasIndex(cc => cc.ComponentId)
                 .HasDatabaseName("ix_component_comments_component_id");
+
+            builder.HasOne<Component>()
+                .WithMany(c => c.Comments)
+                .HasForeignKey(cc => cc.ComponentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

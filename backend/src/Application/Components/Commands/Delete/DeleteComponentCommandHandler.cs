@@ -3,11 +3,8 @@ using Application.Components.Exceptions;
 using Domain.Components;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Application.Components.Commands.Delete
 {
@@ -29,18 +26,25 @@ namespace Application.Components.Commands.Delete
         }
 
         private async Task<Either<ComponentException, Component>> DeleteEntity(
-            Component component,
-            CancellationToken cancellationToken)
+    Component component,
+    CancellationToken cancellationToken)
         {
             try
             {
                 var deleted = await componentRepository.DeleteAsync(component, cancellationToken);
                 return deleted;
             }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23503")
+            {
+                return new ComponentDeleteForbiddenException(
+                    component.Id,
+                    "Компонент має пов’язані записи і не може бути видалений.");
+            }
             catch (Exception exception)
             {
                 return new UnhandledComponentException(component.Id, exception);
             }
         }
+
     }
 }

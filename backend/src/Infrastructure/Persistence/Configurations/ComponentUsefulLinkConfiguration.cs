@@ -54,6 +54,11 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.HasIndex(ul => ul.ComponentId)
                 .HasDatabaseName("ix_component_useful_links_component_id");
+
+            builder.HasOne<Component>()
+                .WithMany(c => c.UsefulLinks)
+                .HasForeignKey(ul => ul.ComponentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

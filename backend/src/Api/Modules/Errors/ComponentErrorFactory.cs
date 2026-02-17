@@ -12,8 +12,12 @@ namespace Api.Modules.Errors
                 StatusCode = error switch
                 {
                     ComponentAlreadyExistException => StatusCodes.Status409Conflict,
-                    ComponentNotFoundException or ComponentCategoryNotFoundException => StatusCodes.Status404NotFound,
-                    UnhandledComponentException => StatusCodes.Status500InternalServerError,
+                    ComponentNotFoundException or ComponentCategoryNotFoundException
+                        => StatusCodes.Status404NotFound,
+                    ComponentDeleteForbiddenException
+                        => StatusCodes.Status409Conflict,
+                    UnhandledComponentException
+                        => StatusCodes.Status500InternalServerError,
                     _ => throw new NotImplementedException("Component error handler is not implemented")
                 }
             };

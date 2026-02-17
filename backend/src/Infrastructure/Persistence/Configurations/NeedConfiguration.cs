@@ -67,7 +67,7 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(n => n.ComponentId)
                 .HasConstraintName("fk_needs_components_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<NeedImportance>()
                 .WithMany()
