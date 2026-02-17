@@ -11,6 +11,8 @@ namespace Application.Needs.Commands.Update
 {
     public sealed class UpdateNeedDetailsCommandHandler(
         INeedRepository needRepository,
+        IActionRepository actionRepository,
+        IEntityTypeRepository entityTypeRepository,
         ISender sender)
         : IRequestHandler<UpdateNeedDetailsCommand, Either<NeedException, Need>>
     {
@@ -50,12 +52,24 @@ namespace Application.Needs.Commands.Update
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
 
+                var actionOption = await actionRepository.GetByNameAsync(
+                    "Update need details", cancellationToken);
+                if (actionOption.IsNone)
+                    throw new InvalidOperationException("Action 'Update need details' not found");
+                var action = actionOption.First();
+
+                var entityTypeOption = await entityTypeRepository.GetByNameAsync(
+                    "Need", cancellationToken);
+                if (entityTypeOption.IsNone)
+                    throw new InvalidOperationException("EntityType 'Need' not found");
+                var entityType = entityTypeOption.First();
+
                 var historyCommand = new CreateHistoryCommand
                 {
                     UserId = request.PerformedBy,
 
-                    ActionId = Guid.Parse("PUT-HERE-ActionId-UPDATE-NEED"),
-                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-NEED"),
+                    ActionId = action.Id.Value,
+                    EntityTypeId = entityType.Id.Value,
 
                     EntityId = need.Id.Value.ToString(),
 
@@ -67,7 +81,8 @@ namespace Application.Needs.Commands.Update
                         $"ImportanceId={need.ImportanceId.Value}, StatusId={need.StatusId.Value}"
                 };
 
-                await sender.Send(historyCommand, cancellationToken);
+                var historyResult = await sender.Send(historyCommand, cancellationToken);
+                historyResult.IfLeft(e => throw e);
 
                 return updated;
             }

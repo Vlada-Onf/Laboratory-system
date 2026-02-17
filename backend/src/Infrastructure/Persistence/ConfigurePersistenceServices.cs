@@ -1,13 +1,14 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
+using Infrastructure.Files;
 using Infrastructure.Persistence.Repositories;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Infrastructure.Persistence
 {
@@ -140,6 +141,8 @@ namespace Infrastructure.Persistence
 
             services.AddScoped<WishlistStatusRepository>();
             services.AddScoped<IWishlistStatusRepository>(p => p.GetRequiredService<WishlistStatusRepository>());
+
+            services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Application.Needs.Commands.Delete
 {
     public sealed class DeleteNeedCommandHandler(
         INeedRepository needRepository,
+        IActionRepository actionRepository,
+        IEntityTypeRepository entityTypeRepository,
         ISender sender)
         : IRequestHandler<DeleteNeedCommand, Either<NeedException, Need>>
     {
@@ -39,17 +41,30 @@ namespace Application.Needs.Commands.Delete
 
                 var deleted = await needRepository.DeleteAsync(need, cancellationToken);
 
+                var actionOption = await actionRepository.GetByNameAsync(
+                    "Delete need", cancellationToken);
+                if (actionOption.IsNone)
+                    throw new InvalidOperationException("Action 'Delete need' not found");
+                var action = actionOption.First();
+
+                var entityTypeOption = await entityTypeRepository.GetByNameAsync(
+                    "Need", cancellationToken);
+                if (entityTypeOption.IsNone)
+                    throw new InvalidOperationException("EntityType 'Need' not found");
+                var entityType = entityTypeOption.First();
+
                 var historyCommand = new CreateHistoryCommand
                 {
                     UserId = performedBy,
-                    ActionId = Guid.Parse("PUT-HERE-ActionId-DELETE-NEED"),
-                    EntityTypeId = Guid.Parse("PUT-HERE-EntityTypeId-NEED"),
+                    ActionId = action.Id.Value,
+                    EntityTypeId = entityType.Id.Value,
                     EntityId = need.Id.Value.ToString(),
                     OldValues = oldValues,
                     NewValues = null
                 };
 
-                await sender.Send(historyCommand, cancellationToken);
+                var historyResult = await sender.Send(historyCommand, cancellationToken);
+                historyResult.IfLeft(e => throw e);
 
                 return deleted;
             }

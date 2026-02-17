@@ -1,14 +1,15 @@
-﻿using System.Security.Claims;
-using Api.Dtos;
+﻿using Api.Dtos;
 using Api.Modules.Errors;
 using Application.Categories.Commands.Create;
 using Application.Categories.Commands.Delete;
 using Application.Categories.Commands.Update;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Domain.Categories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -64,19 +65,34 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<CategoryDto>> CreateCategory(
-            [FromBody] CreateCategoryDto request,
-            CancellationToken cancellationToken)
+     [FromForm] CreateCategoryDto request,
+     IFormFile? image,                
+     CancellationToken cancellationToken,
+     [FromServices] IFileStorageService fileStorage)
         {
             var userGuid = GetCurrentUserGuid();
             if (userGuid is null)
                 return Unauthorized();
 
+            string? photoUrl = request.PhotoUrl;
+
+            if (image is not null && image.Length > 0)
+            {
+                await using var stream = image.OpenReadStream();
+                photoUrl = await fileStorage.UploadAsync(
+                    stream,
+                    image.FileName,
+                    image.ContentType,
+                    cancellationToken);
+            }
+
             var input = new CreateCategoryCommand
             {
                 Name = request.Name,
                 Description = request.Description,
-                PhotoUrl = request.PhotoUrl,
+                PhotoUrl = photoUrl,
                 CardColor = request.CardColor,
                 CreatedBy = userGuid.Value,
                 PerformedBy = userGuid.Value
@@ -97,20 +113,35 @@ namespace Api.Controllers
         }
 
         [HttpPut]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<CategoryDto>> UpdateCategory(
-            [FromBody] UpdateCategoryDto request,
-            CancellationToken cancellationToken)
+            [FromForm] UpdateCategoryDto request,
+            IFormFile? image,
+            CancellationToken cancellationToken,
+            [FromServices] IFileStorageService fileStorage)
         {
             var userGuid = GetCurrentUserGuid();
             if (userGuid is null)
                 return Unauthorized();
+
+            string? photoUrl = request.PhotoUrl;
+
+            if (image is not null && image.Length > 0)
+            {
+                await using var stream = image.OpenReadStream();
+                photoUrl = await fileStorage.UploadAsync(
+                    stream,
+                    image.FileName,
+                    image.ContentType,
+                    cancellationToken);
+            }
 
             var input = new UpdateCategoryCommand
             {
                 Id = request.Id,
                 Name = request.Name,
                 Description = request.Description,
-                PhotoUrl = request.PhotoUrl,
+                PhotoUrl = photoUrl,
                 CardColor = request.CardColor,
                 LastUpdatedBy = userGuid.Value,
                 PerformedBy = userGuid.Value
@@ -122,7 +153,6 @@ namespace Api.Controllers
                 c => CategoryDto.FromDomainModel(c),
                 e => e.ToObjectResult());
         }
-
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteCategory(
             [FromRoute] Guid id,

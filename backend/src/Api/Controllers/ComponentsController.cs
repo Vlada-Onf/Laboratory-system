@@ -1,5 +1,6 @@
 ﻿using Api.Dtos;
 using Api.Modules.Errors;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Application.Components.Commands.Create;
 using Application.Components.Commands.Delete;
@@ -39,10 +40,25 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<ComponentDto>> CreateComponent(
-            [FromBody] CreateComponentDto request,
-            CancellationToken cancellationToken)
+            [FromForm] CreateComponentDto request,
+            IFormFile? image,
+            CancellationToken cancellationToken,
+            [FromServices] IFileStorageService fileStorage)
         {
+            string photoUrl = request.PhotoUrl;
+
+            if (image is not null && image.Length > 0)
+            {
+                await using var stream = image.OpenReadStream();
+                photoUrl = await fileStorage.UploadAsync(
+                    stream,
+                    image.FileName,
+                    image.ContentType,
+                    cancellationToken);
+            }
+
             var input = new CreateComponentCommand
             {
                 CategoryId = request.CategoryId,
@@ -50,7 +66,7 @@ namespace Api.Controllers
                 Description = request.Description,
                 Quantity = request.Quantity,
                 Price = request.Price,
-                PhotoUrl = request.PhotoUrl,
+                PhotoUrl = photoUrl,
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
                 TagIds = request.TagIds,
@@ -65,10 +81,25 @@ namespace Api.Controllers
         }
 
         [HttpPut]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<ComponentDto>> UpdateComponent(
-            [FromBody] UpdateComponentDto request,
-            CancellationToken cancellationToken)
+            [FromForm] UpdateComponentDto request,
+            IFormFile? image,
+            CancellationToken cancellationToken,
+            [FromServices] IFileStorageService fileStorage)
         {
+            string photoUrl = request.PhotoUrl;
+
+            if (image is not null && image.Length > 0)
+            {
+                await using var stream = image.OpenReadStream();
+                photoUrl = await fileStorage.UploadAsync(
+                    stream,
+                    image.FileName,
+                    image.ContentType,
+                    cancellationToken);
+            }
+
             var input = new UpdateComponentCommand
             {
                 Id = request.Id,
@@ -77,7 +108,7 @@ namespace Api.Controllers
                 Description = request.Description,
                 Quantity = request.Quantity,
                 Price = request.Price,
-                PhotoUrl = request.PhotoUrl,
+                PhotoUrl = photoUrl,
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
                 LastUpdatedBy = request.LastUpdatedBy,
@@ -90,7 +121,6 @@ namespace Api.Controllers
                 c => ComponentDto.FromDomainModel(c),
                 e => e.ToObjectResult());
         }
-
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteComponent(
