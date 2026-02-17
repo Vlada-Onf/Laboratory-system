@@ -4,11 +4,11 @@ import { Typography } from '@mui/material';
 import ComponentCell from './../general/ComponentCell';
 import MoveToNeedsButton from './MoveToNeedsButton';
 import AddNeedModal from './AddNeedModal';
-import { useCategoriesStore } from '../../store/useCategoriesStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
 import { useCategoriesMap } from '../../hooks/useCategoriesMap';
-import { useComponentsStore } from '../../store/useComponentsStore';
-import { useDamagedComponentsStore } from '../../store/useDamagedComponentsStore';
-import { useDamagedComponentReasonsStore } from '../../store/useDamagedComponentReasonsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
+import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
+import { useDamagedComponentReasonsStore } from '@store/useDamagedComponentReasonsStore';
 
 const BrokenComponentsTable = ({ onAddNeed }) => {
   const { damagedComponents, isLoading, fetchDamagedComponents } = useDamagedComponentsStore();

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
 import { useComponentsStore } from '../../store/useComponentsStore';
+import { useCategoriesStore } from '../../store/useCategoriesStore';
 import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
@@ -15,6 +16,7 @@ const ComponentPage = () => {
 
   const {
     components,
+    isLoading: componentsLoading,
     openEditModal,
     editModal,
     closeEditModal,
@@ -23,19 +25,57 @@ const ComponentPage = () => {
     deleteComponent,
   } = useComponentsStore();
 
+  const { fetchCategories,  isLoading: categoriesLoading } = useCategoriesStore();
+  
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+
   const { openEditModal: openSchematicEditModal } = useSchematicsStore();
   const addNeed = useNeedsStore(state => state.addNeed);
   const [needModalOpen, setNeedModalOpen] = useState(false);
 
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        await fetchCategories();
+        setCategoriesLoaded(true);
+
+        console.log('🔄 [2/2] Завантажуємо компоненти...');
+        await fetchComponents();
+      } catch (error) {
+        console.error('Помилка ComponentPage:', error);
+      }
+    };
+
+    loadAllData();
+  }, [fetchCategories, fetchComponents]);
+
   const component = components.find(c => c.id === id);
 
+  const pageLoading = componentsLoading || categoriesLoading || !categoriesLoaded;
+
+  if (pageLoading) {
+    return (
+      <PageWrapper>
+        <div style={{ padding: '50px', textAlign: 'center' }}>
+          <div>Завантажуємо компонент...</div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
   if (!component) {
-    return <div>Компонент не знайдено</div>;
+    return (
+      <PageWrapper>
+        <div style={{ padding: '50px', textAlign: 'center' }}>
+          <h2>Компонент не знайдено</h2>
+          <button onClick={() => navigate('/front-components')}>← Назад</button>
+        </div>
+      </PageWrapper>
+    );
   }
 
   const handleComponentSubmit = async (formData) => {
     const componentId = editModal.component?.id || id;
-    
     try {
       await updateComponent(componentId, formData);
       await fetchComponents();

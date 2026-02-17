@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useActionsStore } from '../../store/useActionsStore';
+import { useActionsStore } from '@store/useActionsStore';
 
 const ActionsModal = ({ open, onClose }) => {
   const [newActionName, setNewActionName] = useState('');

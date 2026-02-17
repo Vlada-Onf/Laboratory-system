@@ -3,7 +3,7 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import LinksRow from './LinksRow';
 import LinkEditModal from './LinkEditModal';
-import { useUsefulLinksStore } from '../../../store/useUsefulLinksStore';
+import { useUsefulLinksStore } from '@store/useUsefulLinksStore';
 import { useTheme } from '@mui/material';
 
 const LinksBlock = ({ component }) => {

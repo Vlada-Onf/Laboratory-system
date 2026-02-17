@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import SparkLineCard from './SparkLineCard';
-import { useDashboardStore } from '../../../store/useDashboardStore';
+import { useDashboardStore } from '@store/useDashboardStore';
 
 export default function BrokenComponentsCostSparkLine() {
   const { statistics } = useDashboardStore();

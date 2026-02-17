@@ -3,7 +3,7 @@ import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '
 import SchematicCard from './SchematicCard';
 import AddSchematicCard from './AddSchematicCard';
 import SchematicModal from './SchematicModal';
-import { useSchematicsStore } from '../../../store/useSchematicsStore';
+import { useSchematicsStore } from '@store/useSchematicsStore';
 
 const SchematicsBlock = ({ componentId, onAddSchematic }) => {
   const {

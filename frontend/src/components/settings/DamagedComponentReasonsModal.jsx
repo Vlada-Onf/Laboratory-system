@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDamagedComponentReasonsStore } from '../../store/useDamagedComponentReasonsStore';
+import { useDamagedComponentReasonsStore } from '@store/useDamagedComponentReasonsStore';
 
 const DamagedComponentReasonsModal = ({ open, onClose }) => {
   const [newReasonName, setNewReasonName] = useState('');

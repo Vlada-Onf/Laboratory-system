@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useWishlistImportancesStore } from '../../store/useWishlistImportancesStore';
+import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 
 const WishlistImportancesModal = ({ open, onClose }) => {
   const [newImportanceName, setNewImportanceName] = useState('');

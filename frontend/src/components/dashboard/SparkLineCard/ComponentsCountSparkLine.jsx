@@ -1,5 +1,5 @@
 import SparkLineCard from './SparkLineCard';
-import { useDashboardStore } from '../../../store/useDashboardStore';
+import { useDashboardStore } from '@store/useDashboardStore';
 import { useMemo } from 'react';
 
 const ComponentsCountSparkLine = () => {

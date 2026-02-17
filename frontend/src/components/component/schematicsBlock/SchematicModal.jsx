@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { eventBus } from '../../../utils/eventBus';
-import { useComponentsStore } from '../../../store/useComponentsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
 
 const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
   const isEditing = !!schematic;

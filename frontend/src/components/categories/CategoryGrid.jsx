@@ -33,9 +33,6 @@ const CategoriesGrid = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Категорії ({categories.length})
-      </Typography>
       
       <Grid container spacing={3} justifyContent="center">
         {categories.length > 0 && categories.map((cat) => (

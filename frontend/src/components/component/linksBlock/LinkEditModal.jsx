@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useUsefulLinksStore } from '../../../store/useUsefulLinksStore';
+import { useUsefulLinksStore } from '@store/useUsefulLinksStore';
 
 const LinkEditModal = ({ open, onClose, componentId, usefulLinks = [] }) => {
  

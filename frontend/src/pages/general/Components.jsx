@@ -9,7 +9,7 @@ const Components = () => {
 
   return (
     <PageWrapper>
-      <Box sx={{ p: 3, width: '100%' }}>
+      <Box sx={{ p: 2, width: '100%' }}>
         <ComponentsTable onAddNeed={addNeed} />
       </Box>
     </PageWrapper>

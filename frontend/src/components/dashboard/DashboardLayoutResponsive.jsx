@@ -9,8 +9,8 @@ import ComponentsCostSparkLine from './SparkLineCard/ComponentsCostSparkLine';
 import ComponentsCountSparkLine from './SparkLineCard/ComponentsCountSparkLine';
 import BrokenComponentsCountSparkLine from './SparkLineCard/BrokenComponentsCountSparkLine';
 import BrokenComponentsCostSparkLine from './SparkLineCard/BrokenComponentsCostSparkLine';
-import { useDashboardStore } from '../../store/useDashboardStore';
-import { useComponentsStore } from '../../store/useComponentsStore';
+import { useDashboardStore } from '@store/useDashboardStore';
+import { useComponentsStore } from '@store/useComponentsStore';
 
 const Item = ({ children, sx }) => {
   const { isDarkMode } = useTheme();

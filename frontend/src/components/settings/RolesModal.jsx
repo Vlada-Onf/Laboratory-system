@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useRolesStore } from '../../store/useRolesStore';
+import { useRolesStore } from '@store/useRolesStore';
 
 const RolesModal = ({ open, onClose }) => {
   const [newRoleName, setNewRoleName] = useState('');

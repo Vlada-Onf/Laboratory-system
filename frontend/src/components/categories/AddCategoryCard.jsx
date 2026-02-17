@@ -3,7 +3,7 @@ import { Card, Typography, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useTheme } from '../../context/useTheme';
 import AddCategoryModal from './AddCategoryModal';
-import { useCategoriesStore } from '../../store/useCategoriesStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
 
 const AddCategoryCard = () => {
   const { addCategory } = useCategoriesStore();

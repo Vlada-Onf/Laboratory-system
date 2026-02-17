@@ -6,8 +6,8 @@ import {
   Typography, 
   CircularProgress
 } from '@mui/material';
-import { useCommentsStore } from '../../../store/useCommentsStore';
-import { useComponentsStore } from '../../../store/useComponentsStore';
+import { useCommentsStore } from '@store/useCommentsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
 import CommentCard from './CommentCard';
 
 const CommentsBlock = ({ componentId }) => {

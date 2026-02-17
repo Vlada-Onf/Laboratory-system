@@ -8,9 +8,9 @@ import LinksBlock from './linksBlock/LinksBlock';
 import SchematicsBlock from './schematicsBlock/SchematicsBlock';
 import CommentsBlock from './commentsBlock/CommentsBlock';
 import AddDamagedModal from '../brokenComponents/AddDamagedModal';
-import { useComponentsStore } from '../../store/useComponentsStore';
-import { useSchematicsStore } from '../../store/useSchematicsStore';
-import { useDamagedComponentsStore } from '../../store/useDamagedComponentsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
+import { useSchematicsStore } from '@store/useSchematicsStore';
+import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
 
 const ComponentLayout = ({ component, onEdit, onDelete, onUpdateLinks, onAddNeed }) => {
   const { setCurrentComponent } = useComponentsStore();

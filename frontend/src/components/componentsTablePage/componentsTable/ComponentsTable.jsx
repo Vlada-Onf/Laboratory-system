@@ -9,9 +9,9 @@ import ButtonsCell from './ButtonsCell';
 import ComponentsTableToolbar from './../ComponentsTableToolbar';
 import AddNeedModal from '../../brokenComponents/AddNeedModal';
 import ComponentModal from '../../component/componentBlock/ComponentModal';
-import { useComponentsStore } from '../../../store/useComponentsStore';
-import { useCategoriesStore } from '../../../store/useCategoriesStore';
-import { useTagsStore } from '../../../store/useTagsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
+import { useTagsStore } from '@store/useTagsStore';
 import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const TagsCellLoader = React.memo(({ componentId, allTags }) => {
@@ -83,27 +83,39 @@ const ComponentsTable = ({ onAddNeed }) => {
     closeEditModal,
   } = useComponentsStore();
 
-  const { fetchTags, tags } = useTagsStore();
-  const categories = useCategoriesStore(state => state.categories);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [tagsLoaded, setTagsLoaded] = useState(false);
+
+  const { fetchTags, tags,  } = useTagsStore();
+  const { fetchCategories, categories, isLoading: categoriesLoading } = useCategoriesStore();
 
   const filteredComponents = useMemo(() => {
     if (!categoryIdFilter) return components;
     return components.filter(comp => comp.categoryId === categoryIdFilter);
   }, [components, categoryIdFilter]);
 
-  const getPageTitle = useCallback(() => {
-    if (!categoryIdFilter) return `Компоненти (${components.length})`;
-    const categoryName = categories.find(c => c.id === categoryIdFilter)?.name || 'Категорія';
-    return `${categoryName} (${filteredComponents.length})`;
-  }, [categoryIdFilter, components.length, filteredComponents.length, categories]);
-
+  
   const isEditing = Boolean(editModal.component);
 
   useEffect(() => {
-    fetchComponents();
-    fetchTags();
-  }, [fetchComponents, fetchTags]);
+    const loadAllData = async () => {
+      try {
+        await fetchCategories();
+        setCategoriesLoaded(true);
 
+        await fetchTags();
+        setTagsLoaded(true);
+
+        await fetchComponents();
+      } catch (error) {
+        console.error('Помилка повного завантаження:', error);
+      }
+    };
+
+    loadAllData();
+  }, [fetchCategories, fetchTags, fetchComponents]);
+
+ 
   const handleOpenModal = useCallback((row) => {
     setSelectedRow(row);
     setOpenModal(true);
@@ -178,15 +190,18 @@ const ComponentsTable = ({ onAddNeed }) => {
       ),
     },
     {
-      field: 'category',
-      headerName: 'Категорія',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => {
-        const categoryName = categories?.find(c => c.id === params.row.categoryId)?.name || '—';
-        return <Typography variant="body2">{categoryName}</Typography>;
-      },
+    field: 'category',
+    headerName: 'Категорія',
+    flex: 1,
+    minWidth: 150,
+    renderCell: (params) => {
+      if (!categoriesLoaded || categoriesLoading) {
+        return <CircularProgress size={16} />;
+      }
+      const categoryName = categories?.find(c => c.id === params.row.categoryId)?.name || '—';
+      return <Typography variant="body2">{categoryName}</Typography>;
     },
+  },
     {
       field: 'description',
       headerName: 'Опис',
@@ -238,13 +253,12 @@ const ComponentsTable = ({ onAddNeed }) => {
         />
       ),
     },
-  ], [categories, navigate, tags, openEditModal, handleDeleteClick, handleOpenModal]);
+  ], [categories, categoriesLoaded, categoriesLoading, navigate, tags, openEditModal, handleDeleteClick, handleOpenModal]);
+  
+  const tableLoading = isLoading || categoriesLoading || !categoriesLoaded || !tagsLoaded;
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        {getPageTitle()}
-      </Typography>
       
       
       <ComponentsTableToolbar
@@ -252,15 +266,15 @@ const ComponentsTable = ({ onAddNeed }) => {
         onImportExcel={() => console.log('import excel')}
       />
       
-      <Box sx={{ height: 600, width: '100%' }}>
+      <Box sx={{ height: 550, width: '100%' }}>
         <DataGrid
           rows={filteredComponents}
           columns={columns}
           rowHeight={100}
-          loading={isLoading}
+          loading={tableLoading}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[5, 10]}
+          pageSizeOptions={[5, 10, 20]}
           disableRowSelectionOnClick
           columnReordering
           sx={{

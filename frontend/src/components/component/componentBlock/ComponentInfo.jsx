@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import TagsList from './TagsList';
-import { useCategoriesStore } from '../../../store/useCategoriesStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
 
 const ComponentInfo = function(props) {
   const { description, price, categoryId, tags, category } = props;

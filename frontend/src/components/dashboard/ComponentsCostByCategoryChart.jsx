@@ -2,9 +2,9 @@ import * as React from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { useDashboardStore } from '../../store/useDashboardStore';
+import { useDashboardStore } from '@store/useDashboardStore';
 import { useCategoriesMap } from '../../hooks/useCategoriesMap';
-import { useComponentsStore } from '../../store/useComponentsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
 
 const ComponentsCostByCategoryChart = React.memo(() => {
   const categoriesMapRaw = useCategoriesMap();

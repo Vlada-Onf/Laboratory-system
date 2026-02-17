@@ -3,9 +3,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { PieChart } from '@mui/x-charts/PieChart';
-import { useComponentsStore } from '../../store/useComponentsStore';
+import { useComponentsStore } from '@store/useComponentsStore';
 import { useCategoriesMap } from '../../hooks/useCategoriesMap';
-import { useCategoriesStore } from '../../store/useCategoriesStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
 
 const ComponentsCountPieChart = React.memo(function ComponentsCountPieChart() {
   const { components } = useComponentsStore();

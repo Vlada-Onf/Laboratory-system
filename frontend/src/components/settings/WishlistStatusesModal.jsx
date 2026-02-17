@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useWishlistStatusesStore } from '../../store/useWishlistStatusesStore';
+import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
 
 const WishlistStatusesModal = ({ open, onClose }) => {
   const [newStatusName, setNewStatusName] = useState('');

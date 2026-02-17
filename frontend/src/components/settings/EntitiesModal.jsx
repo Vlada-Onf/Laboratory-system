@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { useEntityTypesStore } from '../../store/useEntityTypesStore';
+import { useEntityTypesStore } from '@store/useEntityTypesStore';
 
 const EntitiesModal = ({ open, onClose }) => {
   const [newEntityName, setNewEntityName] = useState('');

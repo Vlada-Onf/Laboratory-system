@@ -5,8 +5,8 @@ import {
   FormControl, Select, MenuItem
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useCategoriesStore } from '../../../store/useCategoriesStore';
-import { useTagsStore } from '../../../store/useTagsStore';
+import { useCategoriesStore } from '@store/useCategoriesStore';
+import { useTagsStore } from '@store/useTagsStore';
 
 const ComponentModal = ({ open, onClose, onSubmit, component, isEditing = false }) => {
   const categories = useCategoriesStore(state => state.categories);

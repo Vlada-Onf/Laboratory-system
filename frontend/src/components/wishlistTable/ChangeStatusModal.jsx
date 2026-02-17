@@ -1,45 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import { 
-  Box, 
-  Button, 
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  CircularProgress 
-} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import PriorityChip from './PriorityChip';
 import StatusChip from './StatusChip';
+import ChangeStatusModal from './ChangeStatusModal'; 
 import { useWishlistStore } from '@store/useWishlistStore';
-import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
-import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 import AddWishlistModal from './AddWishlistModal';
 import ConfirmDeleteModal from '../general/ConfirmDeleteModal';
+import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 
 const WishlistTable = () => {
   const { wishlistRows, isLoading, fetchAllData } = useWishlistStore();
   const { importances } = useWishlistImportancesStore();
-  const { statuses } = useWishlistStatusesStore();
+
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [statusWishlistId, setStatusWishlistId] = useState(null);
+  const [currentStatusId, setCurrentStatusId] = useState(null);
 
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openStatusModal, setOpenStatusModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [deleteRowId, setDeleteRowId] = useState(null);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-
-  const [statusWishlistId, setStatusWishlistId] = useState(null);
-  const [currentStatusId, setCurrentStatusId] = useState(null);
-  const [newStatusId, setNewStatusId] = useState(null);
-  const [completionReason, setCompletionReason] = useState('');
-  const [isSavingStatus, setIsSavingStatus] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -48,43 +33,11 @@ const WishlistTable = () => {
   const getImportanceName = (importanceId) => {
     return importances.find(i => i.id === importanceId)?.name || 'Низька';
   };
-  const openStatusModalHandler = (wishlistId, statusId) => {
+
+  const handleStatusClick = (wishlistId, statusId) => {
     setStatusWishlistId(wishlistId);
     setCurrentStatusId(statusId);
-    setNewStatusId(statusId);
-    setCompletionReason('');
-    setIsSavingStatus(false);
     setOpenStatusModal(true);
-  };
-
-  const closeStatusModal = () => {
-    setOpenStatusModal(false);
-    setStatusWishlistId(null);
-    setCurrentStatusId(null);
-    setNewStatusId(null);
-    setCompletionReason('');
-    setIsSavingStatus(false);
-  };
-
-  const handleStatusSubmit = async () => {
-    if (!statusWishlistId || newStatusId === currentStatusId) {
-      closeStatusModal();
-      return;
-    }
-
-    setIsSavingStatus(true);
-    try {
-      await useWishlistStore.getState().updateWishlistStatus(
-        statusWishlistId, 
-        newStatusId, 
-        completionReason
-      );
-      closeStatusModal();
-    } catch (error) {
-      console.error('Помилка статусу:', error);
-    } finally {
-      setIsSavingStatus(false);
-    }
   };
 
   const handleOpenModal = (row) => {
@@ -151,7 +104,7 @@ const WishlistTable = () => {
         <StatusChip 
           statusId={row.statusId}
           wishlistId={row.id}
-          onStatusClick={() => openStatusModalHandler(row.id, row.statusId)}
+          onStatusClick={() => handleStatusClick(row.id, row.statusId)}
         />
       )
     },
@@ -214,7 +167,6 @@ const WishlistTable = () => {
       </Box>
 
       <AddWishlistModal open={openModal} onClose={handleCloseModal} row={selectedRow} />
-      
       <ConfirmDeleteModal
         open={openDeleteModal}
         onClose={handleCloseDeleteModal}
@@ -222,51 +174,13 @@ const WishlistTable = () => {
         entityName={selectedRow?.name || 'запис'}
         entityTypeName="Запис у списку бажань"
       />
-
-      <Dialog open={openStatusModal} onClose={closeStatusModal} maxWidth="sm" fullWidth>
-        <DialogTitle>Змінити статус</DialogTitle>
-        
-        <DialogContent>
-          <TextField
-            select
-            fullWidth
-            label="Новий статус"
-            value={newStatusId || ''}
-            onChange={(e) => setNewStatusId(e.target.value)}
-            sx={{ mt: 2 }}
-          >
-            {statuses.map((status) => (
-              <MenuItem key={status.id} value={status.id}>
-                {status.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            fullWidth
-            label="Причина зміни (необов'язково)"
-            multiline
-            rows={3}
-            value={completionReason}
-            onChange={(e) => setCompletionReason(e.target.value)}
-            sx={{ mt: 2 }}
-            placeholder="Опишіть причину зміни статусу..."
-          />
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={closeStatusModal} disabled={isSavingStatus}>
-            Скасувати
-          </Button>
-          <Button
-            onClick={handleStatusSubmit}
-            variant="contained"
-            disabled={isSavingStatus || newStatusId === currentStatusId}
-          >
-            {isSavingStatus ? <CircularProgress size={20} /> : 'Зберегти'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      
+      <ChangeStatusModal
+        open={openStatusModal}
+        onClose={() => setOpenStatusModal(false)}
+        wishlistId={statusWishlistId}
+        currentStatusId={currentStatusId}
+      />
     </Box>
   );
 };
