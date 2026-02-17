@@ -32,9 +32,7 @@ namespace Infrastructure.Files
             string contentType,
             CancellationToken cancellationToken)
         {
-            await _container.CreateIfNotExistsAsync(
-                PublicAccessType.None,
-                cancellationToken: cancellationToken);
+            await _container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
             var uniqueName = $"{Guid.NewGuid():N}_{fileName}";
             var blobClient = _container.GetBlobClient(uniqueName);
