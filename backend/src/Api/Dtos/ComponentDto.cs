@@ -39,7 +39,6 @@ namespace Api.Dtos
         string? Description,
         int Quantity,
         decimal Price,
-        string PhotoUrl,
         string SupplierLink,
         string? DocumentationLink,
         List<Guid> TagIds,
@@ -52,9 +51,9 @@ namespace Api.Dtos
         string? Description,
         int Quantity,
         decimal Price,
-        string PhotoUrl,
         string SupplierLink,
         string? DocumentationLink,
         List<Guid> TagIds,
         Guid LastUpdatedBy);
+
 }

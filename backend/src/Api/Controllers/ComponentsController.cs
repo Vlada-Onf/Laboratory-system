@@ -43,21 +43,19 @@ namespace Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<ComponentDto>> CreateComponent(
             [FromForm] CreateComponentDto request,
-            IFormFile? image,
+            IFormFile image,
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            string photoUrl = request.PhotoUrl;
+            if (image is null || image.Length == 0)
+                return BadRequest("Image is required");
 
-            if (image is not null && image.Length > 0)
-            {
-                await using var stream = image.OpenReadStream();
-                photoUrl = await fileStorage.UploadAsync(
-                    stream,
-                    image.FileName,
-                    image.ContentType,
-                    cancellationToken);
-            }
+            await using var stream = image.OpenReadStream();
+            var photoUrl = await fileStorage.UploadAsync(
+                stream,
+                image.FileName,
+                image.ContentType,
+                cancellationToken);
 
             var input = new CreateComponentCommand
             {
@@ -83,12 +81,20 @@ namespace Api.Controllers
         [HttpPut]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<ComponentDto>> UpdateComponent(
-            [FromForm] UpdateComponentDto request,
-            IFormFile? image,
-            CancellationToken cancellationToken,
-            [FromServices] IFileStorageService fileStorage)
+    [FromForm] UpdateComponentDto request,
+    IFormFile? image,
+    CancellationToken cancellationToken,
+    [FromServices] IFileStorageService fileStorage)
         {
-            string photoUrl = request.PhotoUrl;
+            var componentOption = await componentQueries.GetByIdAsync(
+                new Domain.Components.ComponentId(request.Id),
+                cancellationToken);
+
+            if (componentOption.IsNone)
+                return NotFound();
+
+            var component = componentOption.First();
+            string photoUrl = component.PhotoUrl;
 
             if (image is not null && image.Length > 0)
             {
@@ -99,7 +105,6 @@ namespace Api.Controllers
                     image.ContentType,
                     cancellationToken);
             }
-
             var input = new UpdateComponentCommand
             {
                 Id = request.Id,
@@ -121,6 +126,7 @@ namespace Api.Controllers
                 c => ComponentDto.FromDomainModel(c),
                 e => e.ToObjectResult());
         }
+
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteComponent(
