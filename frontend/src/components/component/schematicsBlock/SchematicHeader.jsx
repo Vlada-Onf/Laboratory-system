@@ -1,16 +1,17 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
-const SchematicHeader = ({ schematic, currentComponent, navigate }) => {
+const SchematicHeader = ({ schematic, currentComponent}) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-
+const navigate = useNavigate();
   return (
     <Box sx={{ mb: 4 }}>
       <Button
         variant="outlined"
-        onClick={() => navigate(`/front-components/${currentComponent?.id}`)}
+        onClick={() => navigate(-1)}
         sx={{
           mb: 3,
           borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : undefined,
