@@ -1,4 +1,5 @@
-﻿using Domain.Schematics;
+﻿using Domain.Categories;
+using Domain.Schematics;
 
 namespace Api.Dtos
 {
@@ -33,7 +34,6 @@ namespace Api.Dtos
         public required Guid ComponentId { get; init; }
         public required string Title { get; init; }
         public string? Description { get; init; }
-        public string? PhotoUrl { get; init; }
         public string? AdditionalLinks { get; init; }
         public required Guid CreatedBy { get; init; }
     }
@@ -43,8 +43,7 @@ namespace Api.Dtos
         public required Guid Id { get; init; }
         public required string Title { get; init; }
         public string? Description { get; init; }
-        public string? PhotoUrl { get; init; }
-        public string? AdditionalLinks { get; init; }
+        public string? AdditionalLinks { get; init; } 
         public required Guid UpdatedBy { get; init; }
     }
 }

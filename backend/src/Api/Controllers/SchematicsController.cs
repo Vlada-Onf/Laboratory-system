@@ -46,21 +46,19 @@ namespace Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<SchematicDto>> Create(
             [FromForm] CreateSchematicDto request,
-            IFormFile? image,
+            IFormFile image,
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            string? photoUrl = request.PhotoUrl;
+            if (image is null || image.Length == 0)
+                return BadRequest("Image is required");
 
-            if (image is not null && image.Length > 0)
-            {
-                await using var stream = image.OpenReadStream();
-                photoUrl = await fileStorage.UploadAsync(
-                    stream,
-                    image.FileName,
-                    image.ContentType,
-                    cancellationToken);
-            }
+            await using var stream = image.OpenReadStream();
+            var photoUrl = await fileStorage.UploadAsync(
+                stream,
+                image.FileName,
+                image.ContentType,
+                cancellationToken);
 
             var input = new CreateSchematicCommand
             {
@@ -87,7 +85,13 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            string? photoUrl = request.PhotoUrl;
+            var option = await sender.Send(new GetSchematicByIdQuery(request.Id), cancellationToken);
+            if (option.IsNone)
+                return NotFound();
+
+            var schematic = option.First();
+
+            string? photoUrl = schematic.PhotoUrl;
 
             if (image is not null && image.Length > 0)
             {
@@ -115,6 +119,7 @@ namespace Api.Controllers
                 s => SchematicDto.FromDomainModel(s),
                 e => e.ToObjectResult());
         }
+
         // DELETE /schematics/{id}
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(

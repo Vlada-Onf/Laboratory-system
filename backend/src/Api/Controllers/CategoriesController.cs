@@ -28,8 +28,6 @@ namespace Api.Controllers
             _categoryQueries = categoryQueries;
             _sender = sender;
         }
-
-        // helper: дістаємо Guid користувача з клеймів
         private Guid? GetCurrentUserGuid()
         {
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -67,26 +65,24 @@ namespace Api.Controllers
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<CategoryDto>> CreateCategory(
-     [FromForm] CreateCategoryDto request,
-     IFormFile? image,                
-     CancellationToken cancellationToken,
-     [FromServices] IFileStorageService fileStorage)
+            [FromForm] CreateCategoryDto request,
+            IFormFile image,
+            CancellationToken cancellationToken,
+            [FromServices] IFileStorageService fileStorage)
         {
             var userGuid = GetCurrentUserGuid();
             if (userGuid is null)
                 return Unauthorized();
 
-            string? photoUrl = request.PhotoUrl;
+            if (image is null || image.Length == 0)
+                return BadRequest("Image is required");
 
-            if (image is not null && image.Length > 0)
-            {
-                await using var stream = image.OpenReadStream();
-                photoUrl = await fileStorage.UploadAsync(
-                    stream,
-                    image.FileName,
-                    image.ContentType,
-                    cancellationToken);
-            }
+            await using var stream = image.OpenReadStream();
+            var photoUrl = await fileStorage.UploadAsync(
+                stream,
+                image.FileName,
+                image.ContentType,
+                cancellationToken);
 
             var input = new CreateCategoryCommand
             {
@@ -104,10 +100,7 @@ namespace Api.Controllers
                 c =>
                 {
                     var dto = CategoryDto.FromDomainModel(c);
-                    return CreatedAtAction(
-                        nameof(GetCategoryById),
-                        new { id = dto.Id },
-                        dto);
+                    return CreatedAtAction(nameof(GetCategoryById), new { id = dto.Id }, dto);
                 },
                 e => e.ToObjectResult());
         }
@@ -123,8 +116,13 @@ namespace Api.Controllers
             var userGuid = GetCurrentUserGuid();
             if (userGuid is null)
                 return Unauthorized();
+            var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(request.Id), cancellationToken);
+            if (categoryOption.IsNone)
+                return NotFound();
 
-            string? photoUrl = request.PhotoUrl;
+            var category = categoryOption.First();
+
+            string? photoUrl = category.PhotoUrl;
 
             if (image is not null && image.Length > 0)
             {
