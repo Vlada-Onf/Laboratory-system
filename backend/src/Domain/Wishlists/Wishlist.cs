@@ -1,5 +1,4 @@
-﻿using Domain.Components;
-using Domain.Users;
+﻿using Domain.Users;
 using Domain.Wishlists.Importance;
 using Domain.Wishlists.Status;
 
@@ -8,8 +7,6 @@ namespace Domain.Wishlists
     public class Wishlist
     {
         public WishlistId Id { get; }
-        public ComponentId ComponentId { get; private set; }
-
         public string Name { get; private set; }
         public string? Description { get; private set; }
         public int QuantityNeeded { get; private set; }
@@ -25,7 +22,6 @@ namespace Domain.Wishlists
 
         private Wishlist(
             WishlistId id,
-            ComponentId componentId,
             string name,
             string? description,
             int quantityNeeded,
@@ -43,7 +39,6 @@ namespace Domain.Wishlists
                 throw new ArgumentException("QuantityNeeded мусить бути більше 0");
 
             Id = id;
-            ComponentId = componentId;
             Name = name;
             Description = description;
             QuantityNeeded = quantityNeeded;
@@ -56,7 +51,6 @@ namespace Domain.Wishlists
         }
 
         public static Wishlist Create(
-            ComponentId componentId,
             string name,
             string? description,
             int quantityNeeded,
@@ -66,7 +60,6 @@ namespace Domain.Wishlists
         {
             return new Wishlist(
                 WishlistId.New(),
-                componentId,
                 name,
                 description,
                 quantityNeeded,

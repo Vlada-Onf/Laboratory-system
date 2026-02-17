@@ -8,13 +8,10 @@ using System.Threading.Tasks;
 namespace Application.Wishlists.Commands.Create
 {
     public sealed class CreateWishlistCommandValidator
-            : AbstractValidator<CreateWishlistCommand>
+        : AbstractValidator<CreateWishlistCommand>
     {
         public CreateWishlistCommandValidator()
         {
-            RuleFor(x => x.ComponentId)
-                .NotEmpty().WithMessage("ComponentId є обов'язковим");
-
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name є обов'язковим")
                 .MaximumLength(200);

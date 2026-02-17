@@ -1,6 +1,5 @@
 ﻿using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
-using Domain.Components;
 using Domain.Users;
 using Domain.Wishlists;
 using LanguageExt;
@@ -40,16 +39,9 @@ namespace Infrastructure.Persistence.Repositories
 
             return entity ?? Option<Wishlist>.None;
         }
-
-        public async Task<IReadOnlyList<Wishlist>> GetByComponentIdAsync(ComponentId componentId, CancellationToken cancellationToken)
-        {
-            return await context.Wishlists
-                .AsNoTracking()
-                .Where(w => w.ComponentId == componentId)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IReadOnlyList<Wishlist>> GetByUserAsync(UserId userId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<Wishlist>> GetByUserAsync(
+            UserId userId,
+            CancellationToken cancellationToken)
         {
             return await context.Wishlists
                 .AsNoTracking()
@@ -57,6 +49,7 @@ namespace Infrastructure.Persistence.Repositories
                 .OrderByDescending(w => w.RequestedAt)
                 .ToListAsync(cancellationToken);
         }
+
         public async Task<IReadOnlyList<Wishlist>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await context.Wishlists

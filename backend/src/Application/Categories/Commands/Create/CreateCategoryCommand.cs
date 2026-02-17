@@ -2,11 +2,6 @@
 using Domain.Categories;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Categories.Commands.Create
 {
@@ -17,5 +12,6 @@ namespace Application.Categories.Commands.Create
         public string? PhotoUrl { get; init; }
         public string? CardColor { get; init; }
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

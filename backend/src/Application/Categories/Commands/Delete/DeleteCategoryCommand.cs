@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Categories.Commands.Delete
 {
-    public record DeleteCategoryCommand(Guid Id)
+    public record DeleteCategoryCommand(Guid Id, Guid PerformedBy)
         : IRequest<Either<CategoryException, Category>>;
 
 }

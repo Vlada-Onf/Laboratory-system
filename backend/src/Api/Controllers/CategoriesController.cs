@@ -1,4 +1,5 @@
-﻿using Api.Dtos;
+﻿using System.Security.Claims;
+using Api.Dtos;
 using Api.Modules.Errors;
 using Application.Categories.Commands.Create;
 using Application.Categories.Commands.Delete;
@@ -6,32 +7,56 @@ using Application.Categories.Commands.Update;
 using Application.Common.Interfaces.Queries;
 using Domain.Categories;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("categories")]
-    public class CategoriesController(
-        ICategoryQueries categoryQueries,
-        ISender sender) : ControllerBase
+    [Authorize]
+    public class CategoriesController : ControllerBase
     {
+        private readonly ICategoryQueries _categoryQueries;
+        private readonly ISender _sender;
+
+        public CategoriesController(
+            ICategoryQueries categoryQueries,
+            ISender sender)
+        {
+            _categoryQueries = categoryQueries;
+            _sender = sender;
+        }
+
+        // helper: дістаємо Guid користувача з клеймів
+        private Guid? GetCurrentUserGuid()
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (id is null)
+                return null;
+
+            return Guid.TryParse(id, out var guid) ? guid : null;
+        }
+
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IReadOnlyList<CategoryDto>>> GetCategories(
             CancellationToken cancellationToken)
         {
-            var categories = await categoryQueries.GetAllAsync(cancellationToken);
+            var categories = await _categoryQueries.GetAllAsync(cancellationToken);
+
             return categories
                 .Select(CategoryDto.FromDomainModel)
                 .ToList();
         }
 
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         public async Task<ActionResult<CategoryDto>> GetCategoryById(
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var categoryOption = await categoryQueries.GetByIdAsync(new CategoryId(id), cancellationToken);
+            var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(id), cancellationToken);
 
             return categoryOption.Match<ActionResult<CategoryDto>>(
                 c => CategoryDto.FromDomainModel(c),
@@ -43,19 +68,31 @@ namespace Api.Controllers
             [FromBody] CreateCategoryDto request,
             CancellationToken cancellationToken)
         {
+            var userGuid = GetCurrentUserGuid();
+            if (userGuid is null)
+                return Unauthorized();
+
             var input = new CreateCategoryCommand
             {
                 Name = request.Name,
                 Description = request.Description,
                 PhotoUrl = request.PhotoUrl,
                 CardColor = request.CardColor,
-                CreatedBy = request.CreatedBy
+                CreatedBy = userGuid.Value,
+                PerformedBy = userGuid.Value
             };
 
-            var result = await sender.Send(input, cancellationToken);
+            var result = await _sender.Send(input, cancellationToken);
 
             return result.Match<ActionResult<CategoryDto>>(
-                c => CategoryDto.FromDomainModel(c),
+                c =>
+                {
+                    var dto = CategoryDto.FromDomainModel(c);
+                    return CreatedAtAction(
+                        nameof(GetCategoryById),
+                        new { id = dto.Id },
+                        dto);
+                },
                 e => e.ToObjectResult());
         }
 
@@ -64,6 +101,10 @@ namespace Api.Controllers
             [FromBody] UpdateCategoryDto request,
             CancellationToken cancellationToken)
         {
+            var userGuid = GetCurrentUserGuid();
+            if (userGuid is null)
+                return Unauthorized();
+
             var input = new UpdateCategoryCommand
             {
                 Id = request.Id,
@@ -71,10 +112,11 @@ namespace Api.Controllers
                 Description = request.Description,
                 PhotoUrl = request.PhotoUrl,
                 CardColor = request.CardColor,
-                LastUpdatedBy = request.LastUpdatedBy
+                LastUpdatedBy = userGuid.Value,
+                PerformedBy = userGuid.Value
             };
 
-            var result = await sender.Send(input, cancellationToken);
+            var result = await _sender.Send(input, cancellationToken);
 
             return result.Match<ActionResult<CategoryDto>>(
                 c => CategoryDto.FromDomainModel(c),
@@ -86,9 +128,13 @@ namespace Api.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteCategoryCommand(id);
+            var userGuid = GetCurrentUserGuid();
+            if (userGuid is null)
+                return Unauthorized();
 
-            var result = await sender.Send(input, cancellationToken);
+            var input = new DeleteCategoryCommand(id, userGuid.Value);
+
+            var result = await _sender.Send(input, cancellationToken);
 
             return result.Match<ActionResult>(
                 _ => NoContent(),

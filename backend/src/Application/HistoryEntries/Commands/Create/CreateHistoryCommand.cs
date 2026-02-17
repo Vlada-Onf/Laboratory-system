@@ -6,7 +6,7 @@ using Domain.History;
 namespace Application.HistoryEntries.Commands.Create
 {
     public sealed record CreateHistoryCommand
-            : IRequest<Either<HistoryException, History>>
+        : IRequest<Either<HistoryException, History>>
     {
         public required Guid UserId { get; init; }
         public required Guid ActionId { get; init; }

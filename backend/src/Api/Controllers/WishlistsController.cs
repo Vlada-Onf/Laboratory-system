@@ -13,7 +13,6 @@ namespace Api.Controllers
     [Route("wishlists")]
     public class WishlistsController(ISender sender) : ControllerBase
     {
-        // GET /wishlists/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<WishlistDto>> GetById(
             [FromRoute] Guid id,
@@ -26,22 +25,6 @@ namespace Api.Controllers
                 () => NotFound());
         }
 
-        // GET /wishlists/by-component/{componentId}
-        [HttpGet("by-component/{componentId:guid}")]
-        public async Task<ActionResult<IReadOnlyList<WishlistDto>>> GetByComponentId(
-            [FromRoute] Guid componentId,
-            CancellationToken cancellationToken)
-        {
-            var wishlists = await sender.Send(
-                new GetWishlistsByComponentIdQuery(componentId),
-                cancellationToken);
-
-            return wishlists
-                .Select(WishlistDto.FromDomainModel)
-                .ToList();
-        }
-
-        // GET /wishlists/by-user/{userId}
         [HttpGet("by-user/{userId:guid}")]
         public async Task<ActionResult<IReadOnlyList<WishlistDto>>> GetByUser(
             [FromRoute] Guid userId,
@@ -56,7 +39,6 @@ namespace Api.Controllers
                 .ToList();
         }
 
-        // POST /wishlists
         [HttpPost]
         public async Task<ActionResult<WishlistDto>> Create(
             [FromBody] CreateWishlistDto request,
@@ -64,7 +46,6 @@ namespace Api.Controllers
         {
             var input = new CreateWishlistCommand
             {
-                ComponentId = request.ComponentId,
                 Name = request.Name,
                 Description = request.Description,
                 QuantityNeeded = request.QuantityNeeded,
@@ -80,7 +61,6 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-        // PUT /wishlists/details
         [HttpPut("details")]
         public async Task<ActionResult<WishlistDto>> UpdateDetails(
             [FromBody] UpdateWishlistDetailsDto request,
@@ -101,7 +81,7 @@ namespace Api.Controllers
                 w => WishlistDto.FromDomainModel(w),
                 e => e.ToObjectResult());
         }
-        // PUT /wishlists/status
+
         [HttpPut("status")]
         public async Task<ActionResult<WishlistDto>> UpdateStatus(
             [FromBody] ChangeWishlistStatusDto request,
@@ -120,7 +100,7 @@ namespace Api.Controllers
                 w => WishlistDto.FromDomainModel(w),
                 e => e.ToObjectResult());
         }
-        // DELETE /wishlists/{id}
+
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
@@ -135,7 +115,6 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-        // GET /wishlists
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<WishlistDto>>> GetAll(
             CancellationToken cancellationToken)

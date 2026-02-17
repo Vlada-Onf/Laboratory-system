@@ -42,11 +42,13 @@ namespace Infrastructure.Persistence.Repositories
             return entityType;
         }
 
-        public async Task<Option<EntityType>> GetByNameAsync(string name, CancellationToken cancellationToken)
+        public async Task<Option<EntityType>> GetByNameAsync(
+                    string name,
+                    CancellationToken cancellationToken)
         {
             var entity = await context.EntityTypes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(et => et.Name == name, cancellationToken);
+                .FirstOrDefaultAsync(e => e.Name == name, cancellationToken);
 
             return entity ?? Option<EntityType>.None;
         }

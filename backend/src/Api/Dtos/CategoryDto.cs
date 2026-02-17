@@ -26,14 +26,12 @@ namespace Api.Dtos
         string Name,
         string? Description,
         string? PhotoUrl,
-        string? CardColor,
-        Guid CreatedBy);
+        string? CardColor);
 
     public record UpdateCategoryDto(
         Guid Id,
         string Name,
         string? Description,
         string? PhotoUrl,
-        string? CardColor,
-        Guid LastUpdatedBy);
+        string? CardColor);
 }

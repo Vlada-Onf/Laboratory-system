@@ -18,5 +18,6 @@ namespace Application.Categories.Commands.Update
         public string? PhotoUrl { get; init; }
         public string? CardColor { get; init; }
         public required Guid LastUpdatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

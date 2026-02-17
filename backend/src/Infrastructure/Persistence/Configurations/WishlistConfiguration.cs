@@ -21,11 +21,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasConversion(x => x.Value, x => new WishlistId(x))
                 .HasColumnName("id");
 
-            builder.Property(w => w.ComponentId)
-                .HasConversion(x => x.Value, x => new ComponentId(x))
-                .HasColumnName("component_id")
-                .IsRequired();
-
             builder.Property(w => w.Name)
                 .HasColumnType("varchar(255)")
                 .HasColumnName("name")
@@ -40,7 +35,7 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(w => w.RequestedBy)
-                .HasConversion(x => x.Value, x => new UserId(x))   // 👈 додали конвертер
+                .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("requested_by")
                 .IsRequired();
 
@@ -68,12 +63,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("varchar(1000)")
                 .HasColumnName("completion_reason");
 
-            builder.HasOne<Component>()
-                .WithMany()
-                .HasForeignKey(w => w.ComponentId)
-                .HasConstraintName("fk_wishlists_components_id")
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne<WishlistImportance>()
                 .WithMany()
                 .HasForeignKey(w => w.ImportanceId)
@@ -90,9 +79,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasForeignKey(w => w.RequestedBy)
                 .HasConstraintName("fk_wishlists_users_requested_by")
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasIndex(w => w.ComponentId)
-                .HasDatabaseName("ix_wishlists_component_id");
 
             builder.HasIndex(w => w.RequestedBy)
                 .HasDatabaseName("ix_wishlists_requested_by");

@@ -4,7 +4,6 @@ namespace Api.Dtos
 {
     public record WishlistDto(
         Guid Id,
-        Guid ComponentId,
         string Name,
         string? Description,
         int QuantityNeeded,
@@ -18,7 +17,6 @@ namespace Api.Dtos
         public static WishlistDto FromDomainModel(Wishlist wishlist)
             => new(
                 wishlist.Id.Value,
-                wishlist.ComponentId.Value,
                 wishlist.Name,
                 wishlist.Description,
                 wishlist.QuantityNeeded,
@@ -32,7 +30,6 @@ namespace Api.Dtos
 
     public record CreateWishlistDto
     {
-        public required Guid ComponentId { get; init; }
         public required string Name { get; init; }
         public string? Description { get; init; }
         public required int QuantityNeeded { get; init; }
