@@ -2,6 +2,11 @@ import React from "react";
 import Layout from "../components/layout/Layout";
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
+
+import SignInPage from "../pages/auth/SignInPage";
+import SignUpPage from "../pages/auth/SignUpPage";
+
 import Main from "../pages/general/Main";
 import Dashboard from "../pages/general/Dashboard";
 import Categories from "../pages/general/Categories";
@@ -20,26 +25,42 @@ import NotFound from "../pages/general/NotFound";
 const AppRoutes = () => {
   return (
     <Routes>
-  <Route element={<Layout />}>
-    <Route path="/" element={<Navigate to="/front-main" />} />
 
-    <Route path="/front-main" element={<Main />} />
-     <Route path="/front-settings" element={<Settings />} />
-    <Route path="/front-dashboard" element={<Dashboard />} />
-    <Route path="/front-сategories" element={<Categories />} />
-    <Route path="/front-components" element={<Components />} />
-    <Route path="/front-history" element={<History />} />
-    <Route path="/front-needs" element={<Needs />} />
-    <Route path="/front-users" element={<Users />} />
-    <Route path="/front-wishlist" element={<Wishlist />} />
-    <Route path="/front-profile" element={<Profile />} />
-    <Route path="/front-components/:id" element={<Component />} />
-    <Route path="/front-schematics/:id" element={<SchematicDetail />} />
-    <Route path="/front-brokenComponents" element={<BrokenComponents />} />
-    <Route path="*" element={<NotFound />} />
-  </Route>
-</Routes>
+      <Route path="/sign-in/*" element={<SignInPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
 
+      <Route
+        element={
+          <>
+            <SignedIn>
+              <Layout />
+            </SignedIn>
+
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        }
+      >
+        <Route path="/" element={<Navigate to="/front-main" />} />
+        <Route path="/front-main" element={<Main />} />
+        <Route path="/front-settings" element={<Settings />} />
+        <Route path="/front-dashboard" element={<Dashboard />} />
+        <Route path="/front-сategories" element={<Categories />} />
+        <Route path="/front-components" element={<Components />} />
+        <Route path="/front-history" element={<History />} />
+        <Route path="/front-needs" element={<Needs />} />
+        <Route path="/front-users" element={<Users />} />
+        <Route path="/front-wishlist" element={<Wishlist />} />
+        <Route path="/front-profile" element={<Profile />} />
+        <Route path="/front-components/:id" element={<Component />} />
+        <Route path="/front-schematics/:id" element={<SchematicDetail />} />
+        <Route path="/front-brokenComponents" element={<BrokenComponents />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+
+    </Routes>
   );
 };
 
