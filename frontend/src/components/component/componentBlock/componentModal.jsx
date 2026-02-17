@@ -6,45 +6,47 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
-import { eventBus } from '../../../utils/eventBus';
 import { useTagsStore } from '../../../store/useTagsStore';
 
-const ComponentModal = ({
-  open,
-  onClose,
-  onSubmit,
-  component,
-  isEditing = false
-}) => {
+const ComponentModal = ({ open, onClose, onSubmit, component, isEditing = false }) => {
   const categories = useCategoriesStore(state => state.categories);
   const tagsStore = useTagsStore();
+  
   const categoryOptions = useMemo(() => 
     categories.map(cat => ({ value: cat.id, label: cat.title || cat.name })), 
-  [categories]
-  );
+  [categories]);
 
   const defaultForm = useMemo(() => ({
-  name: isEditing && component?.name || '',
-  description: isEditing && component?.description || '',
-  price: isEditing && component?.price?.toString() || '',
-  quantity: isEditing && component?.quantity?.toString() || '',
-  burntQuantity: isEditing && component?.burntQuantity?.toString() || '',
-  categoryId: isEditing && component?.categoryId || '',
-  documentationLink: isEditing && (component?.documentationLink || component?.docLink) || '',
-  supplierLink: isEditing && (component?.supplierLink || component?.buyLink) || '',
-  tagInput: '',
-  photo: null,
-}), [isEditing, component]);
+    name: isEditing && component?.name || '',
+    description: isEditing && component?.description || '',
+    price: isEditing && component?.price?.toString() || '',
+    quantity: isEditing && component?.quantity?.toString() || '',
+    burntQuantity: isEditing && component?.burntQuantity?.toString() || '',
+    categoryId: isEditing && component?.categoryId || '',
+    documentationLink: isEditing && (component?.documentationLink || component?.docLink) || '',
+    supplierLink: isEditing && (component?.supplierLink || component?.buyLink) || '',
+    tagInput: '',
+    photo: null,
+  }), [isEditing, component]);
 
-  const defaultTags = useMemo(() =>
-    isEditing && component?.tags ? 
-      typeof component.tags === 'string' 
-        ? component.tags.split(',').filter(Boolean) 
-        : Array.isArray(component.tags) 
-          ? component.tags 
-          : [] 
-    : [],
-  [isEditing, component]);
+  const defaultTags = useMemo(() => {
+    console.log('🔍 defaultTags RAW:', component?.tags);
+    if (!isEditing || !component?.tags) return [];
+
+    if (typeof component.tags === 'string') {
+      return component.tags.split(',').map(t => t.trim()).filter(Boolean);
+    }
+
+    if (Array.isArray(component.tags)) {
+      return component.tags.map(tag => {
+        if (typeof tag === 'object' && tag?.name) return tag.name;
+        if (typeof tag === 'object' && tag?.title) return tag.title;
+        return String(tag);
+      }).filter(Boolean);
+    }
+    
+    return [];
+  }, [isEditing, component]);
 
   const [form, setForm] = useState(defaultForm);
   const [tags, setTags] = useState(defaultTags);
@@ -84,7 +86,6 @@ const ComponentModal = ({
     setTags(prev => prev.filter(tag => tag !== tagToRemove));
   }, []);
 
-
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -92,145 +93,48 @@ const ComponentModal = ({
     }
   }, [addTag]);
 
- 
-const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = useCallback(async (e) => {
   e.preventDefault();
-
+  
   try {
+    const safeTags = Array.isArray(tags) ? tags : [];
+    
     const tagIds = await Promise.all(
-      tags.map(async (tagName) => {
-        const tag = await tagsStore.createTag(tagName);
-        return tag.id;
+      safeTags.map(async (tagName) => {
+        try {
+          const tag = await tagsStore.createTag(tagName);
+          return tag?.id;
+        } catch (error) {
+          console.warn('Помилка тегу:', tagName, error);
+          return null;
+        }
       })
     );
+    
+    const validTagIds = tagIds.filter(id => id != null);
 
     const formData = {
-      categoryId: form.categoryId,
-  name: form.name,
-  description: form.description,
-  quantity: parseInt(form.quantity) || 0,
-  price: parseFloat(form.price) || 0,
-  photoUrl: form.photo ? URL.createObjectURL(form.photo) : '',
-  supplierLink: form.supplierLink || "string",
-  documentationLink: form.documentationLink || "string",
-  tagIds: tagIds,
-  createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      categoryId: form.categoryId || null,
+      name: form.name || '',
+      description: form.description || '',
+      quantity: parseInt(form.quantity) || 0,
+      price: parseFloat(form.price) || 0,
+      photoUrl: form.photo ? URL.createObjectURL(form.photo) : '',
+      supplierLink: form.supplierLink || '',
+      documentationLink: form.documentationLink || '',
+      tagIds: validTagIds,
+      createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     };
-
-
-    const baseEventData = {
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 4,
-      entityTypeName: 'Компонент',
-      entityId: component?.id || crypto.randomUUID(),
-      entityName: form.name,
-    };
-
-    if (isEditing) {
-      const oldPrice = component?.price?.toString() || '';
-      const oldQuantity = component?.quantity?.toString() || '';
-      const oldBurnt = component?.burntQuantity?.toString() || '';
-
-      if (component?.name !== form.name) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'назва',
-          oldValue: component?.name || '',
-          newValue: form.name
-        });
-      }
-
-      if (component?.description !== form.description) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'опис',
-          oldValue: component?.description || '',
-          newValue: form.description
-        });
-      }
-
-      if (oldPrice !== form.price) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'ціна',
-          oldValue: oldPrice,
-          newValue: form.price
-        });
-      }
-
-      if (oldQuantity !== form.quantity) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'кількість',
-          oldValue: oldQuantity,
-          newValue: form.quantity
-        });
-      }
-
-      if (oldBurnt !== form.burntQuantity) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'спалено',
-          oldValue: oldBurnt,
-          newValue: form.burntQuantity
-        });
-      }
-
-      if (form.photo) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'фото',
-          oldValue: component?.photoUrl || null,
-          newValue: URL.createObjectURL(form.photo)
-        });
-      }
-
-      if (component?.categoryId !== form.categoryId) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'категорія',
-          oldValue: categories.find(cat => cat.id === component?.categoryId)?.title || 'Не вибрано',
-          newValue: categories.find(cat => cat.id === form.categoryId)?.title || 'Не вибрано'
-        });
-      }
-
-      const oldTagsStr = Array.isArray(component?.tags) 
-        ? component.tags.join(', ') 
-        : (component?.tags || '').toString();
-      const newTagsStr = tags.join(', ');
-      
-      if (oldTagsStr !== newTagsStr) {
-        eventBus.emit('entity:updated', {
-          ...baseEventData,
-          actionName: 'Оновлено',
-          fieldName: 'теги',
-          oldValue: oldTagsStr || 'немає',
-          newValue: newTagsStr || 'немає'
-        });
-      }
-    } else {
-      eventBus.emit('entity:created', {
-        ...baseEventData,
-        actionName: 'Створено'
-      });
-    }
-
-    onSubmit(formData);
+    
+    await onSubmit(formData);
     handleCloseModal();
+    
   } catch (error) {
-    console.error('💥 Помилка збереження:', error);
+    console.error('Помилка:', error);
   }
-}, [form, tags, component, isEditing, onSubmit, handleCloseModal, categories, tagsStore]);
+}, [form, tags, tagsStore, onSubmit, handleCloseModal]);
 
-  
+
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth>
       <form onSubmit={handleSubmit}>

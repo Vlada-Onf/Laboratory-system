@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import apiClient from '../api/client';
 
-export const useCommentsStore = create((set) => ({
+export const useCommentsStore = create((set, get) => ({
   commentsByComponent: {},
   isLoading: false,
 
@@ -19,7 +19,7 @@ export const useCommentsStore = create((set) => ({
       }));
 
     } catch (error) {
-      console.error('❌ [COMMENTS] API ERROR:', error);
+      console.error('[COMMENTS] API ERROR:', error);
       set((state) => ({
         commentsByComponent: {
           ...state.commentsByComponent,
@@ -66,7 +66,7 @@ export const useCommentsStore = create((set) => ({
 
     try {
       const { data } = await apiClient.put('/component-comments', updateData);
-
+      await get().fetchComponents();
       set((state) => {
         const comments = state.commentsByComponent[componentId] || [];
         const updatedComments = comments.map(c => 

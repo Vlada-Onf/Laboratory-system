@@ -34,7 +34,7 @@ export const useWishlistImportancesStore = create((set, get) => ({
 
   updateImportance: async (id, importanceData) => {
     try {
-      const { data } = await apiClient.put(`/wishlist-importances/${id}`, importanceData);
+      const { data } = await apiClient.put(`/wishlist-importances`, importanceData);
       set((state) => ({
         importances: state.importances.map(imp => 
           imp.id === id ? data : imp

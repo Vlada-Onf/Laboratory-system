@@ -2,17 +2,24 @@ import { create } from 'zustand';
 import apiClient from '../api/client';
 import { useNeedsStore } from './useNeedsStore';
 
-export const useComponentsStore = create((set) => ({
+export const useComponentsStore = create((set, get) => ({
   components: [],
   isLoading: false,
   currentComponent: null,
+
+  normalizeComponent: (comp) => ({
+    ...comp,
+    tags: comp.tags?.map(tag => 
+      typeof tag === 'object' ? tag.name : tag
+    ) || []
+  }),
 
   fetchComponents: async () => {
     set({ isLoading: true });
 
     try {
       const startTime = Date.now();
-      const { data, status, headers } = await apiClient.get('/components');
+      const { data, status} = await apiClient.get('/components');
       const endTime = Date.now();
       
       console.log('fetchComponents SUCCESS:', {
@@ -20,21 +27,15 @@ export const useComponentsStore = create((set) => ({
         status,
         count: data?.length || 0,
         firstItem: data?.[0] || 'empty',
-        headers: Object.fromEntries(Object.entries(headers).slice(0, 10))
       });
       
-      set({ components: data || [] });
+      const normalizedComponents = (data || []).map(comp => 
+        get().normalizeComponent(comp)
+      );
+      
+      set({ components: normalizedComponents });
     } catch (error) {
-      console.error('fetchComponents FAILED:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        url: error.config?.url,
-        method: error.config?.method,
-        message: error.message,
-        stack: error.stack,
-      });
+      console.error('fetchComponents FAILED:', error.response?.status, error.message);
       set({ components: [] });
     } finally {
       set({ isLoading: false });
@@ -42,123 +43,97 @@ export const useComponentsStore = create((set) => ({
   },
 
   addComponent: async (newComponent) => {
-
     try {
       const dataToSend = {
         tagIds: newComponent.tagIds || [],
         ...newComponent,
         createdBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         photoUrl: "віапб",
-       
         categoryId: newComponent.categoryId || null,
         quantity: parseInt(newComponent.quantity) || 0,
         price: parseFloat(newComponent.price) || 0,
       };
 
-      console.log('typeof dataToSend:', {
-        categoryId: typeof dataToSend.categoryId,
-        name: typeof dataToSend.name,
-        quantity: typeof dataToSend.quantity,
-        price: typeof dataToSend.price,
-        tagIds: Array.isArray(dataToSend.tagIds),
-      });
-      const config = {
-        headers: { 
-          'Content-Type': 'application/json',
-          ...apiClient.defaults.headers.common
-        }
-      };
-
       const startTime = Date.now();
-      
-      const response = await apiClient.post('/components', dataToSend, config);
+      const response = await apiClient.post('/components', dataToSend, {
+        headers: { 'Content-Type': 'application/json' }
+      });
       const endTime = Date.now();
+
+      const normalizedData = get().normalizeComponent(response.data);
 
       console.log('addComponent SUCCESS:', {
         duration: `${endTime - startTime}ms`,
         status: response.status,
-        data: response.data,
-        headers: Object.fromEntries(Object.entries(response.headers).slice(0, 10))
+        tags: normalizedData.tags,
+        data: normalizedData
       });
 
-      set((state) => {
-        const newState = { components: [...state.components, response.data] };
-        return newState;
-      });
+      set((state) => ({
+        components: [...state.components, normalizedData]
+      }));
 
-      return response.data;
+      return normalizedData;
     } catch (error) {
-      console.error('addComponent FAILED - FULL ERROR:', {
-        request: {
-          url: error.config?.url,
-          method: error.config?.method,
-          data: error.config?.data ? JSON.stringify(JSON.parse(error.config.data), null, 2) : error.config?.data,
-          headers: error.config?.headers,
-        },
-        response: {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          headers: error.response?.headers,
-        },
+      console.error('addComponent FAILED:', {
+        status: error.response?.status,
+        data: error.response?.data,
         message: error.message,
-        code: error.code,
-        stack: error.stack?.split('\n').slice(0, 5).join('\n'),
       });
-      
-      if (error.response?.status === 500) {
-        console.error('SERVER 500 ERROR - check backend logs');
-      }
-      
       throw error;
     }
   },
-updateComponent: async (componentId, updatedComponent) => {
-  try {
-    const dataToSend = {
-      id: componentId,
-      categoryId: updatedComponent.categoryId || "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      name: updatedComponent.name || "string",
-      description: updatedComponent.description || "string",
-      quantity: parseInt(updatedComponent.quantity) || 0,
-      price: parseFloat(updatedComponent.price) || 0,
-      photoUrl: updatedComponent.photoUrl || "string",
-      supplierLink: updatedComponent.supplierLink || "string",
-      documentationLink: updatedComponent.documentationLink || "string",
-      lastUpdatedBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-    };
 
-    const { data } = await apiClient.put('/components', dataToSend);
-    
-    set((state) => ({
-      components: state.components.map(comp => 
-        comp.id === componentId ? data : comp
-      )
-    }));
+  updateComponent: async (componentId, updatedComponent) => {
+    try {
+      const dataToSend = {
+        id: componentId,
+        categoryId: updatedComponent.categoryId || null,
+        name: updatedComponent.name || "string",
+        description: updatedComponent.description || "string",
+        quantity: parseInt(updatedComponent.quantity) || 0,
+        price: parseFloat(updatedComponent.price) || 0,
+        photoUrl: updatedComponent.photoUrl || "string",
+        supplierLink: updatedComponent.supplierLink || "string",
+        documentationLink: updatedComponent.documentationLink || "string",
+        tagIds: updatedComponent.tagIds || [],
+        lastUpdatedBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+      };
 
-    useNeedsStore.getState().updateComponentInNeeds(componentId, {
-      name: data.name,
-      image: data.photoUrl,
-      categoryId: data.categoryId,
-    });
+      const { data } = await apiClient.put('/components', dataToSend);
+      
+      const normalizedData = get().normalizeComponent(data);
 
-    return data;
-  } catch (error) {
-    console.error('updateComponent FAILED:', error);
-    throw error;
-  }
-},
+      set((state) => ({
+        components: state.components.map(comp => 
+          comp.id === componentId ? normalizedData : comp
+        )
+      }));
+
+      const updateComponentInNeeds = useNeedsStore.getState().updateComponentInNeeds;
+      if (typeof updateComponentInNeeds === 'function') {
+        updateComponentInNeeds({
+          ...normalizedData,
+          image: normalizedData.photoUrl
+        });
+      }
+
+      return normalizedData;
+    } catch (error) {
+      console.error('updateComponent FAILED:', error);
+      throw error;
+    }
+  },
+
   deleteComponent: async (id) => {
-
     try {
       const startTime = Date.now();
-      const { status, data} = await apiClient.delete(`/components/${id}`);
+      const { status } = await apiClient.delete(`/components/${id}`);
       const endTime = Date.now();
       
       console.log('deleteComponent SUCCESS:', {
         duration: `${endTime - startTime}ms`,
         status,
-        data,
       });
 
       set((state) => ({
@@ -167,11 +142,7 @@ updateComponent: async (componentId, updatedComponent) => {
 
       useNeedsStore.getState().updateComponentInNeeds(id, null);
     } catch (error) {
-      console.error('deleteComponent FAILED:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
+      console.error('deleteComponent FAILED:', error);
       throw error;
     }
   },
@@ -179,11 +150,14 @@ updateComponent: async (componentId, updatedComponent) => {
   setCurrentComponent: (component) => {
     set({ currentComponent: component });
   },
+
   clearCurrentComponent: () => {
     set({ currentComponent: null });
   },
+
   setComponents: (components) => {
-    set({ components });
+    const normalized = components.map(comp => get().normalizeComponent(comp));
+    set({ components: normalized });
   },
 
   editModal: { open: false, component: null },

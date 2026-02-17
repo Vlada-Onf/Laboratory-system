@@ -9,7 +9,7 @@ import ButtonsPanel from './ButtonsPanel';
 
 const ComponentCard = ({
    sx, id, name, image, description, price, quantity, 
-  burntQuantity, categoryId, category, tagIds,
+  burntQuantity, categoryId, category, tagIds,tags,
   onEdit, onDelete, onAddNeed
 }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -78,6 +78,7 @@ const ComponentCard = ({
               burntQuantity={burntQuantity}
               categoryId={categoryId}
               category={category}
+              tags={tags}
               tagIds={tagIds}
             />
           </Box>

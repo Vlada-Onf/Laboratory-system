@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, CircularProgress } from '@mui/material';
 import ClickableComponentCell from './ClickableComponentCell';
 import LinkBadge from './../../component/linksBlock/LinkBadge';
 import TagsCell from './TagsCell';
@@ -12,6 +12,54 @@ import { useComponentsStore } from '../../../store/useComponentsStore';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
+import { useTagsStore } from '../../../store/useTagsStore';
+
+const TagsCellLoader = React.memo(({ componentId, allTags }) => {
+  const { getComponentTags } = useTagsStore();
+  const [tags, setTags] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadTags = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const componentTags = await getComponentTags(componentId);
+        if (isMounted) {
+          setTags(componentTags || []);
+        }
+      } catch {
+        if (isMounted) {
+          setError('Помилка завантаження тегів');
+          setTags([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadTags();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [componentId, getComponentTags]);
+
+  if (loading) {
+    return <CircularProgress size={16} />;
+  }
+
+  if (error) {
+    return <Typography variant="caption" color="error">—</Typography>;
+  }
+
+  return <TagsCell tags={tags} allTags={allTags} />;
+});
 
 const ComponentsTable = ({ onAddNeed }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -29,6 +77,7 @@ const ComponentsTable = ({ onAddNeed }) => {
     closeEditModal,
   } = useComponentsStore();
 
+  const { fetchTags, tags } = useTagsStore();
   const categories = useCategoriesStore(state => state.categories);
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
@@ -40,7 +89,8 @@ const ComponentsTable = ({ onAddNeed }) => {
 
   useEffect(() => {
     fetchComponents();
-  }, []);
+    fetchTags();
+  }, [fetchComponents, fetchTags]);
 
   const handleOpenModal = useCallback((row) => {
     setSelectedRow(row);
@@ -82,42 +132,24 @@ const ComponentsTable = ({ onAddNeed }) => {
 
   const handleAddComponentSubmit = useCallback(async (formData) => {
     try {
-      await addComponent({
-        categoryId: formData.categoryId,
-        name: formData.name,
-        description: formData.description,
-        quantity: parseInt(formData.quantity) || 0,
-        price: parseFloat(formData.price) || 0,
-        photoUrl: formData.photoUrl,
-        supplierLink: formData.supplierLink || "string",
-documentationLink: formData.documentationLink || "string",
-      });
-      closeEditModal();
-    } catch (error) {
-      console.error('💥 Помилка додавання:', error);
-    }
-  }, [addComponent, closeEditModal]);
+    await addComponent(formData);
+    closeEditModal();
+  } catch (error) {
+    console.error('Помилка додавання:', error);
+  }
+}, [addComponent, closeEditModal]);
 
   const handleComponentSubmit = useCallback(async (formData) => {
-    try {
-      const componentId = editModal.component.id;
-      await updateComponent(componentId, {
-        categoryId: formData.categoryId,
-        name: formData.name,
-        description: formData.description,
-        quantity: parseInt(formData.quantity) || 0,
-        price: parseFloat(formData.price) || 0,
-        photoUrl: formData.photoUrl,
-        supplierLink: formData.supplierLink || '',
-        documentationLink: formData.documentationLink || '',
-      });
-      closeEditModal();
-    } catch (error) {
-      console.error('Помилка оновлення:', error);
-    }
-  }, [editModal.component, updateComponent, closeEditModal]);
+  try {
+    const componentId = editModal.component.id;
+    await updateComponent(componentId, formData);
+    closeEditModal();
+  } catch (error) {
+    console.error('Помилка оновлення:', error);
+  }
+}, [editModal.component, updateComponent, closeEditModal]);
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       field: 'component',
       headerName: 'Компонент',
@@ -134,16 +166,15 @@ documentationLink: formData.documentationLink || "string",
       ),
     },
     {
-  field: 'category',
-  headerName: 'Категорія',
-  flex: 1,
-  minWidth: 150,
-  renderCell: (params) => {
-    const categoryName = categories?.find(c => c.id === params.row.categoryId)?.name || '—';
-    return <Typography variant="body2">{categoryName}</Typography>;
-  },
-},
-
+      field: 'category',
+      headerName: 'Категорія',
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => {
+        const categoryName = categories?.find(c => c.id === params.row.categoryId)?.name || '—';
+        return <Typography variant="body2">{categoryName}</Typography>;
+      },
+    },
     {
       field: 'description',
       headerName: 'Опис',
@@ -172,12 +203,12 @@ documentationLink: formData.documentationLink || "string",
       renderCell: (params) => <Typography fontWeight={600}>{params.value ? `${params.value} ₴` : '—'}</Typography>,
     },
     {
-      field: 'tags',
-      headerName: 'Теги',
-      flex: 1.5,
-      minWidth: 150,
-      renderCell: (params) => <TagsCell value={params.row.tags || ''} />,
-    },
+  field: 'tags',
+  headerName: 'Теги',
+  flex: 1.5,
+  minWidth: 150,
+  renderCell: (params) => <TagsCell value={params.row.tags} />,
+},
     {
       field: 'rowActions',
       headerName: '',
@@ -193,7 +224,7 @@ documentationLink: formData.documentationLink || "string",
         />
       ),
     },
-  ];
+  ], [categories, navigate, tags, openEditModal, handleDeleteClick, handleOpenModal]);
 
   return (
     <Box>

@@ -52,13 +52,12 @@ const ComponentLayout = ({ component, onEdit, onDelete, onUpdateLinks, onAddNeed
   const componentForCard = useMemo(() => ({
     ...component,
     image: component?.photoUrl,
-    tags: component?.tagIds || [],
+    tags: component?.tags, 
     categoryId: component?.categoryId
   }), [component]);
 
   useEffect(() => {
     if (component?.id) {
-      setCurrentComponent(component);
       fetchDamagedComponents();
     }
   }, [component?.id, setCurrentComponent, fetchDamagedComponents]);

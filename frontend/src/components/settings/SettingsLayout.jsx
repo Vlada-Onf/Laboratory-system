@@ -6,6 +6,9 @@ import WishlistImportancesModal from './WishlistImportancesModal';
 import NeedStatusesModal from './NeedStatusesModal';
 import NeedImportancesModal from './NeedImportancesModal';
 import DamagedComponentReasonsModal from './DamagedComponentReasonsModal';
+import EntitiesModal from './EntitiesModal';
+import ActionsModal from './ActionsModal';
+import RolesModal from './RolesModal';
 
 const StyledButton = React.memo(({ onClick, children, sx }) => {
   const themeContext = useTheme();
@@ -37,10 +40,15 @@ const StyledButton = React.memo(({ onClick, children, sx }) => {
 
 const SettingsLayout = ({ children }) => {
   const [statusesModalOpen, setStatusesModalOpen] = useState(false);
- const [importancesModalOpen, setImportancesModalOpen] = useState(false);
-const [needStatusesModalOpen, setNeedStatusesModalOpen] = useState(false);
-const [needImportancesModalOpen, setNeedImportancesModalOpen] = useState(false);
-const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
+  const [importancesModalOpen, setImportancesModalOpen] = useState(false);
+  const [needStatusesModalOpen, setNeedStatusesModalOpen] = useState(false);
+  const [needImportancesModalOpen, setNeedImportancesModalOpen] = useState(false);
+  const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
+  
+const [entitiesModalOpen, setEntitiesModalOpen] = useState(false);
+const [actionsModalOpen, setActionsModalOpen] = useState(false);
+
+const [rolesModalOpen, setRolesModalOpen] = useState(false);
   return (
     <Box sx={{ 
       width: '100%', 
@@ -63,32 +71,30 @@ const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <StyledButton onClick={() => setStatusesModalOpen(true)}>
-              Статуси 
+              Статуси
             </StyledButton>
-            
             <StyledButton onClick={() => setImportancesModalOpen(true)}>
               Рівні важливості
             </StyledButton>
           </Box>
         </Box>
-<Box>
-          <Typography variant="h5" sx={{ fontWeight: 600}}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Потреби
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <StyledButton onClick={() => setNeedStatusesModalOpen(true)}>
-              Статуси 
+              Статуси
             </StyledButton>
-            
             <StyledButton onClick={() => setNeedImportancesModalOpen(true)}>
               Рівні важливості
             </StyledButton>
           </Box>
         </Box>
-        
+
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600}}>
-            Заламі компоненти
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Зламані компоненти
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <StyledButton onClick={() => setDamagedReasonsModalOpen(true)}>
@@ -96,24 +102,63 @@ const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
             </StyledButton>
           </Box>
         </Box>
+
         <Box>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Сутності та дії над ними
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <StyledButton onClick={() => setEntitiesModalOpen(true)}>
+              Сутності
+            </StyledButton>
+            <StyledButton onClick={() => setActionsModalOpen(true)}>
+              Дії
+            </StyledButton>
+          </Box>
         </Box>
-        <WishlistStatusesModal 
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Ролі
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <StyledButton onClick={() => setRolesModalOpen(true)}>
+              Список ролей
+            </StyledButton>
+          </Box>
+        </Box>
+
+        {children}
+      </Box>
+
+      <WishlistStatusesModal 
         open={statusesModalOpen}
         onClose={() => setStatusesModalOpen(false)}
       />
       <WishlistImportancesModal 
-      open={importancesModalOpen}
-      onClose={() => setImportancesModalOpen(false)}
-    />
-    <NeedStatusesModal open={needStatusesModalOpen} onClose={() => setNeedStatusesModalOpen(false)} />
-<NeedImportancesModal open={needImportancesModalOpen} onClose={() => setNeedImportancesModalOpen(false)} />
-    <DamagedComponentReasonsModal 
-  open={damagedReasonsModalOpen}
-  onClose={() => setDamagedReasonsModalOpen(false)}
+        open={importancesModalOpen}
+        onClose={() => setImportancesModalOpen(false)}
+      />
+      <NeedStatusesModal 
+        open={needStatusesModalOpen} 
+        onClose={() => setNeedStatusesModalOpen(false)} 
+      />
+      <NeedImportancesModal 
+        open={needImportancesModalOpen} 
+        onClose={() => setNeedImportancesModalOpen(false)} 
+      />
+      <DamagedComponentReasonsModal 
+        open={damagedReasonsModalOpen}
+        onClose={() => setDamagedReasonsModalOpen(false)}
+      />
+      <EntitiesModal 
+  open={entitiesModalOpen}
+  onClose={() => setEntitiesModalOpen(false)}
 />
-        {children}
-      </Box>
+ <ActionsModal 
+  open={actionsModalOpen}
+  onClose={() => setActionsModalOpen(false)}
+/>     
+      <RolesModal open={rolesModalOpen} onClose={() => setRolesModalOpen(false)} />
     </Box>
   );
 };

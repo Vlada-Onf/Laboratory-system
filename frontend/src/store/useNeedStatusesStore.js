@@ -34,7 +34,7 @@ export const useNeedStatusesStore = create((set, get) => ({
 
   updateStatus: async (id, statusData) => {
     try {
-      const { data } = await apiClient.put(`/need-statuses/${id}`, statusData);
+      const { data } = await apiClient.put(`/need-statuses`, statusData);
       set((state) => ({
         statuses: state.statuses.map(status => 
           status.id === id ? data : status

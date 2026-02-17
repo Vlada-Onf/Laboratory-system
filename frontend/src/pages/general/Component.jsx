@@ -19,6 +19,7 @@ const ComponentPage = () => {
     editModal,
     closeEditModal,
     updateComponent,
+    fetchComponents,
     deleteComponent,
   } = useComponentsStore();
 
@@ -32,10 +33,16 @@ const ComponentPage = () => {
     return <div>Компонент не знайдено</div>;
   }
 
-  const handleComponentSubmit = (formData) => {
+  const handleComponentSubmit = async (formData) => {
     const componentId = editModal.component?.id || id;
-    updateComponent(componentId, formData);
-    closeEditModal();
+    
+    try {
+      await updateComponent(componentId, formData);
+      await fetchComponents();
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка оновлення компонента:', error);
+    }
   };
 
   const handleEditComponent = () => openEditModal(component);
@@ -55,11 +62,16 @@ const ComponentPage = () => {
     navigate('/front-components');
   };
 
-  const handleUpdateLinks = (updatedLinks) => {
-    updateComponent(component.id, {
-      supplierLink: updatedLinks.buyLink || "string",
-      documentationLink: updatedLinks.docLink || "string",
-    });
+  const handleUpdateLinks = async (updatedLinks) => {
+    try {
+      await updateComponent(component.id, {
+        supplierLink: updatedLinks.buyLink || "string",
+        documentationLink: updatedLinks.docLink || "string",
+      });
+      await fetchComponents();
+    } catch (error) {
+      console.error('Помилка оновлення посилань:', error);
+    }
   };
 
   const handleOpenNeedModal = () => setNeedModalOpen(true);
