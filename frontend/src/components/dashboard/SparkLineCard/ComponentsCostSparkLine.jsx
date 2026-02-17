@@ -1,14 +1,10 @@
 import SparkLineCard from './SparkLineCard';
 import { useDashboardStore } from '../../../store/useDashboardStore';
 import { useMemo } from 'react';
-import { useEffect } from 'react';
 
 const ComponentsCostSparkLine = () => {
-  const { statistics, fetchDashboardStatistics, isLoading } = useDashboardStore();
+  const { statistics, isLoading } = useDashboardStore();
   
-  useEffect(() => {
-    fetchDashboardStatistics();
-  }, [fetchDashboardStatistics]);
 
   const data = useMemo(() => 
     statistics.map(stat => stat.totalComponentsCost || 0).reverse(), 

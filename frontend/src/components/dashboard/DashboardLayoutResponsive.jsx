@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography , Button } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';  
 import PageWrapper from '../../components/layout/PaperWrapper';
 import { useTheme } from '../../context/useTheme';
 import ComponentsCostByCategoryChart from './ComponentsCostByCategoryChart';
@@ -68,7 +69,11 @@ const SectionTitle = ({ children }) => (
 );
 
 const DashboardResponsive = () => {
-  const { fetchDashboardStatistics } = useDashboardStore();
+  const { 
+    fetchDashboardStatistics, 
+    createStatistic,
+    getLatestStatistic
+  } = useDashboardStore();
   const { fetchComponents } = useComponentsStore();
 
   React.useEffect(() => {
@@ -76,8 +81,44 @@ const DashboardResponsive = () => {
     fetchComponents();
   }, [fetchDashboardStatistics, fetchComponents]);
 
+  const handleRefreshStatistics = async () => {
+    console.log('Створюємо СЬОГОДНІШНЮ статистику...');
+    
+  try {
+      const latestStat = getLatestStatistic();
+      const todayISO = new Date().toISOString();
+      
+      console.log('Сьогодні:', todayISO);
+      console.log('Останній запис:', latestStat?.statisticDate);
+      
+      await createStatistic(todayISO);
+      
+      await fetchComponents();
+      
+    } catch (error) {
+      console.error('Помилка:', error);
+    }
+  };
+
+
   return (
     <PageWrapper>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefreshStatistics}
+          sx={{
+            background: 'linear-gradient(135deg, #08273b, #365468)',
+            color: '#fff',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #051926, #20314a)',
+            },
+            }}
+        >
+          Оновити статистику
+        </Button>
+      </Box>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, width: '100%', gap: 1, overflowY: 'auto' }}>
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1, width: '100%' }}>
@@ -88,6 +129,7 @@ const DashboardResponsive = () => {
               <ComponentsCountSparkLine />
             </Item>
           </Box>
+
 
           <ChartItem sx={{ flex: 1 }}>
             <SectionTitle>Вартість компонентів за категоріями</SectionTitle>

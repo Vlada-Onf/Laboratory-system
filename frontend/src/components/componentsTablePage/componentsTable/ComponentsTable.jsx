@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Box, CircularProgress } from '@mui/material';
+import { Typography, Box, Button, CircularProgress } from '@mui/material';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ClickableComponentCell from './ClickableComponentCell';
 import LinkBadge from './../../component/linksBlock/LinkBadge';
 import TagsCell from './TagsCell';
@@ -10,9 +11,8 @@ import AddNeedModal from '../../brokenComponents/AddNeedModal';
 import ComponentModal from '../../component/componentBlock/ComponentModal';
 import { useComponentsStore } from '../../../store/useComponentsStore';
 import { useCategoriesStore } from '../../../store/useCategoriesStore';
-import { useNavigate } from 'react-router-dom';
-import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 import { useTagsStore } from '../../../store/useTagsStore';
+import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const TagsCellLoader = React.memo(({ componentId, allTags }) => {
   const { getComponentTags } = useTagsStore();
@@ -64,6 +64,12 @@ const TagsCellLoader = React.memo(({ componentId, allTags }) => {
 const ComponentsTable = ({ onAddNeed }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [componentToDelete, setComponentToDelete] = useState(null);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const categoryIdFilter = searchParams.get('categoryId');
 
   const {
     components,
@@ -80,11 +86,17 @@ const ComponentsTable = ({ onAddNeed }) => {
   const { fetchTags, tags } = useTagsStore();
   const categories = useCategoriesStore(state => state.categories);
 
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
+  const filteredComponents = useMemo(() => {
+    if (!categoryIdFilter) return components;
+    return components.filter(comp => comp.categoryId === categoryIdFilter);
+  }, [components, categoryIdFilter]);
 
-  const navigate = useNavigate();
+  const getPageTitle = useCallback(() => {
+    if (!categoryIdFilter) return `Компоненти (${components.length})`;
+    const categoryName = categories.find(c => c.id === categoryIdFilter)?.name || 'Категорія';
+    return `${categoryName} (${filteredComponents.length})`;
+  }, [categoryIdFilter, components.length, filteredComponents.length, categories]);
+
   const isEditing = Boolean(editModal.component);
 
   useEffect(() => {
@@ -132,22 +144,22 @@ const ComponentsTable = ({ onAddNeed }) => {
 
   const handleAddComponentSubmit = useCallback(async (formData) => {
     try {
-    await addComponent(formData);
-    closeEditModal();
-  } catch (error) {
-    console.error('Помилка додавання:', error);
-  }
-}, [addComponent, closeEditModal]);
+      await addComponent(formData);
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка додавання:', error);
+    }
+  }, [addComponent, closeEditModal]);
 
   const handleComponentSubmit = useCallback(async (formData) => {
-  try {
-    const componentId = editModal.component.id;
-    await updateComponent(componentId, formData);
-    closeEditModal();
-  } catch (error) {
-    console.error('Помилка оновлення:', error);
-  }
-}, [editModal.component, updateComponent, closeEditModal]);
+    try {
+      const componentId = editModal.component.id;
+      await updateComponent(componentId, formData);
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка оновлення:', error);
+    }
+  }, [editModal.component, updateComponent, closeEditModal]);
 
   const columns = useMemo(() => [
     {
@@ -202,13 +214,15 @@ const ComponentsTable = ({ onAddNeed }) => {
       minWidth: 100,
       renderCell: (params) => <Typography fontWeight={600}>{params.value ? `${params.value} ₴` : '—'}</Typography>,
     },
-    {
+{
   field: 'tags',
   headerName: 'Теги',
   flex: 1.5,
   minWidth: 150,
   renderCell: (params) => <TagsCell value={params.row.tags} />,
 },
+
+
     {
       field: 'rowActions',
       headerName: '',
@@ -228,6 +242,11 @@ const ComponentsTable = ({ onAddNeed }) => {
 
   return (
     <Box>
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        {getPageTitle()}
+      </Typography>
+      
+      
       <ComponentsTableToolbar
         onAddComponent={() => openEditModal(null)}
         onImportExcel={() => console.log('import excel')}
@@ -235,7 +254,7 @@ const ComponentsTable = ({ onAddNeed }) => {
       
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={components}
+          rows={filteredComponents}
           columns={columns}
           rowHeight={100}
           loading={isLoading}

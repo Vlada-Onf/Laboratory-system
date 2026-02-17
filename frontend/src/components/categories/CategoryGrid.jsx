@@ -1,16 +1,26 @@
-import React from 'react';
+import React, {useCallback}from 'react';
 import { Grid, Box, Typography, CircularProgress } from '@mui/material';
 import { useCategoriesStore } from '../../store/useCategoriesStore';
 import CategoryCard from './CategoryCard';
 import AddCategoryCard from './AddCategoryCard';
+import { useNavigate } from 'react-router-dom';
 
 const CategoriesGrid = () => {
+  const navigate = useNavigate();
   const {
     categories,
     isLoading,
     updateCategory,
     deleteCategory
   } = useCategoriesStore();
+
+  const handleCategoryClick = useCallback((categoryId) => {
+    if (categoryId) {
+      navigate(`/front-components?categoryId=${categoryId}`);
+    } else {
+      navigate('/front-components');
+    }
+  }, [navigate]);
 
   if (isLoading) {
     return (
@@ -38,6 +48,7 @@ const CategoriesGrid = () => {
               id={cat.id}
               onEditCategory={updateCategory}
               onDeleteCategory={deleteCategory}
+              onCategoryClick={handleCategoryClick}
             />
           </Grid>
         ))}

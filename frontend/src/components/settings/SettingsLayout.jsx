@@ -66,7 +66,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
       
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ fontWeight: 500, fontSize: 20}}>
             Список бажаного
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -79,7 +79,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
           </Box>
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ fontWeight: 500, fontSize: 20 }}>
             Потреби
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -93,7 +93,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
         </Box>
 
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ fontWeight: 500 , fontSize: 20}}>
             Зламані компоненти
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -104,7 +104,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
         </Box>
 
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ fontWeight: 500 , fontSize: 20}}>
             Сутності та дії над ними
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -117,7 +117,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
           </Box>
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ fontWeight: 500 , fontSize: 20}}>
             Ролі
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
