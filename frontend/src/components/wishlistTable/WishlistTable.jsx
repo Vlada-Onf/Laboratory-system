@@ -1,126 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import { 
-  Box, 
-  Button, 
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  CircularProgress 
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PriorityChip from './PriorityChip';
 import StatusChip from './StatusChip';
-import { useWishlistStore } from '@store/useWishlistStore';
-import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
-import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 import AddWishlistModal from './AddWishlistModal';
 import ConfirmDeleteModal from '../general/ConfirmDeleteModal';
+import ChangeStatusModal from './ChangeStatusModal';
+import WishlistTableToolbar from './WishlistTableToolbar';
+import WishlistDataGrid from './WishlistDataGrid';
+import { useWishlistTable } from '../../hooks/wishlist/useWishlistTable';
+import { useWishlistModals } from '../../hooks/wishlist/useWishlistModals';
+
 
 const WishlistTable = () => {
-  const { wishlistRows, isLoading, fetchAllData } = useWishlistStore();
-  const { importances } = useWishlistImportancesStore();
-  const { statuses } = useWishlistStatusesStore();
+  const wishlistTableData = useWishlistTable();
+  const wishlistModals = useWishlistModals();
 
-  const [openModal, setOpenModal] = useState(false);
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openStatusModal, setOpenStatusModal] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [deleteRowId, setDeleteRowId] = useState(null);
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-
-  const [statusWishlistId, setStatusWishlistId] = useState(null);
-  const [currentStatusId, setCurrentStatusId] = useState(null);
-  const [newStatusId, setNewStatusId] = useState(null);
-  const [completionReason, setCompletionReason] = useState('');
-  const [isSavingStatus, setIsSavingStatus] = useState(false);
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
-
-  const getImportanceName = (importanceId) => {
-    return importances.find(i => i.id === importanceId)?.name || 'Низька';
-  };
-  const openStatusModalHandler = (wishlistId, statusId) => {
-    setStatusWishlistId(wishlistId);
-    setCurrentStatusId(statusId);
-    setNewStatusId(statusId);
-    setCompletionReason('');
-    setIsSavingStatus(false);
-    setOpenStatusModal(true);
-  };
-
-  const closeStatusModal = () => {
-    setOpenStatusModal(false);
-    setStatusWishlistId(null);
-    setCurrentStatusId(null);
-    setNewStatusId(null);
-    setCompletionReason('');
-    setIsSavingStatus(false);
-  };
-
-  const handleStatusSubmit = async () => {
-    if (!statusWishlistId || newStatusId === currentStatusId) {
-      closeStatusModal();
-      return;
-    }
-
-    setIsSavingStatus(true);
-    try {
-      await useWishlistStore.getState().updateWishlistStatus(
-        statusWishlistId, 
-        newStatusId, 
-        completionReason
-      );
-      closeStatusModal();
-    } catch (error) {
-      console.error('Помилка статусу:', error);
-    } finally {
-      setIsSavingStatus(false);
-    }
-  };
-
-  const handleOpenModal = (row) => {
-    setSelectedRow(row || { id: 'new', name: 'Новий запис' });
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setSelectedRow(null);
-  };
-
-  const handleOpenDeleteModal = (id, name) => {
-    setDeleteRowId(id);
-    setSelectedRow({ name });
-    setOpenDeleteModal(true);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setOpenDeleteModal(false);
-    setDeleteRowId(null);
-    setSelectedRow(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (deleteRowId) {
-      try {
-        await useWishlistStore.getState().deleteWishlist(deleteRowId);
-      } catch (error) {
-        console.error('Помилка видалення:', error);
-      }
-    }
-    handleCloseDeleteModal();
-  };
-
-  if (!wishlistRows.length) {
+  if (!wishlistTableData.wishlistRows.length) {
     return (
       <Box sx={{ height: 510, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6">Завантажуємо список бажань...</Typography>
@@ -140,7 +38,9 @@ const WishlistTable = () => {
       field: 'priority', 
       headerName: 'Важливість', 
       flex: 1,
-      renderCell: ({ row }) => <PriorityChip priority={getImportanceName(row.importanceId)} /> 
+      renderCell: ({ row }) => (
+        <PriorityChip priority={wishlistTableData.getImportanceName(row.importanceId)} />
+      )
     },
     { field: 'description', headerName: 'Опис', flex: 2, minWidth: 200 },
     {
@@ -151,7 +51,7 @@ const WishlistTable = () => {
         <StatusChip 
           statusId={row.statusId}
           wishlistId={row.id}
-          onStatusClick={() => openStatusModalHandler(row.id, row.statusId)}
+          onStatusClick={() => wishlistModals.openStatusModalHandler(row.id, row.statusId)}
         />
       )
     },
@@ -164,14 +64,14 @@ const WishlistTable = () => {
           key="edit"
           icon={<EditIcon />}
           label="Редагувати"
-          onClick={() => handleOpenModal(params.row)}
+          onClick={() => wishlistModals.openAddModal(params.row)}
           showInMenu={false}
         />,
         <GridActionsCellItem
           key="delete"
           icon={<DeleteIcon />}
           label="Видалити"
-          onClick={() => handleOpenDeleteModal(params.id, params.row.name)}
+          onClick={() => wishlistModals.openDeleteModal(params.id, params.row.name)}
           color="error"
           showInMenu={false}
         />,
@@ -181,92 +81,44 @@ const WishlistTable = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenModal({ id: 'new', name: 'Виберіть компонент' })}
-        >
-          Додати до списку
-        </Button>
-      </Box>
-
-      <Box sx={{ height: 510, width: '100%' }}>
-        <DataGrid
-          rows={wishlistRows}
-          getRowId={(row) => row.id}
-          columns={columns}
-          loading={isLoading}
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-          sx={{
-            '& .MuiDataGrid-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              lineHeight: 1.4,
-            },
-          }}
-        />
-      </Box>
-
-      <AddWishlistModal open={openModal} onClose={handleCloseModal} row={selectedRow} />
+      <WishlistTableToolbar onAddClick={() => wishlistModals.openAddModal({ id: 'new' })} />
       
-      <ConfirmDeleteModal
-        open={openDeleteModal}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-        entityName={selectedRow?.name || 'запис'}
-        entityTypeName="Запис у списку бажань"
+      <WishlistDataGrid
+        wishlistRows={wishlistTableData.wishlistRows}
+        columns={columns}
+        paginationModel={wishlistTableData.paginationModel}
+        onPaginationModelChange={wishlistTableData.setPaginationModel}
+        isLoading={wishlistTableData.isLoading}
+        getImportanceName={wishlistTableData.getImportanceName}
+        modals={wishlistModals}
       />
 
-      <Dialog open={openStatusModal} onClose={closeStatusModal} maxWidth="sm" fullWidth>
-        <DialogTitle>Змінити статус</DialogTitle>
-        
-        <DialogContent>
-          <TextField
-            select
-            fullWidth
-            label="Новий статус"
-            value={newStatusId || ''}
-            onChange={(e) => setNewStatusId(e.target.value)}
-            sx={{ mt: 2 }}
-          >
-            {statuses.map((status) => (
-              <MenuItem key={status.id} value={status.id}>
-                {status.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            fullWidth
-            label="Причина зміни (необов'язково)"
-            multiline
-            rows={3}
-            value={completionReason}
-            onChange={(e) => setCompletionReason(e.target.value)}
-            sx={{ mt: 2 }}
-            placeholder="Опишіть причину зміни статусу..."
-          />
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={closeStatusModal} disabled={isSavingStatus}>
-            Скасувати
-          </Button>
-          <Button
-            onClick={handleStatusSubmit}
-            variant="contained"
-            disabled={isSavingStatus || newStatusId === currentStatusId}
-          >
-            {isSavingStatus ? <CircularProgress size={20} /> : 'Зберегти'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddWishlistModal 
+        open={wishlistModals.addModal.open}
+        onClose={wishlistModals.closeAddModal}
+        row={wishlistModals.addModal.selectedRow} 
+      />
+      
+      <ConfirmDeleteModal
+        open={wishlistModals.deleteModal.open}
+        onClose={wishlistModals.closeDeleteModal}
+        onConfirm={wishlistModals.handleConfirmDelete}
+        entityName={wishlistModals.deleteModal.selectedRow?.name || 'запис'}
+        entityTypeName="Запис у списку бажань"
+      />
+      
+      <ChangeStatusModal
+        openStatusModal={wishlistModals.statusModal.open}
+        statuses={wishlistModals.statusModal.statuses}
+        newStatusId={wishlistModals.statusModal.newStatusId}
+        currentStatusId={wishlistModals.statusModal.currentStatusId}
+        completionReason={wishlistModals.statusModal.completionReason}
+        isSavingStatus={wishlistModals.statusModal.isSavingStatus}
+        onClose={wishlistModals.closeStatusModal}
+        onSubmit={wishlistModals.handleStatusSubmit}
+        onStatusChange={wishlistModals.updateStatusField}
+        onReasonChange={wishlistModals.updateStatusField}
+      />
     </Box>
   );
 };

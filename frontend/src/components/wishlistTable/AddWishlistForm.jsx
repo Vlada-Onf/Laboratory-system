@@ -1,14 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Stack,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import {Box, TextField, Button, Stack, Typography, FormControl, Select, MenuItem, } from '@mui/material';
 import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
 
@@ -87,9 +78,7 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
     <Box component="form" id="add-wishlist-form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
       <Stack spacing={2} mt={1}>
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Назва запису *
-          </Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Назва запису *</Typography>
           <TextField
             value={form.name}
             onChange={handleChange('name')}
@@ -101,9 +90,7 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Опис
-          </Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Опис</Typography>
           <TextField
             value={form.description}
             onChange={handleChange('description')}
@@ -116,9 +103,7 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Кількість *
-          </Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Кількість *</Typography>
           <TextField
             type="number"
             value={form.quantity}
@@ -132,36 +117,22 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Важливість *
-          </Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Важливість *</Typography>
           <FormControl fullWidth error={!!errors.importanceId} required>
-            <Select 
-              value={form.importanceId} 
-              onChange={handleChange('importanceId')}
-            >
+            <Select value={form.importanceId} onChange={handleChange('importanceId')}>
               {importances.map((imp) => (
-                <MenuItem key={imp.id} value={imp.id}>
-                  {imp.name}
-                </MenuItem>
+                <MenuItem key={imp.id} value={imp.id}>{imp.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Статус *
-          </Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Статус *</Typography>
           <FormControl fullWidth error={!!errors.statusId} required>
-            <Select 
-              value={form.statusId} 
-              onChange={handleChange('statusId')}
-            >
+            <Select value={form.statusId} onChange={handleChange('statusId')}>
               {statuses.map((status) => (
-                <MenuItem key={status.id} value={status.id}>
-                  {status.name}
-                </MenuItem>
+                <MenuItem key={status.id} value={status.id}>{status.name}</MenuItem>
               ))}
             </Select>
           </FormControl>

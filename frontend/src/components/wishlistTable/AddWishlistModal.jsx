@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  Slide,
-  IconButton,
-  Typography
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, Slide, IconButton,} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useWishlistStore } from '@store/useWishlistStore';
 import { eventBus } from '../../utils/eventBus';
@@ -19,7 +10,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 const AddWishlistModal = ({ open, onClose, row }) => {
-  console.log('🎭 MODAL open:', open, 'row:', row);
   
   const { createWishlist, updateWishlistDetails } = useWishlistStore();
   const isEditing = !!row?.id && row.id !== 'new';
