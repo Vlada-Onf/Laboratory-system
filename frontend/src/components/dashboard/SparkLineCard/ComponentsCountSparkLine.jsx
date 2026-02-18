@@ -4,17 +4,17 @@ import { useMemo } from 'react';
 
 const ComponentsCountSparkLine = () => {
   const { statistics, isLoading } = useDashboardStore();
-  
-  const data = useMemo(() => 
-    statistics.map(stat => stat.totalComponentsCount || 0).reverse(), 
+
+  const data = useMemo(() =>
+    statistics.map(stat => stat.totalComponentsCount || 0).reverse(),
     [statistics]
   );
-  
-  const labels = useMemo(() => 
+
+  const labels = useMemo(() =>
     statistics.map(stat => {
       const date = new Date(stat.statisticDate);
       return date.toLocaleDateString('uk-UA', { month: 'short', day: 'numeric' });
-    }).reverse(), 
+    }).reverse(),
     [statistics]
   );
 

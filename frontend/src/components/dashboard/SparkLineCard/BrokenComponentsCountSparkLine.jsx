@@ -4,20 +4,20 @@ import { useDashboardStore } from '@store/useDashboardStore';
 
 export default function BrokenComponentsCountSparkLine() {
   const { statistics } = useDashboardStore();
-  
-  const data = useMemo(() => 
-    statistics.map(stat => stat.totalDecommissionedCount || 0).reverse(), 
+
+  const data = useMemo(() =>
+    statistics.map(stat => stat.totalDecommissionedCount || 0).reverse(),
     [statistics]
   );
-  
-  const labels = useMemo(() => 
+
+  const labels = useMemo(() =>
     statistics.map(stat => {
       const date = new Date(stat.statisticDate);
-      return date.toLocaleDateString('uk-UA', { 
-        day: 'numeric', 
-        month: 'short' 
+      return date.toLocaleDateString('uk-UA', {
+        day: 'numeric',
+        month: 'short'
       });
-    }).reverse(), 
+    }).reverse(),
     [statistics]
   );
 

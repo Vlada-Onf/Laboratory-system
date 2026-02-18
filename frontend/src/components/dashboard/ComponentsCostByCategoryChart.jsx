@@ -3,7 +3,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useDashboardStore } from '@store/useDashboardStore';
-import { useCategoriesMap } from '../../hooks/useCategoriesMap';
+import { useCategoriesMap } from '../../hooks/categories/useCategoriesMap';
 import { useComponentsStore } from '@store/useComponentsStore';
 
 const ComponentsCostByCategoryChart = React.memo(() => {

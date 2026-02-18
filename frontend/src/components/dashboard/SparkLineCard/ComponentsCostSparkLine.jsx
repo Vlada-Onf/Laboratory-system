@@ -4,18 +4,17 @@ import { useMemo } from 'react';
 
 const ComponentsCostSparkLine = () => {
   const { statistics, isLoading } = useDashboardStore();
-  
 
-  const data = useMemo(() => 
-    statistics.map(stat => stat.totalComponentsCost || 0).reverse(), 
+  const data = useMemo(() =>
+    statistics.map(stat => stat.totalComponentsCost || 0).reverse(),
     [statistics]
   );
-  
-  const labels = useMemo(() => 
+
+  const labels = useMemo(() =>
     statistics.map(stat => {
       const date = new Date(stat.statisticDate);
       return date.toLocaleDateString('uk-UA', { month: 'short', day: 'numeric' });
-    }).reverse(), 
+    }).reverse(),
     [statistics]
   );
 

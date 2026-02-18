@@ -9,7 +9,6 @@ import { hexToRgba } from '../../../utils/color';
 import { formatValue } from '../../../utils/formatValue';
 import { useSparkLineHighlight } from '../../../hooks/useSparkLineHighlight';
 
-
 export default function SparkLineCard({
   data = [],
   labels = [],
@@ -18,79 +17,24 @@ export default function SparkLineCard({
   valueType = 'number',
 }) {
   const length = Math.min(data.length, labels.length);
+  
+  const { highlightIndex, onKeyDown, onFocus, handleHighlightChange } = useSparkLineHighlight(length);
 
-  const { highlightIndex, onKeyDown, onFocus, handleHighlightChange } =
-    useSparkLineHighlight(length);
-
-  const areaColor = useMemo(() => hexToRgba(lineColor, 0.5), [lineColor]);
-  const borderColor = useMemo(() => hexToRgba(lineColor, 0.3), [lineColor]);
+  const chartColors = useMemo(() => ({
+    area: hexToRgba(lineColor, 0.5),
+    border: hexToRgba(lineColor, 0.3),
+    line: lineColor
+  }), [lineColor]);
 
   const displayLabel = highlightIndex !== null ? labels[highlightIndex] : title;
   const displayValue = highlightIndex !== null ? data[highlightIndex] : data[length - 1];
+  
   const formattedValue = useMemo(
     () => formatValue(displayValue, valueType),
     [displayValue, valueType]
   );
 
-  const content =
-    length === 0 ? (
-      <Typography color="rgba(255, 255, 255, 0.7)">Дані відсутні</Typography>
-    ) : (
-      <Stack direction="column" width="100%" maxWidth={450}>
-        <Typography
-          sx={{
-            fontWeight: 500,
-            fontSize: 18,
-            pt: 1,
-          }}
-        >
-          {displayLabel}
-        </Typography>
-
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-end"
-          sx={{ borderBottom: `2px solid ${borderColor}` }}
-        >
-          <Typography
-            aria-live="polite"
-            sx={{
-              fontSize: '2rem',
-              fontWeight: 500,
-            }}
-          >
-            {formattedValue}
-          </Typography>
-
-          <SparkLineChart
-            height={80}
-            width={195}
-            area
-            showHighlight
-            data={data}
-            baseline="min"
-            xAxis={{ id: 'week-axis', data: labels }}
-            margin={{ bottom: 0, top: 5, left: 4, right: 0 }}
-            series={[{ line: { stroke: lineColor, strokeWidth: 2 }, color: areaColor }]}
-            highlightedAxis={
-              highlightIndex === null
-                ? []
-                : [{ axisId: 'week-axis', dataIndex: highlightIndex }]
-            }
-            onHighlightedAxisChange={handleHighlightChange}
-            axisHighlight={{ x: 'line' }}
-            clipAreaOffset={{ top: 0, bottom: 0 }}
-            slotProps={{ lineHighlight: { r: 4, fill: lineColor } }}
-            sx={{
-              [`& .${lineElementClasses.root}`]: { stroke: lineColor, strokeWidth: 2 },
-              [`& .${areaElementClasses.root}`]: { fill: areaColor },
-              [`& .${chartsAxisHighlightClasses.root}`]: { stroke: lineColor, strokeWidth: 2 },
-            }}
-          />
-        </Stack>
-      </Stack>
-    );
+  const hasData = length > 0;
 
   return (
     <Box
@@ -104,7 +48,64 @@ export default function SparkLineCard({
       onKeyDown={onKeyDown}
       onFocus={onFocus}
     >
-      {content}
+      {hasData ? (
+        <Stack direction="column" width="100%" maxWidth={450}>
+          <Typography sx={{ fontWeight: 500, fontSize: 18}}>
+            {displayLabel}
+          </Typography>
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="flex-end"
+            sx={{ borderBottom: `2px solid ${chartColors.border}` }}
+          >
+            <Typography
+              aria-live="polite"
+              sx={{ fontSize: '2rem', fontWeight: 500 }}
+            >
+              {formattedValue}
+            </Typography>
+
+            <SparkLineChart
+              height={80}
+              width={195}
+              area
+              showHighlight
+              data={data}
+              baseline="min"
+              xAxis={{ id: 'week-axis', data: labels }}
+              margin={{ bottom: 0, top: 5, left: 4, right: 0 }}
+              series={[{ 
+                line: { stroke: chartColors.line, strokeWidth: 2 }, 
+                color: chartColors.area 
+              }]}
+              highlightedAxis={
+                highlightIndex === null
+                  ? []
+                  : [{ axisId: 'week-axis', dataIndex: highlightIndex }]
+              }
+              onHighlightedAxisChange={handleHighlightChange}
+              axisHighlight={{ x: 'line' }}
+              clipAreaOffset={{ top: 0, bottom: 0 }}
+              slotProps={{ lineHighlight: { r: 4, fill: chartColors.line } }}
+              sx={{
+                [`& .${lineElementClasses.root}`]: { 
+                  stroke: chartColors.line, 
+                  strokeWidth: 2 
+                },
+                [`& .${areaElementClasses.root}`]: { fill: chartColors.area },
+                [`& .${chartsAxisHighlightClasses.root}`]: { 
+                  stroke: chartColors.line, 
+                  strokeWidth: 2 
+                },
+              }}
+            />
+          </Stack>
+        </Stack>
+      ) : (
+        <Typography color="rgba(255, 255, 255, 0.7)">Дані відсутні</Typography>
+      )}
     </Box>
   );
 }
