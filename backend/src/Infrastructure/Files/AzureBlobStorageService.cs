@@ -3,9 +3,8 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Files
@@ -21,6 +20,10 @@ namespace Infrastructure.Files
 
             var containerName = configuration["AzureBlob:Container"]
                 ?? throw new InvalidOperationException("AzureBlob:Container is missing");
+
+            // тимчасовий лог, щоб перевірити, що взагалі читається з конфігів
+            Console.WriteLine($"[AzureBlob] ConnectionString = '{connectionString}'");
+            Console.WriteLine($"[AzureBlob] Container = '{containerName}'");
 
             var serviceClient = new BlobServiceClient(connectionString);
             _container = serviceClient.GetBlobContainerClient(containerName);

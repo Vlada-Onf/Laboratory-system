@@ -4,7 +4,7 @@ using FluentValidation;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
@@ -12,19 +12,19 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 // Controllers + глобальна валідація
 builder.Services.AddControllers(options =>
 {
-options.Filters.Add<ValidationFilter>();
+    options.Filters.Add<ValidationFilter>();
 });
 
 // CORS
 builder.Services.AddCors(options =>
 {
-options.AddPolicy(name: FrontendCorsPolicy, policy =>
-{
-policy
-    .AllowAnyOrigin()
-    .AllowAnyHeader()
-    .AllowAnyMethod();
-});
+    options.AddPolicy(name: FrontendCorsPolicy, policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 // Swagger
@@ -41,32 +41,32 @@ var clerkAudience = builder.Configuration["Clerk:Audience"];
 
 builder.Services
     .AddAuthentication(options =>
-{
-options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
-{
-options.RequireHttpsMetadata = true;
-options.SaveToken = true;
+    {
+        options.RequireHttpsMetadata = true;
+        options.SaveToken = true;
 
-options.Authority = clerkIssuer;
-options.MetadataAddress = $"{clerkIssuer}/.well-known/jwks.json";
+        options.Authority = clerkIssuer;
+        options.MetadataAddress = $"{clerkIssuer}/.well-known/jwks.json";
 
-options.TokenValidationParameters = new TokenValidationParameters
-{
-ValidateIssuer = true,
-ValidIssuer = clerkIssuer,
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = clerkIssuer,
 
-ValidateAudience = true,
-ValidAudience = clerkAudience,
+            ValidateAudience = true,
+            ValidAudience = clerkAudience,
 
-ValidateLifetime = true,
-ClockSkew = TimeSpan.FromMinutes(1),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1),
 
-ValidateIssuerSigningKey = true
-};
-});
+            ValidateIssuerSigningKey = true
+        };
+    });
 
 builder.Services.AddAuthorization();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -77,20 +77,17 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 1. HTTPS
 app.UseHttpsRedirection();
 
-// 2. Routing
 app.UseRouting();
 
-// 3. CORS (між Routing та Auth)
+// CORS між Routing та Auth
 app.UseCors(FrontendCorsPolicy);
 
-// 4. Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 5. Endpoints + примусово навісити CORS
+// Endpoints + CORS
 app.MapControllers().RequireCors(FrontendCorsPolicy);
 
 app.Run();
