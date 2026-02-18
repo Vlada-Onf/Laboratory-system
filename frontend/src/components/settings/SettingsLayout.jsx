@@ -44,19 +44,11 @@ const SettingsLayout = ({ children }) => {
   const [needStatusesModalOpen, setNeedStatusesModalOpen] = useState(false);
   const [needImportancesModalOpen, setNeedImportancesModalOpen] = useState(false);
   const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
-  
-const [entitiesModalOpen, setEntitiesModalOpen] = useState(false);
-const [actionsModalOpen, setActionsModalOpen] = useState(false);
-
-const [rolesModalOpen, setRolesModalOpen] = useState(false);
+  const [entitiesModalOpen, setEntitiesModalOpen] = useState(false);
+  const [actionsModalOpen, setActionsModalOpen] = useState(false);
+  const [rolesModalOpen, setRolesModalOpen] = useState(false);
   return (
-    <Box sx={{ 
-      width: '100%', 
-      maxWidth: 1400, 
-      mx: 'auto', 
-      p: { xs: 1, md: 3 },
-      minHeight: '100vh'
-    }}>
+    <Box sx={{ width: '100%', maxWidth: 1400, mx: 'auto', p: { xs: 1, md: 3 },minHeight: '100vh'}}>
       <Typography 
         variant="h4" 
         sx={{ mb: 6, fontWeight: 600, textAlign: 'center' }}
@@ -157,7 +149,7 @@ const [rolesModalOpen, setRolesModalOpen] = useState(false);
  <ActionsModal 
   open={actionsModalOpen}
   onClose={() => setActionsModalOpen(false)}
-/>     
+/>
       <RolesModal open={rolesModalOpen} onClose={() => setRolesModalOpen(false)} />
     </Box>
   );

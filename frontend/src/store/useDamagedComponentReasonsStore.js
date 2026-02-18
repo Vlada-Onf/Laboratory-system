@@ -34,7 +34,7 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
 
   updateReason: async (id, reasonData) => {
     try {
-      const { data } = await apiClient.put(`/damaged-component-reasons/${id}`, reasonData);
+      const { data } = await apiClient.put(`/damaged-component-reasons`, reasonData);
       set((state) => ({
         reasons: state.reasons.map(reason => 
           reason.id === id ? data : reason
