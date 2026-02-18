@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Swagger (простий)
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -50,7 +50,6 @@ if (string.IsNullOrWhiteSpace(clerkIssuer))
 
 var normalizedClerkIssuer = clerkIssuer.TrimEnd('/');
 var validIssuers = new[] { normalizedClerkIssuer, $"{normalizedClerkIssuer}/" };
-var hasAudience = !string.IsNullOrWhiteSpace(clerkAudience);
 
 builder.Services
     .AddAuthentication(options =>
@@ -68,9 +67,7 @@ builder.Services
         {
             ValidateIssuer = true,
             ValidIssuers = validIssuers,
-
-            ValidateAudience = hasAudience,
-            ValidAudience = clerkAudience,
+            ValidateAudience = false,
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
