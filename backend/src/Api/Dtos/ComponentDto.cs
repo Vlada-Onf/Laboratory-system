@@ -30,30 +30,30 @@ namespace Api.Dtos
                 component.CreatedAt,
                 component.LastUpdatedAt,
                 component.Tags.Select(TagDto.FromDomainModel).ToList());
-
     }
-
-    public record CreateComponentDto(
-        Guid CategoryId,
-        string Name,
-        string? Description,
-        int Quantity,
-        decimal Price,
-        string SupplierLink,
-        string? DocumentationLink,
-        List<Guid> TagIds,
-        Guid CreatedBy);
-
-    public record UpdateComponentDto(
-        Guid Id,
-        Guid CategoryId,
-        string Name,
-        string? Description,
-        int Quantity,
-        decimal Price,
-        string SupplierLink,
-        string? DocumentationLink,
-        List<Guid> TagIds,
-        Guid LastUpdatedBy);
-
+    public class CreateComponentDto
+    {
+        public Guid CategoryId { get; set; }
+        public string Name { get; set; } = "";
+        public string? Description { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string SupplierLink { get; set; } = "";
+        public string? DocumentationLink { get; set; }
+        public List<Guid> TagIds { get; set; } = new();
+        public Guid CreatedBy { get; set; }
+    }
+    public class UpdateComponentDto
+    {
+        public Guid Id { get; set; }
+        public Guid CategoryId { get; set; }
+        public string Name { get; set; } = "";
+        public string? Description { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string SupplierLink { get; set; } = "";
+        public string? DocumentationLink { get; set; }
+        public List<Guid> TagIds { get; set; } = new();
+        public Guid LastUpdatedBy { get; set; }
+    }
 }

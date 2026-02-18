@@ -74,5 +74,11 @@ namespace Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
+        public async Task ClearComponentTagsAsync(ComponentId componentId, CancellationToken cancellationToken = default)
+        {
+            await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"DELETE FROM component_tags WHERE component_id = {componentId.Value}",
+                cancellationToken);
+        }
     }
 }

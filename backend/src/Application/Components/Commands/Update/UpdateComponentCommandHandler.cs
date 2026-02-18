@@ -2,7 +2,6 @@
 using Application.Components.Exceptions;
 using Domain.Categories;
 using Domain.Components;
-using Domain.Tags;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
@@ -26,12 +25,10 @@ namespace Application.Components.Commands.Update
             if (!categoryExists)
                 return new ComponentCategoryNotFoundException(componentId);
 
-            // важливо: тут бажано підтягнути теги, але припустимо,
-            // що репозиторій вже це робить
             var option = await componentRepository.GetByIdAsync(componentId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: component => UpdateEntity(component, request, categoryId, tagRepository, cancellationToken),
+                Some: component => UpdateEntity(component, request, categoryId, cancellationToken),
                 None: () => Task.FromResult<Either<ComponentException, Component>>(
                     new ComponentNotFoundException(componentId)));
         }
@@ -40,7 +37,6 @@ namespace Application.Components.Commands.Update
             Component component,
             UpdateComponentCommand request,
             CategoryId categoryId,
-            ITagRepository tagRepository,
             CancellationToken cancellationToken)
         {
             try
@@ -57,6 +53,8 @@ namespace Application.Components.Commands.Update
                     supplierLink: request.SupplierLink,
                     documentationLink: request.DocumentationLink,
                     lastUpdatedBy: lastUpdatedBy);
+
+                await componentRepository.ClearComponentTagsAsync(component.Id, cancellationToken);
 
                 var tags = await tagRepository.GetByIdsAsync(request.TagIds, cancellationToken);
                 component.Tags.Clear();
