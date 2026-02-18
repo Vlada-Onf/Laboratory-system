@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// константи
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
+const string ClerkAuthenticationScheme = JwtBearerDefaults.AuthenticationScheme;
 
 // Controllers + глобальна валідація
 builder.Services.AddControllers(options =>
@@ -23,12 +26,12 @@ builder.Services.AddCors(options =>
     {
         policy
             .AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
-// Swagger
+// Swagger (простий)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -36,30 +39,37 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Authentication (JWT from Clerk)
+// Authentication (JWT від Clerk)
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
 var clerkAudience = builder.Configuration["Clerk:Audience"];
+
+if (string.IsNullOrWhiteSpace(clerkIssuer))
+{
+    throw new InvalidOperationException("Missing Clerk configuration value 'Clerk:Issuer'.");
+}
+
+var normalizedClerkIssuer = clerkIssuer.TrimEnd('/');
+var validIssuers = new[] { normalizedClerkIssuer, $"{normalizedClerkIssuer}/" };
+var hasAudience = !string.IsNullOrWhiteSpace(clerkAudience);
 
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = ClerkAuthenticationScheme;
+        options.DefaultChallengeScheme = ClerkAuthenticationScheme;
     })
-    .AddJwtBearer(options =>
+    .AddJwtBearer(ClerkAuthenticationScheme, options =>
     {
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
-
-        options.Authority = clerkIssuer;
-        options.MetadataAddress = $"{clerkIssuer}/.well-known/jwks.json";
+        options.MapInboundClaims = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = clerkIssuer,
+            ValidIssuers = validIssuers,
 
-            ValidateAudience = true,
+            ValidateAudience = hasAudience,
             ValidAudience = clerkAudience,
 
             ValidateLifetime = true,
