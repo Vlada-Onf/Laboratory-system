@@ -3,11 +3,16 @@ import { Box, Chip } from '@mui/material';
 
 const TagsCell = ({ value }) => {
   const safeTags = React.useMemo(() => {
-    if (!value || !Array.isArray(value)) return [];
-    
+    if (!value || !Array.isArray(value)){
+      return [];
+    }
     return value.map(tag => {
-      if (typeof tag === 'object' && tag?.name) return tag.name;
-      if (typeof tag === 'object' && tag?.title) return tag.title;
+      if (typeof tag === 'object' && tag?.name){
+        return tag.name;
+      }
+      if (typeof tag === 'object' && tag?.title){
+        return tag.title;
+      }
       return String(tag).trim();
     }).filter(Boolean);
   }, [value]);

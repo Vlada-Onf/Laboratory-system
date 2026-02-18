@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Avatar, Typography } from '@mui/material';
 
 const ClickableComponentCell = ({ image, name, id, onClick }) => {

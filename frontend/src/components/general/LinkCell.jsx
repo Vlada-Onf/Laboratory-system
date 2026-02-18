@@ -1,70 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Link, Tooltip, Typography, useTheme } from '@mui/material';
 
-const LinkCell = function(props) {
-    const url = props.url;
-    const [domain, setDomain] = useState('');
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === 'dark';
+const LinkCell = memo(({ url }) => {
+  const [domain, setDomain] = useState('');
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
-    useEffect(function() {
-        if (!url) {
-            return;
-        }
-
-        const timer = setTimeout(function() {
-            try {
-                const parsed = new URL(url);
-                setDomain(parsed.hostname);
-            } catch (error) {
-                console.error('Invalid URL:', error);
-                setDomain(url);
-            }
-        }, 0);
-
-        return function() {
-            clearTimeout(timer);
-        };
-    }, [url]);
-
+  React.useEffect(() => {
     if (!url) {
-        return "—";
+      setDomain('');
+      return;
     }
 
-    return (
-        <Tooltip title={url}>
-            <Link
-                href={url}
-                target="_blank"
-                rel="noopener"
-                underline="hover"
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                    color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'inherit',
-                }}
-            >
-                <img
-                    src={"https://www.google.com/s2/favicons?domain=" + url}
-                    alt=""
-                    width={16}
-                    height={16}
-                    style={{ borderRadius: 2 }}
-                />
-                <Typography
-                    variant="body2"
-                    noWrap
-                    sx={{
-                        maxWidth: 180,
-                        color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'inherit',
-                    }}
-                >
-                    {domain}
-                </Typography>
-            </Link>
-        </Tooltip>
-    );
-};
+    try {
+      const parsed = new URL(url);
+      setDomain(parsed.hostname);
+    } catch {
+      setDomain(url.slice(0, 30) + '...');
+    }
+  }, [url]);
 
+  if (!url) {
+    return <Typography variant="body2" color="text.secondary">—</Typography>;
+  }
+
+  return (
+    <Tooltip title={url}>
+      <Link
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        underline="hover"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'primary.main',
+          textDecoration: 'none',
+          '&:hover': {
+            color: isDarkMode ? '#fff' : 'primary.dark',
+          }
+        }}
+      >
+        <img
+          src={`https://www.google.com/s2/favicons?domain=${url}&sz=16`}
+          alt="Favicon"
+          width={16}
+          height={16}
+          style={{ borderRadius: 2 }}
+          loading="lazy"
+          onError={(e) => {
+            e.target.style.display = 'none';
+          }}
+        />
+        <Typography
+          variant="body2"
+          noWrap
+          sx={{
+            maxWidth: 180,
+            color: 'inherit',
+          }}
+        >
+          {domain || url.slice(0, 30) + '...'}
+        </Typography>
+      </Link>
+    </Tooltip>
+  );
+});
+
+LinkCell.displayName = 'LinkCell';
 export default LinkCell;

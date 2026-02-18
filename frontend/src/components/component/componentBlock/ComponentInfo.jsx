@@ -9,8 +9,12 @@ const ComponentInfo = function(props) {
   const categoryName = categories.find(cat => cat.id === categoryId)?.name || category || '—';
 
   const normalizedTags = React.useMemo(() => {
-    if (!tags) return [];
-    if (Array.isArray(tags)) return tags;
+    if (!tags){
+      return [];
+    }
+    if (Array.isArray(tags)){
+      return tags;
+    }
     if (typeof tags === 'string') {
       return tags.split(',').map(tag => tag.trim()).filter(Boolean);
     }

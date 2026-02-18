@@ -1,9 +1,4 @@
-import React from 'react';
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button
-} from '@mui/material';
-
+import {Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { eventBus } from '../../utils/eventBus';
 
@@ -41,9 +36,9 @@ const ConfirmDeleteModal = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Скасувати</Button>
-        <Button 
+        <Button
           onClick={handleConfirm}
-          variant="contained" 
+          variant="contained"
           color="error"
           startIcon={<DeleteIcon />}
         >

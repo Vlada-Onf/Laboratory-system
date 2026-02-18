@@ -1,170 +1,181 @@
 import { create } from 'zustand';
-import apiClient from '../api/client';
-import { useNeedsStore } from './useNeedsStore';
+import apiClient from '@/api/client';
 
-export const useComponentsStore = create((set, get) => ({
+export const useComponentsStore = create((set) => ({
   components: [],
   isLoading: false,
   currentComponent: null,
+  editModal: { open: false, component: null },
 
-  normalizeComponent: (comp) => ({
-    ...comp,
-    tags: comp.tags?.map(tag => 
-      typeof tag === 'object' ? tag.name : tag
-    ) || []
-  }),
+  addComponent: async (formData, file) => {
+  console.log('addComponent ОТРИМАВ:', { 
+    formData: formData.name,
+    fileExists: !!file,
+    fileType: typeof file,
+    fileName: file?.name,
+    fileSize: file?.size,
+    isFile: file instanceof File
+  });
+  
+  set({ isLoading: true });
+  
+  try {
+    if (!file || !(file instanceof File)) {
+      console.error('file не є File object:', file);
+      throw new Error('Фото обов\'язкове! (File object)');
+    }
+    
+    const formDataToSend = new FormData();
+    
+    formDataToSend.append('CategoryId', formData.categoryId);
+    formDataToSend.append('Name', formData.name);
+    formDataToSend.append('CreatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    
+    if (formData.description){
+      formDataToSend.append('Description', formData.description);
+    }
+    if (formData.quantity){
+      formDataToSend.append('Quantity', formData.quantity);
+    }
+    if (formData.price){
+      formDataToSend.append('Price', formData.price);
+    }
+    if (formData.supplierLink){
+      formDataToSend.append('SupplierLink', formData.supplierLink);
+    }
+    if (formData.documentationLink){
+      formDataToSend.append('DocumentationLink', formData.documentationLink);
+    }
+    
+    formDataToSend.append('image', file);
+    
+    if (formData.tagIds?.length) {
+      formData.tagIds.forEach(tagId => formDataToSend.append('TagIds', tagId));
+    }
+    
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, typeof value === 'object' ? value.name || 'File' : value);
+    }
+    
+    const { data } = await apiClient.post('/components', formDataToSend, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
+
+    set((state) => ({ components: [data, ...state.components] }));
+    console.log('Створено:', data);
+    return data;
+    
+  } catch (error) {
+    console.error('FAILED:', error);
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
+  updateComponent: async (componentId, formData, file = null) => {
+  set({ isLoading: true });
+  
+  try {
+    const formDataToSend = new FormData();
+    
+    formDataToSend.append('Id', componentId); 
+    formDataToSend.append('CategoryId', formData.categoryId);
+    formDataToSend.append('Name', formData.name);
+    formDataToSend.append('LastUpdatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    
+    if (formData.description){
+      formDataToSend.append('Description', formData.description);
+    }
+    if (formData.quantity){
+      formDataToSend.append('Quantity', formData.quantity);
+    }
+    if (formData.price){
+      formDataToSend.append('Price', formData.price);
+    }
+    if (formData.supplierLink){
+      formDataToSend.append('SupplierLink', formData.supplierLink);
+    }
+    if (formData.documentationLink){
+      formDataToSend.append('DocumentationLink', formData.documentationLink);
+    }
+    
+    if (file && file instanceof File) {
+      formDataToSend.append('image', file);
+    }
+    
+    if (formData.tagIds?.length) {
+      formData.tagIds.forEach(tagId => formDataToSend.append('TagIds', tagId));
+    }
+    
+    const { data } = await apiClient.put(`/components`, formDataToSend, {
+      headers: { 
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    set((state) => ({
+      components: state.components.map(comp => 
+        comp.id === componentId ? data : comp
+      ),
+    }));
+    
+    return data;
+    
+  } catch (error) {
+    console.error('❌ updateComponent FAILED:', error.response?.data || error.message);
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
+deleteComponent: async (componentId) => {
+  set({ isLoading: true });
+  
+  try {
+    await apiClient.delete(`/components/${componentId}`);
+    
+    set((state) => ({
+      components: state.components.filter(comp => comp.id !== componentId),
+    }));
+    
+    console.log('Компонент видалено:', componentId);
+  } catch (error) {
+    console.error('deleteComponent FAILED:', error);
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
 
   fetchComponents: async () => {
     set({ isLoading: true });
-
     try {
-      const startTime = Date.now();
-      const { data, status} = await apiClient.get('/components');
-      const endTime = Date.now();
-      
-      console.log('fetchComponents SUCCESS:', {
-        duration: `${endTime - startTime}ms`,
-        status,
-        count: data?.length || 0,
-        firstItem: data?.[0] || 'empty',
-      });
-      
-      const normalizedComponents = (data || []).map(comp => 
-        get().normalizeComponent(comp)
-      );
-      
-      set({ components: normalizedComponents });
+      const { data } = await apiClient.get('/components');
+      set({ components: data });
     } catch (error) {
-      console.error('fetchComponents FAILED:', error.response?.status, error.message);
-      set({ components: [] });
+      console.error('fetchComponents FAILED:', error);
     } finally {
       set({ isLoading: false });
     }
   },
 
-  addComponent: async (newComponent) => {
+  fetchSingleComponent: async (id) => {
     try {
-      const dataToSend = {
-        tagIds: newComponent.tagIds || [],
-        ...newComponent,
-        createdBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-        photoUrl: "віапб",
-        categoryId: newComponent.categoryId || null,
-        quantity: parseInt(newComponent.quantity) || 0,
-        price: parseFloat(newComponent.price) || 0,
-      };
-
-      const startTime = Date.now();
-      const response = await apiClient.post('/components', dataToSend, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const endTime = Date.now();
-
-      const normalizedData = get().normalizeComponent(response.data);
-
-      console.log('addComponent SUCCESS:', {
-        duration: `${endTime - startTime}ms`,
-        status: response.status,
-        tags: normalizedData.tags,
-        data: normalizedData
-      });
-
-      set((state) => ({
-        components: [...state.components, normalizedData]
-      }));
-
-      return normalizedData;
+      const { data } = await apiClient.get(`/components/${id}`);
+      set({ currentComponent: data });
+      return data;
     } catch (error) {
-      console.error('addComponent FAILED:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-      throw error;
+      console.error('fetchSingleComponent FAILED:', error);
     }
   },
 
-  updateComponent: async (componentId, updatedComponent) => {
-    try {
-      const dataToSend = {
-        id: componentId,
-        categoryId: updatedComponent.categoryId || null,
-        name: updatedComponent.name || "string",
-        description: updatedComponent.description || "string",
-        quantity: parseInt(updatedComponent.quantity) || 0,
-        price: parseFloat(updatedComponent.price) || 0,
-        photoUrl: updatedComponent.photoUrl || "string",
-        supplierLink: updatedComponent.supplierLink || "string",
-        documentationLink: updatedComponent.documentationLink || "string",
-        tagIds: updatedComponent.tagIds || [],
-        lastUpdatedBy: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-      };
-
-      const { data } = await apiClient.put('/components', dataToSend);
-      
-      const normalizedData = get().normalizeComponent(data);
-
-      set((state) => ({
-        components: state.components.map(comp => 
-          comp.id === componentId ? normalizedData : comp
-        )
-      }));
-
-      const updateComponentInNeeds = useNeedsStore.getState().updateComponentInNeeds;
-      if (typeof updateComponentInNeeds === 'function') {
-        updateComponentInNeeds({
-          ...normalizedData,
-          image: normalizedData.photoUrl
-        });
-      }
-
-      return normalizedData;
-    } catch (error) {
-      console.error('updateComponent FAILED:', error);
-      throw error;
-    }
-  },
-
-  deleteComponent: async (id) => {
-    try {
-      const startTime = Date.now();
-      const { status } = await apiClient.delete(`/components/${id}`);
-      const endTime = Date.now();
-      
-      console.log('deleteComponent SUCCESS:', {
-        duration: `${endTime - startTime}ms`,
-        status,
-      });
-
-      set((state) => ({
-        components: state.components.filter((comp) => comp.id !== id),
-      }));
-
-      useNeedsStore.getState().updateComponentInNeeds(id, null);
-    } catch (error) {
-      console.error('deleteComponent FAILED:', error);
-      throw error;
-    }
-  },
-
-  setCurrentComponent: (component) => {
-    set({ currentComponent: component });
-  },
-
-  clearCurrentComponent: () => {
-    set({ currentComponent: null });
-  },
-
-  setComponents: (components) => {
-    const normalized = components.map(comp => get().normalizeComponent(comp));
-    set({ components: normalized });
-  },
-
-  editModal: { open: false, component: null },
-  openEditModal: (component) => {
-    set({ editModal: { open: true, component } });
-  },
-  closeEditModal: () => {
-    set({ editModal: { open: false, component: null } });
-  },
+  openEditModal: (component) => set({ 
+    editModal: { open: true, component } 
+  }),
+  closeEditModal: () => set({ 
+    editModal: { open: false, component: null } 
+  }),
+  setCurrentComponent: (component) => set({ currentComponent: component }),
 }));

@@ -1,14 +1,13 @@
-import React from 'react';
 import Item from './../Item';
 import SectionTitle from './../SectionTitle';
 import { Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 
-const StatCard = ({ 
-  title, 
-  value, 
-  bgcolor, 
+const StatCard = ({
+  title,
+  value,
+  bgcolor,
   titleColor,
   onEdit,
   showEditButton = false
@@ -24,13 +23,7 @@ const StatCard = ({
     }}
   >
     <SectionTitle color={titleColor || '#fff'}>{title}</SectionTitle>
-    <Typography
-      variant="h4"
-      fontWeight={600}
-      color="#fff"
-    >
-      {value}
-    </Typography>
+    <Typography variant="h4" fontWeight={600} color="#fff">{value}</Typography>
 
     {showEditButton && (
       <IconButton

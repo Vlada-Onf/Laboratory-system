@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
-import {
-  Box, Typography, Card, CardMedia,
-  Dialog, DialogTitle, DialogContent, DialogActions, Button
-} from '@mui/material';
+import { Box, Typography, Card, CardMedia, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import ComponentInfo from './ComponentInfo';
 import Item from './../Item';
 import ButtonsPanel from './ButtonsPanel';
 
 const ComponentCard = ({
-   sx, id, name, image, description, price, quantity, 
-  burntQuantity, categoryId, category, tagIds,tags,
+  sx, id, name, image, photoUrl, description, price, quantity,
+  burntQuantity, categoryId, category, tagIds, tags,
   onEdit, onDelete, onAddNeed
 }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
+  const finalImage = image || 
+                     photoUrl || 
+                     'https://via.placeholder.com/300x300/08273b/ffffff?text=No+Image';
+
+
   const componentData = {
     id,
     name,
-    image,
+    image: finalImage,
     description,
     price,
     quantity,
@@ -41,31 +43,31 @@ const ComponentCard = ({
 
   return (
     <>
-      <Item sx={{
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    ...sx
-  }}>
+      <Item sx={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column', ...sx}}>
         <Box sx={{
-  display: 'flex',
-  flex: 1,
-  height: '100%',
-  flexDirection: { xs: 'column', md: 'row' },
-  gap: 3,
-  alignItems: { xs: 'center', md: 'flex-start' }
-}}>
+          display: 'flex',
+          flex: 1,
+          height: '100%',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 3,
+          alignItems: { xs: 'center', md: 'flex-start' }
+        }}>
           <Box sx={{ minWidth: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
             <Typography variant="h6" textAlign="center" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
               {name}
             </Typography>
+
             <Card sx={{ width: 220, maxHeight: 200, flexShrink: 1 }}>
-              <CardMedia
-                component="img"
-                image={image}
+              <CardMedia 
+                component="img" 
+                image={finalImage}
                 alt={name}
-                sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                sx={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'contain',
+                  backgroundColor: '#f5f5f5'
+                }}
               />
             </Card>
           </Box>
@@ -84,11 +86,7 @@ const ComponentCard = ({
           </Box>
         </Box>
 
-        <ButtonsPanel
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
-          onAddNeed={onAddNeed}
-        />
+        <ButtonsPanel onEdit={handleEdit} onDelete={handleDeleteClick} onAddNeed={onAddNeed}/>
       </Item>
 
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>

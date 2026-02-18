@@ -39,7 +39,6 @@ const ComponentPage = () => {
         await fetchCategories();
         setCategoriesLoaded(true);
 
-        console.log('🔄 [2/2] Завантажуємо компоненти...');
         await fetchComponents();
       } catch (error) {
         console.error('Помилка ComponentPage:', error);
@@ -74,16 +73,17 @@ const ComponentPage = () => {
     );
   }
 
-  const handleComponentSubmit = async (formData) => {
-    const componentId = editModal.component?.id || id;
-    try {
-      await updateComponent(componentId, formData);
-      await fetchComponents();
-      closeEditModal();
-    } catch (error) {
-      console.error('Помилка оновлення компонента:', error);
-    }
-  };
+  const handleComponentSubmit = async (formData, selectedFile) => {
+  const componentId = editModal.component?.id || id;
+  try {
+    await updateComponent(componentId, formData, selectedFile);
+    await fetchComponents();
+    closeEditModal();
+  } catch (error) {
+    console.error('Помилка оновлення компонента:', error);
+  }
+};
+
 
   const handleEditComponent = () => openEditModal(component);
 
@@ -141,6 +141,8 @@ const ComponentPage = () => {
   const handleOpenAddSchematicModal = () => {
     openSchematicEditModal(null);
   };
+
+
 
   return (
     <PageWrapper>

@@ -49,12 +49,24 @@ const ComponentLayout = ({ component, onEdit, onDelete, onUpdateLinks, onAddNeed
       : 'linear-gradient(135deg, #f16731, #f4926c)',
   [currentDamaged.quantity]);
 
-  const componentForCard = useMemo(() => ({
+const componentForCard = useMemo(() => {
+  const photoUrl = component?.photoUrl || 
+                   component?.photo || 
+                   component?.imageUrl || 
+                   component?.image ||
+                   'https://via.placeholder.com/300x300/08273b/ffffff?text=No+Image';
+  
+ 
+
+  return {
     ...component,
-    image: component?.photoUrl,
-    tags: component?.tags, 
+    image: photoUrl,
+    photoUrl: photoUrl,
+    tags: Array.isArray(component?.tags) ? component.tags : [],
     categoryId: component?.categoryId
-  }), [component]);
+  };
+}, [component]);
+
 
   useEffect(() => {
     if (component?.id) {

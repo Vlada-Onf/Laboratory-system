@@ -1,12 +1,4 @@
-import React from 'react';
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
+import {Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,} from '@mui/material';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SignpostIcon from '@mui/icons-material/Signpost';
 import WidgetsIcon from '@mui/icons-material/Widgets';
