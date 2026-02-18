@@ -12,19 +12,19 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 // Controllers + глобальна вал≥дац≥€
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<ValidationFilter>();
+options.Filters.Add<ValidationFilter>();
 });
 
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: FrontendCorsPolicy, policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+options.AddPolicy(name: FrontendCorsPolicy, policy =>
+{
+policy
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod();
+});
 });
 
 // Swagger
@@ -41,59 +41,57 @@ var clerkAudience = builder.Configuration["Clerk:Audience"];
 
 builder.Services
     .AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+{
+options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = true;
-        options.SaveToken = true;
+{
+options.RequireHttpsMetadata = true;
+options.SaveToken = true;
 
-        options.Authority = clerkIssuer;
-        options.MetadataAddress = $"{clerkIssuer}/.well-known/jwks.json";
+options.Authority = clerkIssuer;
+options.MetadataAddress = $"{clerkIssuer}/.well-known/jwks.json";
 
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = clerkIssuer,
+options.TokenValidationParameters = new TokenValidationParameters
+{
+ValidateIssuer = true,
+ValidIssuer = clerkIssuer,
 
-            ValidateAudience = true,
-            ValidAudience = clerkAudience,
+ValidateAudience = true,
+ValidAudience = clerkAudience,
 
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(1),
+ValidateLifetime = true,
+ClockSkew = TimeSpan.FromMinutes(1),
 
-            ValidateIssuerSigningKey = true
-        };
-    });
+ValidateIssuerSigningKey = true
+};
+});
 
 builder.Services.AddAuthorization();
-
-// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
-// Swagger можна залишити завжди або обгорнути в if (app.Environment.IsDevelopment())
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 1. CORS рано
-app.UseCors(FrontendCorsPolicy);
+// 1. HTTPS
+app.UseHttpsRedirection();
 
-// 2. Routing (додамо €вно Ч це best practice)
+// 2. Routing
 app.UseRouting();
 
-// 3. HTTPS
-app.UseHttpsRedirection();
+// 3. CORS (м≥ж Routing та Auth)
+app.UseCors(FrontendCorsPolicy);
 
 // 4. Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 5. Endpoints
-app.MapControllers();
+// 5. Endpoints + примусово нав≥сити CORS
+app.MapControllers().RequireCors(FrontendCorsPolicy);
 
 app.Run();
 
