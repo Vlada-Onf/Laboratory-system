@@ -3,9 +3,6 @@ import axios from 'axios';
 const apiClient = axios.create({
   baseURL: 'https://laboratory-system.onrender.com',
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 apiClient.interceptors.response.use(

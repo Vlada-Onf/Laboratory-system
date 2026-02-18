@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProviderWrapper } from "./context/ThemeProvider";
 import HistoryProvider from "./store/HistoryProvider";
 import AppRoutes from "./routes/AppRoutes";
+import LayoutWithSearch from './components/layout/LayoutWithSearch';
 
 import '@fontsource/geologica/400.css';
 import '@fontsource/geologica/500.css';
@@ -12,8 +13,10 @@ function App() {
   return (
     <ThemeProviderWrapper>
       <HistoryProvider>
-        <BrowserRouter>
-          <AppRoutes />
+          <BrowserRouter>
+          <LayoutWithSearch>
+            <AppRoutes />
+          </LayoutWithSearch>
         </BrowserRouter>
       </HistoryProvider>
     </ThemeProviderWrapper>
