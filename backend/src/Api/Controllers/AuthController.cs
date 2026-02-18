@@ -22,10 +22,14 @@ namespace Api.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken cancellationToken)
         {
+            Console.WriteLine("[AuthController] /auth/me hit");
+
             var userId = User.FindFirstValue("sub") ?? User.FindFirstValue("user_id");
             var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email_address");
             var firstName = User.FindFirstValue("given_name") ?? User.FindFirstValue("first_name") ?? "";
             var lastName = User.FindFirstValue("family_name") ?? User.FindFirstValue("last_name") ?? "";
+
+            Console.WriteLine($"[AuthController] claims: sub={userId}, email={email}, firstName={firstName}, lastName={lastName}");
 
             if (userId is null || email is null)
                 return Unauthorized("Invalid Clerk token claims");
