@@ -1,10 +1,11 @@
+using Api.Auth;
 using Api.Filters;
 using Application;
 using FluentValidation;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
@@ -22,8 +23,8 @@ builder.Services.AddCors(options =>
     {
         policy
             .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -68,7 +69,19 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+// Authorization + policy SuperAdminOnly
+builder.Services.AddScoped<IAuthorizationHandler, SuperAdminHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SuperAdminOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddRequirements(new SuperAdminRequirement());
+    });
+});
+
+// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();

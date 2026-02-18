@@ -3,9 +3,9 @@
 namespace Api.Dtos
 {
     public record RoleDto(
-        Guid Id,
-        string Name,
-        DateTime CreatedAt)
+           Guid Id,
+           string Name,
+           DateTime CreatedAt)
     {
         public static RoleDto FromDomainModel(Role role)
             => new(

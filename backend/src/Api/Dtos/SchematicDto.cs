@@ -29,21 +29,20 @@ namespace Api.Dtos
                 schematic.UpdatedAt);
     }
 
-    public record CreateSchematicDto
+    public class CreateSchematicDto
     {
-        public required Guid ComponentId { get; init; }
-        public required string Title { get; init; }
-        public string? Description { get; init; }
-        public string? AdditionalLinks { get; init; }
-        public required Guid CreatedBy { get; init; }
+        public Guid ComponentId { get; set; }
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public string? AdditionalLinks { get; set; }
+        public Guid CreatedBy { get; set; }
     }
-
-    public record UpdateSchematicDto
+    public class UpdateSchematicDto
     {
-        public required Guid Id { get; init; }
-        public required string Title { get; init; }
-        public string? Description { get; init; }
-        public string? AdditionalLinks { get; init; } 
-        public required Guid UpdatedBy { get; init; }
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public string? AdditionalLinks { get; set; }
+        public Guid UpdatedBy { get; set; }
     }
 }

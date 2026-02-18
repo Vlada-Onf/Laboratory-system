@@ -7,8 +7,8 @@ namespace Domain.Users
         protected User() { }
 
         public UserId Id { get; private set; }
-        public string ClerkId { get; private set; }
         public string Email { get; private set; }
+        public string ClerkId { get; private set; }
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
         public RoleId RoleId { get; private set; }
@@ -18,6 +18,7 @@ namespace Domain.Users
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? LastActivityAt { get; private set; }
         public Role Role { get; private set; } = null!;
+
         private User(
             UserId id,
             string clerkId,
@@ -33,12 +34,12 @@ namespace Domain.Users
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email не може бути порожнім");
-
             if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("Ім'я не може бути порожнім");
-
             if (string.IsNullOrWhiteSpace(lastName))
                 throw new ArgumentException("Прізвище не може бути порожнім");
+            if (string.IsNullOrWhiteSpace(clerkId))
+                throw new ArgumentException("ClerkId не може бути порожнім");
 
             Id = id;
             ClerkId = clerkId;
@@ -80,7 +81,6 @@ namespace Domain.Users
         {
             if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("Ім'я не може бути порожнім");
-
             if (string.IsNullOrWhiteSpace(lastName))
                 throw new ArgumentException("Прізвище не може бути порожнім");
 

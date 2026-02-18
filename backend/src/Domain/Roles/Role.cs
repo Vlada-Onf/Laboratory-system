@@ -4,7 +4,6 @@
     {
         public RoleId Id { get; }
         public string Name { get; private set; }
-
         public DateTime CreatedAt { get; }
 
         private Role(RoleId id, string name, DateTime createdAt)

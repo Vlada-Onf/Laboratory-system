@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Persistence.Repositories
 {
     public class UserRepository(ApplicationDbContext context)
-        : IUserRepository, IUserQueries
+            : IUserRepository, IUserQueries
     {
         public async Task<User> AddAsync(User user, CancellationToken cancellationToken)
         {
@@ -56,6 +56,7 @@ namespace Infrastructure.Persistence.Repositories
             await context.SaveChangesAsync(cancellationToken);
             return user;
         }
+
         public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await context.Users
