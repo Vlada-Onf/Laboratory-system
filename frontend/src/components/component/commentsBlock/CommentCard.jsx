@@ -32,19 +32,13 @@ const CommentCard = ({ comment, onUpdate, onDelete }) => {
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      gap: 2, 
-      p: 2, 
-      mb: 2, 
-      borderRadius: 2, 
+    <Box sx={{display: 'flex', gap: 2, p: 2, mb: 2, borderRadius: 2,
       bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : '#f8f9fa',
       border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e0e0e0'
     }}>
-      <Avatar src={avatarSrc} sx={{ width: 44, height: 44 }}>
-        Д
-      </Avatar>
-      
+
+      <Avatar src={avatarSrc} sx={{ width: 44, height: 44 }}> Д </Avatar>
+
       <Box sx={{ flex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="subtitle2" fontWeight={600}>
@@ -66,44 +60,21 @@ const CommentCard = ({ comment, onUpdate, onDelete }) => {
             sx={{ mb: 1 }}
           />
         ) : (
-          <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.5 }}>
-            {text || ' '}
-          </Typography>
+          <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.5 }}>{text || ''}</Typography>
         )}
 
         <Box sx={{ display: 'flex', gap: 1 }}>
           {isEditing ? (
             <>
-              <Button 
-                size="small" 
-                variant="outlined"
-                onClick={handleSave}
-                disabled={!text.trim()}
-              >
-                Зберегти
-              </Button>
-              <Button 
-                size="small" 
-                onClick={handleCancel}
-              >
-                Скасувати
-              </Button>
+              <Button size="small" variant="outlined" onClick={handleSave} disabled={!text.trim()}>Зберегти</Button>
+
+              <Button size="small" onClick={handleCancel}>Скасувати</Button>
             </>
           ) : (
             <>
-              <Button 
-                size="small" 
-                onClick={() => setIsEditing(true)}
-              >
-                Редагувати
-              </Button>
-              <Button 
-                size="small" 
-                onClick={handleDelete}
-                color="error"
-              >
-                Видалити
-              </Button>
+              <Button size="small" onClick={() => setIsEditing(true)}> Редагувати </Button>
+
+              <Button size="small" onClick={handleDelete} color="error"> Видалити </Button>
             </>
           )}
         </Box>
