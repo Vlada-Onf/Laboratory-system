@@ -10,4 +10,12 @@ export default defineConfig({
       '@store': resolve('./src/store'),
     },
   },
+  optimizeDeps: {
+    include: ['exceljs', 'file-saver']
+  },
+  build: {
+    rollupOptions: {
+      external: ['exceljs']
+    }
+  }
 })
