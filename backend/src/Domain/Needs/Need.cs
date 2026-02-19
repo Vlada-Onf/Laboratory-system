@@ -21,14 +21,15 @@ namespace Domain.Needs
         private Need() { }
 
         private Need(
-            NeedId id,
-            ComponentId componentId,
-            NeedStatusId statusId,
-            int quantityNeeded,
-            UserId requestedBy,
-            DateTime requestedAt,
-            string? description,
-            NeedImportanceId importanceId)
+        NeedId id,
+        ComponentId componentId,
+        NeedStatusId statusId,
+        int quantityNeeded,
+        UserId requestedBy,
+        DateTime requestedAt,
+        string? description,
+        NeedImportanceId importanceId,
+        string? completionReason)
         {
             Id = id;
             ComponentId = componentId;
@@ -38,6 +39,7 @@ namespace Domain.Needs
             RequestedAt = requestedAt;
             Description = description;
             ImportanceId = importanceId;
+            CompletionReason = completionReason;
         }
 
         public static Need Create(
@@ -46,7 +48,8 @@ namespace Domain.Needs
             UserId requestedBy,
             string? description,
             NeedImportanceId importanceId,
-            NeedStatusId statusId)
+            NeedStatusId statusId,
+            string? completionReason)
         {
             var id = NeedId.New();
             var requestedAt = DateTime.UtcNow;
@@ -59,19 +62,22 @@ namespace Domain.Needs
                 requestedBy,
                 requestedAt,
                 description,
-                importanceId);
+                importanceId,
+                completionReason);
         }
 
         public void UpdateDetails(
             int quantityNeeded,
             string? description,
             NeedImportanceId importanceId,
-            NeedStatusId statusId)
+            NeedStatusId statusId,
+            string? completionReason)
         {
             QuantityNeeded = quantityNeeded;
             Description = description;
             ImportanceId = importanceId;
             StatusId = statusId;
+            CompletionReason = completionReason;
         }
 
         public void UpdateImportance(NeedImportanceId importanceId)

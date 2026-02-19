@@ -45,7 +45,8 @@ namespace Application.Needs.Commands.Create
                     requestedBy: requestedBy,
                     description: request.Description,
                     importanceId: importanceId,
-                    statusId: statusId);
+                    statusId: statusId,
+                    completionReason: request.CompletionReason);
 
                 needId = need.Id;
 

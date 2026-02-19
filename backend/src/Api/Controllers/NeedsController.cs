@@ -98,8 +98,10 @@ namespace Api.Controllers
                 Description = request.Description,
                 StatusId = request.StatusId,
                 ImportanceId = request.ImportanceId,
+                CompletionReason = request.CompletionReason,
                 PerformedBy = request.PerformedBy
             };
+
 
             var result = await sender.Send(input, cancellationToken);
 
@@ -119,9 +121,11 @@ namespace Api.Controllers
                 QuantityNeeded = request.QuantityNeeded,
                 Description = request.Description,
                 ImportanceId = request.ImportanceId,
+                CompletionReason = request.CompletionReason,
                 StatusId = request.StatusId,
                 PerformedBy = request.PerformedBy
             };
+
 
             var result = await sender.Send(input, cancellationToken);
 

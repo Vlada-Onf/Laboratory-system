@@ -48,7 +48,9 @@ namespace Application.Needs.Commands.Update
                     quantityNeeded: request.QuantityNeeded,
                     description: request.Description,
                     importanceId: importanceId,
-                    statusId: statusId);
+                    statusId: statusId,
+                    completionReason: request.CompletionReason);
+
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
 
