@@ -1,20 +1,21 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {Box, TextField, Button, Stack, Typography, FormControl, Select, MenuItem, } from '@mui/material';
-import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
-import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
+import {Box, TextField, Button, Stack, Typography, FormControl, Select, MenuItem, InputLabel} from '@mui/material';
+import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
+import { useNeedStatusesStore } from '@store/useNeedStatusesStore';
 
 const getInitialForm = (initialData) => ({
-  name: initialData?.name || '',
+  componentId: initialData?.componentId || '',
+  quantity: initialData?.quantity || 1,
   description: initialData?.description || '',
-  quantity: initialData?.quantityNeeded || 1,
   importanceId: initialData?.importanceId || '',
   statusId: initialData?.statusId || '',
+  completionReason: initialData?.completionReason || '',
 });
 
-const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
-  const { importances, fetchImportances } = useWishlistImportancesStore();
-  const { statuses, fetchStatuses } = useWishlistStatusesStore();
-  
+const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
+  const { importances, fetchImportances } = useNeedImportancesStore();
+  const { statuses, fetchStatuses } = useNeedStatusesStore();
+
   const [form, setForm] = useState(() => getInitialForm(initialData));
   const [errors, setErrors] = useState({});
 
@@ -38,8 +39,8 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = 'Назва обов’язкова';
+    if (!form.componentId) {
+      newErrors.componentId = 'Компонент обов’язковий';
     }
     if (!form.importanceId) {
       newErrors.importanceId = 'Важливість обов’язкова';
@@ -47,8 +48,8 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
     if (!form.statusId) {
       newErrors.statusId = 'Статус обов’язковий';
     }
-    if (form.quantity < 1) {
-      newErrors.quantity = 'Кількість має бути більше 0';
+    if (form.quantity < 0) {
+      newErrors.quantity = 'Кількість не може бути від’ємною';
     }
 
     setErrors(newErrors);
@@ -57,45 +58,62 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     const data = {
-      name: form.name.trim(),
-      description: form.description.trim(),
+      componentId: form.componentId,
       quantity: Number(form.quantity),
+      description: form.description.trim(),
       importanceId: form.importanceId,
       statusId: form.statusId,
+      completionReason: form.completionReason.trim(),
     };
-    
     onSubmit(data);
   };
 
-  const isEditing = !!initialData?.id && initialData.id !== 'new';
+  const isEditing = !!initialData?.id;
 
   return (
-    <Box component="form" id="add-wishlist-form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+    <Box component="form" id="add-need-form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
       <Stack spacing={2} mt={1}>
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Назва запису *</Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Компонент *
+          </Typography>
           <TextField
-            value={form.name}
-            onChange={handleChange('name')}
-            error={!!errors.name}
-            helperText={errors.name}
+            value={form.componentId}
+            onChange={handleChange('componentId')}
+            error={!!errors.componentId}
+            helperText={errors.componentId}
+            fullWidth
+            required
+            placeholder="Введіть ID компонента"
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Кількість *
+          </Typography>
+          <TextField
+            type="number"
+            value={form.quantity}
+            onChange={handleChange('quantity')}
+            error={!!errors.quantity}
+            helperText={errors.quantity}
+            inputProps={{ min: 0, step: 1 }}
             fullWidth
             required
           />
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Опис</Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Опис
+          </Typography>
           <TextField
             value={form.description}
             onChange={handleChange('description')}
-            error={!!errors.description}
-            helperText={errors.description}
             multiline
             rows={3}
             fullWidth
@@ -103,23 +121,29 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Кількість *</Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Причина завершення
+          </Typography>
           <TextField
-            type="number"
-            value={form.quantity}
-            onChange={handleChange('quantity')}
-            error={!!errors.quantity}
-            helperText={errors.quantity}
-            inputProps={{ min: 1 }}
+            value={form.completionReason}
+            onChange={handleChange('completionReason')}
+            multiline
+            rows={2}
             fullWidth
-            required
           />
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Важливість *</Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Важливість *
+          </Typography>
           <FormControl fullWidth error={!!errors.importanceId} required>
-            <Select value={form.importanceId} onChange={handleChange('importanceId')}>
+            <InputLabel>Важливість</InputLabel>
+            <Select
+              value={form.importanceId}
+              onChange={handleChange('importanceId')}
+              label="Важливість"
+            >
               {importances.map((imp) => (
                 <MenuItem key={imp.id} value={imp.id}>{imp.name}</MenuItem>
               ))}
@@ -128,9 +152,16 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
         </Box>
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>Статус *</Typography>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+            Статус *
+          </Typography>
           <FormControl fullWidth error={!!errors.statusId} required>
-            <Select value={form.statusId} onChange={handleChange('statusId')}>
+            <InputLabel>Статус</InputLabel>
+            <Select
+              value={form.statusId}
+              onChange={handleChange('statusId')}
+              label="Статус"
+            >
               {statuses.map((status) => (
                 <MenuItem key={status.id} value={status.id}>{status.name}</MenuItem>
               ))}
@@ -165,7 +196,7 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
               },
             }}
           >
-            {isEditing ? 'Зберегти зміни' : 'Додати запис'}
+            {isEditing ? 'Зберегти зміни' : 'Створити потребу'}
           </Button>
         </Stack>
       </Stack>
@@ -173,4 +204,4 @@ const AddWishlistForm = ({ initialData, onSubmit, onCancel }) => {
   );
 };
 
-export default AddWishlistForm;
+export default AddNeedForm;

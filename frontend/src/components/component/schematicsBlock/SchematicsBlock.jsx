@@ -56,20 +56,20 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
     onAddSchematic?.();
   };
 
-  const handleSaveSchematic = async (schematicData) => {
-    try {
-      if (editModal.schematic) {
-        await updateSchematic(schematicData);
-      } else {
-        schematicData.componentId = String(componentId);
-        await addSchematic(schematicData);
-      }
-      closeEditModal();
-    } catch (error) {
-      console.error('Помилка збереження схеми:', error);
+  const handleSaveSchematic = async (formData, file) => {
+  try {
+    if (editModal.schematic) {
+      formData.id = editModal.schematic.id;
+      await updateSchematic(formData, file);
+    } else {
+      formData.componentId = String(componentId);
+      await addSchematic(formData, file);
     }
-  };
-
+    closeEditModal();
+  } catch (error) {
+    console.error('Помилка збереження схеми:', error);
+  }
+};
   if (isLoading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>Завантаження...</Box>;
   }

@@ -27,17 +27,19 @@ const WishlistTable = () => {
   }
 
   const columns = [
-    { field: 'name', headerName: 'Компонент', flex: 1.5 },
+    { field: 'name', headerName: 'Компонент', flex: 1.5 , minWidth: 160},
     { 
       field: 'quantityNeeded', 
       headerName: 'Кількість', 
       flex: 0.8,
+      minWidth: 100,
       renderCell: ({ value }) => <Typography fontWeight={600}>{value} шт</Typography>
     },
     { 
       field: 'priority', 
       headerName: 'Важливість', 
       flex: 1,
+      minWidth: 100,
       renderCell: ({ row }) => (
         <PriorityChip priority={wishlistTableData.getImportanceName(row.importanceId)} />
       )
@@ -47,6 +49,7 @@ const WishlistTable = () => {
       field: 'status',
       headerName: 'Статус', 
       flex: 1,
+      minWidth: 100,
       renderCell: ({ row }) => (
         <StatusChip 
           statusId={row.statusId}

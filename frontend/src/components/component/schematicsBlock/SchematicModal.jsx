@@ -1,8 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, Chip, Box, IconButton, Typography
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Chip, Box, IconButton, Typography} from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { eventBus } from '../../../utils/eventBus';
 import { useComponentsStore } from '@store/useComponentsStore';
@@ -20,21 +17,20 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
     if (schematicData?.links && Array.isArray(schematicData.links)) {
       return schematicData.links;
     }
-    
+
     if (schematicData?.additionalLinks) {
       if (Array.isArray(schematicData.additionalLinks)) {
         return schematicData.additionalLinks;
       }
-      
+
       const linksArray = schematicData.additionalLinks
         .split(',')
         .map(link => link.trim())
         .filter(Boolean);
-      
       return linksArray;
     }
-    
-    return []; 
+
+    return [];
   }, []);
   const defaultLinks = useMemo(() => {
     if (isEditing) {
@@ -95,27 +91,38 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('ПЕРЕД відправкою:', {
+    isEditing,
+    initialLinks: defaultLinks,
+    currentLinks: links,
+    linksLength: links.length,
+    linksContent: links
+  });
 
-    const additionalLinksString = links.join(',');
-    
-    const apiData = {
-      id: schematic?.id || crypto.randomUUID(),
-      title: form.title.trim(),
-      description: form.description.trim() || "string",
-      photoUrl: getImageUrl() || "string",
-      links: links, 
-      additionalLinks: additionalLinksString,
-      componentId: componentId,
-    };
+    const formDataToSend = {
+    title: form.title.trim(),
+    description: form.description.trim() || '',
+    componentId: componentId,
+    additionalLinks: links.join(',') || ''
+  };
 
-    const baseEventData = {
-      userId: 'currentUser',
-      userName: 'Дарина',
-      entityTypeId: 5,
-      entityTypeName: 'Схему',
-      entityId: apiData.id,
-      entityName: `${form.title.trim()} (${getComponentName(componentId)})`
-    };
+    console.log('Modal відправляє:', {
+    formData: formDataToSend.title,
+    file: form.photo,
+    isFile: form.photo instanceof File,
+    fileName: form.photo?.name,
+    fileSize: form.photo?.size
+  });
+
+  const baseEventData = {
+    userId: 'currentUser',
+    userName: 'Дарина',
+    entityTypeId: 5,
+    entityTypeName: 'Схему',
+    entityId: schematic?.id || crypto.randomUUID(),
+    entityName: `${form.title.trim()} (${getComponentName(componentId)})`
+  };
+
 
     if (isEditing) {
       const oldTitle = schematic?.title || '';
@@ -164,8 +171,8 @@ const SchematicModal = ({ open, onClose, onSave, schematic, componentId }) => {
       eventBus.emit('entity:created', { ...baseEventData, actionName: 'Створено' });
     }
 
-    onSave(apiData);
-    handleCloseModal();
+    onSave(formDataToSend, form.photo);
+  handleCloseModal();
   };
 
   return (

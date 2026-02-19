@@ -91,7 +91,7 @@ const CommentsBlock = ({ componentId }) => {
           Коментарів поки немає. Будьте першим!
         </Typography>
       ) : (
-        <Box sx={{ maxHeight: 400, overflow: 'auto', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ maxHeight: 400, overflow: 'auto', borderRadius: 1, }}>
           {comments.map((comment) => (
             <CommentCard
               key={comment.id}

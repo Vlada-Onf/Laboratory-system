@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
 import { useDashboardStore } from '@store/useDashboardStore';
 import { useComponentsStore } from '@store/useComponentsStore';
+import { useCategoriesStore } from '@store/useCategoriesStore'; 
 
 export const useDashboardData = () => {
   const { fetchDashboardStatistics, createStatistic } = useDashboardStore();
   const { fetchComponents } = useComponentsStore();
+  const { fetchCategories } = useCategoriesStore();
 
   useEffect(() => {
-    fetchDashboardStatistics();
+    fetchCategories();
     fetchComponents();
-  }, [fetchDashboardStatistics, fetchComponents]);
+    fetchDashboardStatistics();
+  }, [fetchCategories, fetchComponents, fetchDashboardStatistics]);
 
   const handleRefreshStatistics = async () => {
     try {

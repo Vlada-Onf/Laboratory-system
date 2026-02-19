@@ -7,7 +7,7 @@ import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';
-import AddNeedModal from '../../components/brokenComponents/AddNeedModal';
+import AddNeedModal from '../../components/needsTable/AddNeedModal';
 import { eventBus } from '../../utils/eventBus';
 
 const ComponentPage = () => {

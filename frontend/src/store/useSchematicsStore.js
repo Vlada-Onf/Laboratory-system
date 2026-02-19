@@ -18,41 +18,110 @@ export const useSchematicsStore = create((set) => ({
     }
   },
 
-  addSchematic: async (schematicData) => {
-    const dataToSend = {
-      componentId: schematicData.componentId,
-      title: schematicData.title || "Схема",
-      description: schematicData.description || "string",
-      photoUrl: schematicData.photoUrl || "string",
-      additionalLinks: schematicData.links?.join(',') || "string",
-      createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"  // хардкор
-    };
+  addSchematic: async (formData, file) => {
+  console.log('addSchematic ОТРИМАВ:', {
+    formData: formData.title,
+    fileExists: !!file,
+    fileName: file?.name
+  });
 
-    const response = await apiClient.post('/schematics', dataToSend);
+  set({ isLoading: true });
+
+  try {
+    if (!file || !(file instanceof File)) {
+      throw new Error('Фото обов\'язкове! (File object)');
+    }
+    const formDataToSend = new FormData();
+    formDataToSend.append('componentId', formData.componentId);
+    formDataToSend.append('Title', formData.title || 'Схема');
+    formDataToSend.append('Description', formData.description || '');
+    formDataToSend.append('CreatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    formDataToSend.append('image', file);
+
+    if (formData.additionalLinks) {
+      formDataToSend.append('AdditionalLinks', formData.additionalLinks);
+    }
+    for (let [key, value] of formDataToSend.entries()) {
+  console.log(key, value instanceof File ? value.name : value);
+}
+
+    const { data } = await apiClient.post('/schematics', formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
     set((state) => ({
-      schematics: [...state.schematics, response.data]
+      schematics: [data, ...state.schematics]
     }));
-    return response.data;
-  },
 
-  updateSchematic: async (schematicData) => {
-    const dataToSend = {
-      id: schematicData.id,
-      title: schematicData.title || "Схема",
-      description: schematicData.description || "string",
-      photoUrl: schematicData.photoUrl || "string",
-      additionalLinks: schematicData.links?.join(',') || "string",
-      updatedBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"  // хардкор
-    };
+    console.log('Схема створена:', data);
+    return data;
 
-    const response = await apiClient.put('/schematics', dataToSend);
+  } catch (error) {
+    console.error('addSchematic FAILED:', error.response?.data || error.message);
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
+
+  updateSchematic: async (formData, file = null) => {
+  console.log('updateSchematic ОТРИМАВ:', {
+    formData: formData.title,
+    fileExists: !!file,
+    fileName: file?.name,
+    schematicId: formData.id
+  });
+
+  set({ isLoading: true });
+
+  try {
+    const formDataToSend = new FormData();
+
+    formDataToSend.append('Id', formData.id);
+    formDataToSend.append('Title', formData.title || 'Схема');
+    formDataToSend.append('Description', formData.description || '');
+    formDataToSend.append('UpdatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
+
+    if (formData.additionalLinks) {
+      formDataToSend.append('AdditionalLinks', formData.additionalLinks);
+    }
+
+    if (file && file instanceof File) {
+      formDataToSend.append('image', file);
+      console.log('Нове фото додано до FormData');
+    } else {
+      console.log('Залишаємо старе фото');
+    }
+
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value instanceof File ? value.name : value);
+    }
+
+    const { data } = await apiClient.put('/schematics', formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
     set((state) => ({
-      schematics: state.schematics.map(s => 
-        s.id === schematicData.id ? response.data : s
+      schematics: state.schematics.map(s =>
+        s.id === formData.id ? data : s
       )
     }));
-    return response.data;
-  },
+
+    console.log('Схема оновлена:', data);
+    return data;
+
+  } catch (error) {
+    console.error('updateSchematic FAILED:', error.response?.data || error.message);
+    throw error;
+  } finally {
+    set({ isLoading: false });
+  }
+},
 
   deleteSchematic: async (schematicId) => {
     await apiClient.delete(`/schematics/${schematicId}`);

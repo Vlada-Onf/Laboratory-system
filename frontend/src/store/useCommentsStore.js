@@ -17,7 +17,6 @@ export const useCommentsStore = create((set, get) => ({
           [componentId]: data || []
         }
       }));
-
     } catch (error) {
       console.error('[COMMENTS] API ERROR:', error);
       set((state) => ({
