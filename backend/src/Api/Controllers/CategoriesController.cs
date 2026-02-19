@@ -32,7 +32,6 @@ namespace Api.Controllers
             _sender = sender;
         }
 
-        // 🔍 Пошук нашого Guid по Clerk sub
         private async Task<Guid?> GetCurrentUserGuidAsync(CancellationToken ct)
         {
             var clerkId =
@@ -135,15 +134,8 @@ namespace Api.Controllers
         {
             try
             {
-                Console.WriteLine("===== PUT /categories START =====");
-                Console.WriteLine($"request.Id: {request.Id}");
-                Console.WriteLine($"request.Name: {request.Name}");
-                Console.WriteLine($"request.Description: {request.Description}");
-                Console.WriteLine($"request.CardColor: {request.CardColor}");
-                Console.WriteLine($"image is null: {image is null}");
 
                 var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
-                Console.WriteLine($"GetCurrentUserGuidAsync(): {userGuid}");
 
                 if (userGuid is null)
                     return Unauthorized("User not found");
@@ -151,13 +143,10 @@ namespace Api.Controllers
                 var categoryOption = await _categoryQueries
                     .GetByIdAsync(new CategoryId(request.Id), cancellationToken);
 
-                Console.WriteLine($"categoryOption.IsNone: {categoryOption.IsNone}");
-
                 if (categoryOption.IsNone)
                     return NotFound("Category not found");
 
                 var category = categoryOption.First();
-                Console.WriteLine($"Category from DB: {category.Name}");
 
                 string? photoUrl = category.PhotoUrl;
 
@@ -182,10 +171,7 @@ namespace Api.Controllers
                     LastUpdatedBy = userGuid.Value,
                     PerformedBy = userGuid.Value
                 };
-
-                Console.WriteLine("Sending UpdateCategoryCommand...");
                 var result = await _sender.Send(input, cancellationToken);
-                Console.WriteLine("UpdateCategoryCommand completed.");
 
                 return result.Match<ActionResult<CategoryDto>>(
                     c => CategoryDto.FromDomainModel(c),
@@ -193,9 +179,6 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("💥 EXCEPTION in UpdateCategory:");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
                 return StatusCode(500, "Unexpected error occurred");
             }
         }

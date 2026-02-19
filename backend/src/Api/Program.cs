@@ -35,14 +35,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// 🔎 CLERK CONFIG
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
 var clerkAudience = builder.Configuration["Clerk:Audience"];
 
-Console.WriteLine("=========== CLERK CONFIG DEBUG ===========");
-Console.WriteLine("ISSUER: " + clerkIssuer);
-Console.WriteLine("AUDIENCE: " + clerkAudience);
-Console.WriteLine("===========================================");
 
 if (string.IsNullOrWhiteSpace(clerkIssuer))
 {
@@ -64,7 +59,6 @@ builder.Services
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
 
-        // важливо для Clerk – зберегти оригінальні назви клеймів
         options.MapInboundClaims = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
@@ -89,30 +83,15 @@ builder.Services
         {
             OnMessageReceived = context =>
             {
-                Console.WriteLine("🔵 OnMessageReceived");
 
                 var authHeader = context.Request.Headers["Authorization"].ToString();
-                Console.WriteLine("Authorization Header: " + authHeader);
 
                 if (authHeader?.StartsWith("Bearer ") == true)
                 {
                     var token = authHeader.Substring("Bearer ".Length);
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwt = handler.ReadJwtToken(token);
 
-                    try
-                    {
-                        var handler = new JwtSecurityTokenHandler();
-                        var jwt = handler.ReadJwtToken(token);
-
-                        Console.WriteLine("------ TOKEN DEBUG ------");
-                        Console.WriteLine("ISS: " + jwt.Issuer);
-                        Console.WriteLine("AUD: " + string.Join(",", jwt.Audiences));
-                        Console.WriteLine("EXP: " + jwt.ValidTo);
-                        Console.WriteLine("-------------------------");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Token parse error: " + ex.Message);
-                    }
                 }
 
                 return Task.CompletedTask;
@@ -120,28 +99,16 @@ builder.Services
 
             OnTokenValidated = context =>
             {
-                Console.WriteLine("🟢 TOKEN VALIDATED SUCCESSFULLY");
-
-                foreach (var claim in context.Principal.Claims)
-                {
-                    Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
-                }
-
                 return Task.CompletedTask;
             },
 
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine("🔴 AUTHENTICATION FAILED");
-                Console.WriteLine(context.Exception.ToString());
                 return Task.CompletedTask;
             },
 
             OnChallenge = context =>
             {
-                Console.WriteLine("🟠 CHALLENGE TRIGGERED");
-                Console.WriteLine("Error: " + context.Error);
-                Console.WriteLine("Description: " + context.ErrorDescription);
                 return Task.CompletedTask;
             }
         };
@@ -162,7 +129,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
-// 🔥 Головний лог усіх HTTP-запитів
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"➡️ REQUEST: {context.Request.Method} {context.Request.Path}");
