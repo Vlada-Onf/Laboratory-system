@@ -31,6 +31,7 @@ namespace Api.Controllers
             _userQueries = userQueries;
             _sender = sender;
         }
+
         private async Task<Guid?> GetCurrentUserGuidAsync(CancellationToken ct)
         {
             var clerkId =
@@ -122,7 +123,6 @@ namespace Api.Controllers
                 },
                 e => e.ToObjectResult());
         }
-
         [HttpPut]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<CategoryDto>> UpdateCategory(
@@ -139,17 +139,20 @@ namespace Api.Controllers
                 Console.WriteLine($"request.Description: {request.Description}");
                 Console.WriteLine($"request.CardColor: {request.CardColor}");
                 Console.WriteLine($"image is null: {image is null}");
+
                 var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
                 Console.WriteLine($"GetCurrentUserGuidAsync(): {userGuid}");
 
                 if (userGuid is null)
-                    return Unauthorized();
+                    return Unauthorized("User not found");
 
-                var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(request.Id), cancellationToken);
+                var categoryOption = await _categoryQueries
+                    .GetByIdAsync(new CategoryId(request.Id), cancellationToken);
+
                 Console.WriteLine($"categoryOption.IsNone: {categoryOption.IsNone}");
 
                 if (categoryOption.IsNone)
-                    return NotFound();
+                    return NotFound("Category not found");
 
                 var category = categoryOption.First();
                 Console.WriteLine($"Category from DB: {category.Name}");
@@ -191,7 +194,7 @@ namespace Api.Controllers
                 Console.WriteLine("💥 EXCEPTION in UpdateCategory:");
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
-                throw;
+                return StatusCode(500, "Unexpected error occurred");
             }
         }
 
