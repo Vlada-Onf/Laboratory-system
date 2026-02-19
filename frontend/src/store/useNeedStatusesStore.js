@@ -4,22 +4,25 @@ import apiClient from '../api/client';
 export const useNeedStatusesStore = create((set, get) => ({
   statuses: [],
   isLoading: false,
-  
+
   fetchStatuses: async () => {
-    const { isLoading } = get();
-    if (isLoading) return;
-    
-    set({ isLoading: true });
-    try {
-      const { data } = await apiClient.get('/need-statuses');
-      set({ statuses: data || [] });
-    } catch (error) {
-      console.error('Помилка завантаження статусів потреб:', error);
-      set({ statuses: [] });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+  const { statuses, isLoading } = get();
+  if (isLoading || statuses.length > 0){
+    return;
+  }
+
+  set({ isLoading: true });
+  try {
+    const { data } = await apiClient.get('/need-statuses');
+    set({ statuses: data || [] });
+  } catch (error) {
+    console.error('Помилка завантаження статусів потреб:', error);
+    set({ statuses: [] });
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
 
   addStatus: async (statusData) => {
     try {

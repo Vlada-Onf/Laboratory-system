@@ -4,11 +4,13 @@ import apiClient from '../api/client';
 export const useNeedImportancesStore = create((set, get) => ({
   importances: [],
   isLoading: false,
-  
+
   fetchImportances: async () => {
-    const { isLoading } = get();
-    if (isLoading) return;
-    
+    const { importances, isLoading } = get();
+    if (isLoading || importances.length > 0){
+      return;
+    }
+
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get('/need-importances');
@@ -18,6 +20,23 @@ export const useNeedImportancesStore = create((set, get) => ({
       set({ importances: [] });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  updateNeedImportance: async (needId, importanceId, reason) => {
+    try {
+      console.log('ОНОВЛЕННЯ ПРІОРИТЕТУ:', { needId, importanceId, reason });
+
+      const { data } = await apiClient.put(`/needs/importance`, {
+        id: needId,
+        importanceId: importanceId,
+        performedBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      });
+      return data;
+    }
+    catch (error) {
+      console.error('Помилка пріоритету:', error.response?.data || error.message);
+      throw error;
     }
   },
 
@@ -36,7 +55,7 @@ export const useNeedImportancesStore = create((set, get) => ({
     try {
       const { data } = await apiClient.put(`/need-importances`, importanceData);
       set((state) => ({
-        importances: state.importances.map(imp => 
+        importances: state.importances.map(imp =>
           imp.id === id ? data : imp
         )
       }));

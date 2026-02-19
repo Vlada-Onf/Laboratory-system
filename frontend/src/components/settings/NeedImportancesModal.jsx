@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {Dialog, DialogTitle, DialogContent,TextField, IconButton, Box, Typography} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography} from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
@@ -18,7 +18,7 @@ const NeedImportancesModal = ({ open, onClose }) => {
   const handleSaveImportance = useCallback(async (impId = null, name, level) => {
     try {
       const levelNum = parseInt(level);
-      if (isNaN(levelNum) || levelNum < 0){
+      if (isNaN(levelNum) || levelNum < 0) {
         return;
       }
       
@@ -58,33 +58,47 @@ const NeedImportancesModal = ({ open, onClose }) => {
       </DialogTitle>
       
       <DialogContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'end', mb: 3 }}>
-          <TextField 
-            label="Назва"
-            value={newImportanceName} 
-            onChange={(e) => setNewImportanceName(e.target.value)}
-            size="small" 
-            fullWidth 
-          />
-          <TextField 
-            label="Рівень"
-            type="number"
-            value={newImportanceLevel} 
-            onChange={(e) => setNewImportanceLevel(e.target.value)}
-            size="small" 
-            fullWidth 
-            inputProps={{ min: 0, step: 1 }}
-          />
+        {/* ✅ ФОРМА ДОДАВАННЯ - назва НАД кожним полем */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', mb: 3 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+              Назва рівня
+            </Typography>
+            <TextField 
+              value={newImportanceName} 
+              onChange={(e) => setNewImportanceName(e.target.value)}
+              size="small" 
+              fullWidth 
+              placeholder="Введіть назву"
+            />
+          </Box>
+          
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+              Рівень (число)
+            </Typography>
+            <TextField 
+              type="number"
+              value={newImportanceLevel} 
+              onChange={(e) => setNewImportanceLevel(e.target.value)}
+              size="small" 
+              fullWidth 
+              placeholder="0"
+              inputProps={{ min: 0, step: 1 }}
+            />
+          </Box>
+          
           <IconButton 
             onClick={() => handleSaveImportance(null, newImportanceName, newImportanceLevel)}
             disabled={isAddDisabled}
-            sx={{ height: '40px', width: '40px' }}
+            sx={{ height: '40px', width: '40px', alignSelf: 'flex-end' }}
             aria-label="Додати рівень важливості"
           >
             <AddCircleIcon />
           </IconButton>
         </Box>
 
+        {/* ✅ СПИСОК */}
         <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
           {isLoading ? (
             <Typography textAlign="center" color="text.secondary">
@@ -99,25 +113,31 @@ const NeedImportancesModal = ({ open, onClose }) => {
               <Box 
                 key={imp.id}
                 sx={{ 
-                  display: 'flex', gap: 1, alignItems: 'center', 
+                  display: 'flex', gap: 2, alignItems: 'center', 
                   p: 2, border: '1px solid', borderColor: 'divider', 
                   borderRadius: 1, mb: 1 
                 }}
               >
-                <TextField 
-                  value={imp.name} 
-                  onChange={(e) => handleSaveImportance(imp.id, e.target.value, imp.level)}
-                  size="small" 
-                  sx={{ flex: 1 }} 
-                />
-                <TextField 
-                  value={imp.level} 
-                  type="number"
-                  onChange={(e) => handleSaveImportance(imp.id, imp.name, e.target.value)}
-                  size="small" 
-                  sx={{ flex: 1 }}
-                  inputProps={{ min: 0, step: 1 }}
-                />
+                <Box sx={{ flex: 1 }}>
+                  <TextField 
+                    value={imp.name} 
+                    onChange={(e) => handleSaveImportance(imp.id, e.target.value, imp.level)}
+                    size="small" 
+                    fullWidth 
+                    placeholder="Назва"
+                  />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <TextField 
+                    value={imp.level} 
+                    type="number"
+                    onChange={(e) => handleSaveImportance(imp.id, imp.name, e.target.value)}
+                    size="small" 
+                    fullWidth 
+                    placeholder="0"
+                    inputProps={{ min: 0, step: 1 }}
+                  />
+                </Box>
                 <IconButton 
                   onClick={() => handleDeleteImportance(imp.id)}
                   size="small" 

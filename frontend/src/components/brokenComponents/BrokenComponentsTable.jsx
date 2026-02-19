@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import AddNeedModal from './AddNeedModal';
+import AddNeedModal from './../needsTable/AddNeedModal';
 import { useBrokenComponentsData } from '../../hooks/broken/useBrokenComponentsData';
 import { brokenComponentsColumns } from './BrokenComponentsColumn';
 
@@ -13,9 +13,21 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleOpenModal = useCallback((row) => {
-    setSelectedRow(row);
-    setOpenModal(true);
-  }, []);
+  
+  const component = getComponentById(row?.componentId);
+  const fullRow = {
+    ...row,
+    componentId: row.componentId,
+    componentName: component?.name || row.component?.name || '—',
+    name: component?.name || row.component?.name || '—',
+    categoryId: component?.categoryId,
+    category: categoriesMap.get(component?.categoryId) || row.categoryName || '—',
+  };
+  
+  setSelectedRow(fullRow);
+  setOpenModal(true);
+}, [getComponentById, categoriesMap]);
+
 
   const handleCloseModal = useCallback(() => {
     setOpenModal(false);
@@ -70,7 +82,6 @@ const BrokenComponentsTable = ({ onAddNeed }) => {
               fontWeight: 600,
             },
             '& .MuiDataGrid-row:hover': {
-              backgroundColor: '#f8f9ff',
             },
           }}
         />

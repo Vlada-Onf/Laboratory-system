@@ -4,10 +4,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const MoveToNeedsButton = ({ onMoveToNeeds }) => {
     return (
-        <IconButton
-            size="small"
-            onClick={onMoveToNeeds}
-        >
+        <IconButton size="small" onClick={onMoveToNeeds}>
             <ShoppingCartIcon fontSize="small" />
         </IconButton>
     );

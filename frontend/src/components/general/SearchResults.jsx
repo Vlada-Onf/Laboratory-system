@@ -130,15 +130,15 @@ const SearchResults = ({ results }) => {
                 {getItemIcon('schematic')}
               </IconButton>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="body1" fontWeight={500} noWrap>
-                  {sch.name}
-                </Typography>
-                {sch.description && (
-                  <Typography variant="body2" color="text.secondary" noWrap>
-                    {sch.description}
-                  </Typography>
-                )}
-              </Box>
+      <Typography variant="body1" fontWeight={500} noWrap>
+        {sch.title}
+      </Typography>
+      {sch.description && (
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {sch.description}
+        </Typography>
+      )}
+    </Box>
             </Box>
           ))}
         </Box>
