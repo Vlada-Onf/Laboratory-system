@@ -19,22 +19,42 @@ namespace Api.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryQueries _categoryQueries;
+        private readonly IUserQueries _userQueries;
         private readonly ISender _sender;
 
         public CategoriesController(
             ICategoryQueries categoryQueries,
+            IUserQueries userQueries,
             ISender sender)
         {
             _categoryQueries = categoryQueries;
+            _userQueries = userQueries;
             _sender = sender;
         }
-        private Guid? GetCurrentUserGuid()
+
+        // 🔍 Отримуємо GUID користувача з нашої БД по Clerk sub
+        private async Task<Guid?> GetCurrentUserGuidAsync(CancellationToken ct)
         {
-            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (id is null)
+            var clerkId =
+                User.FindFirstValue("sub") ??
+                User.FindFirstValue("user_id");
+
+            Console.WriteLine($"🔍 Clerk sub: {clerkId}");
+
+            if (string.IsNullOrWhiteSpace(clerkId))
                 return null;
 
-            return Guid.TryParse(id, out var guid) ? guid : null;
+            var userOption = await _userQueries.GetByClerkIdAsync(clerkId, ct);
+            if (userOption.IsNone)
+            {
+                Console.WriteLine("❌ User with this ClerkId not found in DB");
+                return null;
+            }
+
+            var user = userOption.First();
+            Console.WriteLine($"✅ App user id: {user.Id.Value}");
+
+            return user.Id.Value;
         }
 
         [HttpGet]
@@ -70,7 +90,7 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            var userGuid = GetCurrentUserGuid();
+            var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
             if (userGuid is null)
                 return Unauthorized();
 
@@ -113,9 +133,10 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            var userGuid = GetCurrentUserGuid();
+            var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
             if (userGuid is null)
                 return Unauthorized();
+
             var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(request.Id), cancellationToken);
             if (categoryOption.IsNone)
                 return NotFound();
@@ -151,12 +172,13 @@ namespace Api.Controllers
                 c => CategoryDto.FromDomainModel(c),
                 e => e.ToObjectResult());
         }
+
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteCategory(
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var userGuid = GetCurrentUserGuid();
+            var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
             if (userGuid is null)
                 return Unauthorized();
 
