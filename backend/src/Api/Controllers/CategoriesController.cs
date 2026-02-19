@@ -31,8 +31,6 @@ namespace Api.Controllers
             _userQueries = userQueries;
             _sender = sender;
         }
-
-        // 🔍 Отримуємо GUID користувача з нашої БД по Clerk sub
         private async Task<Guid?> GetCurrentUserGuidAsync(CancellationToken ct)
         {
             var clerkId =
@@ -133,44 +131,68 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
-            if (userGuid is null)
-                return Unauthorized();
-
-            var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(request.Id), cancellationToken);
-            if (categoryOption.IsNone)
-                return NotFound();
-
-            var category = categoryOption.First();
-
-            string? photoUrl = category.PhotoUrl;
-
-            if (image is not null && image.Length > 0)
+            try
             {
-                await using var stream = image.OpenReadStream();
-                photoUrl = await fileStorage.UploadAsync(
-                    stream,
-                    image.FileName,
-                    image.ContentType,
-                    cancellationToken);
+                Console.WriteLine("===== PUT /categories START =====");
+                Console.WriteLine($"request.Id: {request.Id}");
+                Console.WriteLine($"request.Name: {request.Name}");
+                Console.WriteLine($"request.Description: {request.Description}");
+                Console.WriteLine($"request.CardColor: {request.CardColor}");
+                Console.WriteLine($"image is null: {image is null}");
+                var userGuid = await GetCurrentUserGuidAsync(cancellationToken);
+                Console.WriteLine($"GetCurrentUserGuidAsync(): {userGuid}");
+
+                if (userGuid is null)
+                    return Unauthorized();
+
+                var categoryOption = await _categoryQueries.GetByIdAsync(new CategoryId(request.Id), cancellationToken);
+                Console.WriteLine($"categoryOption.IsNone: {categoryOption.IsNone}");
+
+                if (categoryOption.IsNone)
+                    return NotFound();
+
+                var category = categoryOption.First();
+                Console.WriteLine($"Category from DB: {category.Name}");
+
+                string? photoUrl = category.PhotoUrl;
+
+                if (image is not null && image.Length > 0)
+                {
+                    Console.WriteLine($"New image: {image.FileName}, {image.Length} bytes");
+                    await using var stream = image.OpenReadStream();
+                    photoUrl = await fileStorage.UploadAsync(
+                        stream,
+                        image.FileName,
+                        image.ContentType,
+                        cancellationToken);
+                }
+
+                var input = new UpdateCategoryCommand
+                {
+                    Id = request.Id,
+                    Name = request.Name,
+                    Description = request.Description,
+                    PhotoUrl = photoUrl,
+                    CardColor = request.CardColor,
+                    LastUpdatedBy = userGuid.Value,
+                    PerformedBy = userGuid.Value
+                };
+
+                Console.WriteLine("Sending UpdateCategoryCommand...");
+                var result = await _sender.Send(input, cancellationToken);
+                Console.WriteLine("UpdateCategoryCommand completed.");
+
+                return result.Match<ActionResult<CategoryDto>>(
+                    c => CategoryDto.FromDomainModel(c),
+                    e => e.ToObjectResult());
             }
-
-            var input = new UpdateCategoryCommand
+            catch (Exception ex)
             {
-                Id = request.Id,
-                Name = request.Name,
-                Description = request.Description,
-                PhotoUrl = photoUrl,
-                CardColor = request.CardColor,
-                LastUpdatedBy = userGuid.Value,
-                PerformedBy = userGuid.Value
-            };
-
-            var result = await _sender.Send(input, cancellationToken);
-
-            return result.Match<ActionResult<CategoryDto>>(
-                c => CategoryDto.FromDomainModel(c),
-                e => e.ToObjectResult());
+                Console.WriteLine("💥 EXCEPTION in UpdateCategory:");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                throw;
+            }
         }
 
         [HttpDelete("{id:guid}")]
