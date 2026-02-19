@@ -1,4 +1,4 @@
-using Api.Auth;
+Ôªøusing Api.Auth;
 using Api.Filters;
 using Application;
 using FluentValidation;
@@ -9,17 +9,14 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ÍÓÌÒÚ‡ÌÚË
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
 const string ClerkAuthenticationScheme = JwtBearerDefaults.AuthenticationScheme;
 
-// Controllers + „ÎÓ·‡Î¸Ì‡ ‚‡Î≥‰‡ˆ≥ˇ
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
 });
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: FrontendCorsPolicy, policy =>
@@ -31,17 +28,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Application + Infrastructure
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Authentication (JWT ‚≥‰ Clerk)
+// Authentication (JWT –≤—ñ–¥ Clerk)
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
-var clerkAudience = builder.Configuration["Clerk:Audience"];
 
 if (string.IsNullOrWhiteSpace(clerkIssuer))
 {
@@ -59,6 +53,9 @@ builder.Services
     })
     .AddJwtBearer(ClerkAuthenticationScheme, options =>
     {
+        // üîë –û–°–¨ –ì–û–õ–û–í–ù–ï: Authority –∫–∞–∂–µ JwtBearer –∑–≤—ñ–¥–∫–∏ –±—Ä–∞—Ç–∏ JWKS –∫–ª—é—á—ñ
+        options.Authority = normalizedClerkIssuer;
+
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
         options.MapInboundClaims = false;
@@ -67,6 +64,7 @@ builder.Services
         {
             ValidateIssuer = true,
             ValidIssuers = validIssuers,
+
             ValidateAudience = false,
 
             ValidateLifetime = true,
@@ -76,7 +74,6 @@ builder.Services
         };
     });
 
-// Authorization + policy SuperAdminOnly
 builder.Services.AddScoped<IAuthorizationHandler, SuperAdminHandler>();
 
 builder.Services.AddAuthorization(options =>
@@ -88,12 +85,10 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
-// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -101,13 +96,11 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-// CORS Ï≥Ê Routing Ú‡ Auth
 app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Endpoints + CORS
 app.MapControllers().RequireCors(FrontendCorsPolicy);
 
 app.Run();
