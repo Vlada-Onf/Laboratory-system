@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
-using Application.HistoryEntries.Commands.Create;
+// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Components;
 using Domain.Needs;
@@ -51,35 +51,36 @@ namespace Application.Needs.Commands.Create
 
                 var created = await needRepository.AddAsync(need, cancellationToken);
 
-                var actionOption = await actionRepository.GetByNameAsync(
-                    "Create need", cancellationToken);
-                if (actionOption.IsNone)
-                    throw new InvalidOperationException("Action 'Create need' not found");
-                var action = actionOption.First();
-
-                var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                    "Need", cancellationToken);
-                if (entityTypeOption.IsNone)
-                    throw new InvalidOperationException("EntityType 'Need' not found");
-                var entityType = entityTypeOption.First();
-
-                var historyCommand = new CreateHistoryCommand
-                {
-                    UserId = request.PerformedBy,
-                    ActionId = action.Id.Value,
-                    EntityTypeId = entityType.Id.Value,
-                    EntityId = created.Id.Value.ToString(),
-                    OldValues = null,
-                    NewValues =
-                        $"ComponentId={need.ComponentId.Value}, " +
-                        $"Quantity={need.QuantityNeeded}, " +
-                        $"StatusId={need.StatusId.Value}, " +
-                        $"ImportanceId={need.ImportanceId.Value}, " +
-                        $"Description={need.Description}"
-                };
-
-                var historyResult = await sender.Send(historyCommand, cancellationToken);
-                historyResult.IfLeft(e => throw e);
+                // ІСТОРІЯ тимчасово відключена
+                // var actionOption = await actionRepository.GetByNameAsync(
+                //     "Create need", cancellationToken);
+                // if (actionOption.IsNone)
+                //     throw new InvalidOperationException("Action 'Create need' not found");
+                // var action = actionOption.First();
+                //
+                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
+                //     "Need", cancellationToken);
+                // if (entityTypeOption.IsNone)
+                //     throw new InvalidOperationException("EntityType 'Need' not found");
+                // var entityType = entityTypeOption.First();
+                //
+                // var historyCommand = new CreateHistoryCommand
+                // {
+                //     UserId = request.PerformedBy,
+                //     ActionId = action.Id.Value,
+                //     EntityTypeId = entityType.Id.Value,
+                //     EntityId = created.Id.Value.ToString(),
+                //     OldValues = null,
+                //     NewValues =
+                //         $"ComponentId={need.ComponentId.Value}, " +
+                //         $"Quantity={need.QuantityNeeded}, " +
+                //         $"StatusId={need.StatusId.Value}, " +
+                //         $"ImportanceId={need.ImportanceId.Value}, " +
+                //         $"Description={need.Description}"
+                // };
+                //
+                // var historyResult = await sender.Send(historyCommand, cancellationToken);
+                // historyResult.IfLeft(e => throw e);
 
                 return created;
             }

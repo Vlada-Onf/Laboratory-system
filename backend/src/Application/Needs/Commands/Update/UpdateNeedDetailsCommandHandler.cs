@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
-using Application.HistoryEntries.Commands.Create;
+// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Needs;
 using Domain.Needs.Importance;
@@ -36,10 +36,10 @@ namespace Application.Needs.Commands.Update
         {
             try
             {
-                var oldQuantity = need.QuantityNeeded;
-                var oldDescription = need.Description;
-                var oldImportanceId = need.ImportanceId;
-                var oldStatusId = need.StatusId;
+                // var oldQuantity = need.QuantityNeeded;
+                // var oldDescription = need.Description;
+                // var oldImportanceId = need.ImportanceId;
+                // var oldStatusId = need.StatusId;
 
                 var importanceId = new NeedImportanceId(request.ImportanceId);
                 var statusId = new NeedStatusId(request.StatusId);
@@ -52,37 +52,35 @@ namespace Application.Needs.Commands.Update
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
 
-                var actionOption = await actionRepository.GetByNameAsync(
-                    "Update need details", cancellationToken);
-                if (actionOption.IsNone)
-                    throw new InvalidOperationException("Action 'Update need details' not found");
-                var action = actionOption.First();
-
-                var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                    "Need", cancellationToken);
-                if (entityTypeOption.IsNone)
-                    throw new InvalidOperationException("EntityType 'Need' not found");
-                var entityType = entityTypeOption.First();
-
-                var historyCommand = new CreateHistoryCommand
-                {
-                    UserId = request.PerformedBy,
-
-                    ActionId = action.Id.Value,
-                    EntityTypeId = entityType.Id.Value,
-
-                    EntityId = need.Id.Value.ToString(),
-
-                    OldValues =
-                        $"Quantity={oldQuantity}, Description={oldDescription}, " +
-                        $"ImportanceId={oldImportanceId.Value}, StatusId={oldStatusId.Value}",
-                    NewValues =
-                        $"Quantity={need.QuantityNeeded}, Description={need.Description}, " +
-                        $"ImportanceId={need.ImportanceId.Value}, StatusId={need.StatusId.Value}"
-                };
-
-                var historyResult = await sender.Send(historyCommand, cancellationToken);
-                historyResult.IfLeft(e => throw e);
+                // ІСТОРІЯ тимчасово відключена
+                // var actionOption = await actionRepository.GetByNameAsync(
+                //     "Update need details", cancellationToken);
+                // if (actionOption.IsNone)
+                //     throw new InvalidOperationException("Action 'Update need details' not found");
+                // var action = actionOption.First();
+                //
+                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
+                //     "Need", cancellationToken);
+                // if (entityTypeOption.IsNone)
+                //     throw new InvalidOperationException("EntityType 'Need' not found");
+                // var entityType = entityTypeOption.First();
+                //
+                // var historyCommand = new CreateHistoryCommand
+                // {
+                //     UserId = request.PerformedBy,
+                //     ActionId = action.Id.Value,
+                //     EntityTypeId = entityType.Id.Value,
+                //     EntityId = need.Id.Value.ToString(),
+                //     OldValues =
+                //         $"Quantity={oldQuantity}, Description={oldDescription}, " +
+                //         $"ImportanceId={oldImportanceId.Value}, StatusId={oldStatusId.Value}",
+                //     NewValues =
+                //         $"Quantity={need.QuantityNeeded}, Description={need.Description}, " +
+                //         $"ImportanceId={need.ImportanceId.Value}, StatusId={need.StatusId.Value}"
+                // };
+                //
+                // var historyResult = await sender.Send(historyCommand, cancellationToken);
+                // historyResult.IfLeft(e => throw e);
 
                 return updated;
             }

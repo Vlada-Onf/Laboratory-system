@@ -36,6 +36,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Authentication (JWT від Clerk)
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
+var clerkAudience = builder.Configuration["Clerk:Audience"];
 
 if (string.IsNullOrWhiteSpace(clerkIssuer))
 {
@@ -53,9 +54,8 @@ builder.Services
     })
     .AddJwtBearer(ClerkAuthenticationScheme, options =>
     {
-        // 🔑 ОСЬ ГОЛОВНЕ: Authority каже JwtBearer звідки брати JWKS ключі
         options.Authority = normalizedClerkIssuer;
-
+        options.MetadataAddress = $"{normalizedClerkIssuer}/.well-known/openid-configuration";
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
         options.MapInboundClaims = false;
@@ -65,11 +65,11 @@ builder.Services
             ValidateIssuer = true,
             ValidIssuers = validIssuers,
 
-            ValidateAudience = false,
+            ValidateAudience = true,
+            ValidAudience = clerkAudience,
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
-
             ValidateIssuerSigningKey = true
         };
     });

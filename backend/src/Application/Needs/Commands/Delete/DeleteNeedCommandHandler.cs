@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
-using Application.HistoryEntries.Commands.Create;
+// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
 using Domain.Needs;
 using LanguageExt;
@@ -34,37 +34,38 @@ namespace Application.Needs.Commands.Delete
         {
             try
             {
-                var oldValues =
-                    $"NeedId={need.Id.Value}, ComponentId={need.ComponentId.Value}, " +
-                    $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}, " +
-                    $"StatusId={need.StatusId.Value}";
+                // var oldValues =
+                //     $"NeedId={need.Id.Value}, ComponentId={need.ComponentId.Value}, " +
+                //     $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}, " +
+                //     $"StatusId={need.StatusId.Value}";
 
                 var deleted = await needRepository.DeleteAsync(need, cancellationToken);
 
-                var actionOption = await actionRepository.GetByNameAsync(
-                    "Delete need", cancellationToken);
-                if (actionOption.IsNone)
-                    throw new InvalidOperationException("Action 'Delete need' not found");
-                var action = actionOption.First();
-
-                var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                    "Need", cancellationToken);
-                if (entityTypeOption.IsNone)
-                    throw new InvalidOperationException("EntityType 'Need' not found");
-                var entityType = entityTypeOption.First();
-
-                var historyCommand = new CreateHistoryCommand
-                {
-                    UserId = performedBy,
-                    ActionId = action.Id.Value,
-                    EntityTypeId = entityType.Id.Value,
-                    EntityId = need.Id.Value.ToString(),
-                    OldValues = oldValues,
-                    NewValues = null
-                };
-
-                var historyResult = await sender.Send(historyCommand, cancellationToken);
-                historyResult.IfLeft(e => throw e);
+                // ІСТОРІЯ тимчасово відключена
+                // var actionOption = await actionRepository.GetByNameAsync(
+                //     "Delete need", cancellationToken);
+                // if (actionOption.IsNone)
+                //     throw new InvalidOperationException("Action 'Delete need' not found");
+                // var action = actionOption.First();
+                //
+                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
+                //     "Need", cancellationToken);
+                // if (entityTypeOption.IsNone)
+                //     throw new InvalidOperationException("EntityType 'Need' not found");
+                // var entityType = entityTypeOption.First();
+                //
+                // var historyCommand = new CreateHistoryCommand
+                // {
+                //     UserId = performedBy,
+                //     ActionId = action.Id.Value,
+                //     EntityTypeId = entityType.Id.Value,
+                //     EntityId = need.Id.Value.ToString(),
+                //     OldValues = oldValues,
+                //     NewValues = null
+                // };
+                //
+                // var historyResult = await sender.Send(historyCommand, cancellationToken);
+                // historyResult.IfLeft(e => throw e);
 
                 return deleted;
             }
