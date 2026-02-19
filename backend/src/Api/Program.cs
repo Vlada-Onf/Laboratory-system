@@ -55,7 +55,6 @@ builder.Services
     .AddJwtBearer(ClerkAuthenticationScheme, options =>
     {
         options.Authority = normalizedClerkIssuer;
-        options.MetadataAddress = $"{normalizedClerkIssuer}/.well-known/openid-configuration";
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
         options.MapInboundClaims = false;
@@ -70,7 +69,7 @@ builder.Services
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
-            ValidateIssuerSigningKey = true
+/*            ValidateIssuerSigningKey = true*/
         };
     });
 
