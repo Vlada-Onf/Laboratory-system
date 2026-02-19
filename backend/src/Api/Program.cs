@@ -34,9 +34,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Authentication (JWT від Clerk)
+//
+// 🔎 CLERK CONFIG DEBUG
+//
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
 var clerkAudience = builder.Configuration["Clerk:Audience"];
+
+Console.WriteLine("=========== CLERK CONFIG DEBUG ===========");
+Console.WriteLine("ISSUER: " + clerkIssuer);
+Console.WriteLine("AUDIENCE: " + clerkAudience);
+Console.WriteLine("===========================================");
 
 if (string.IsNullOrWhiteSpace(clerkIssuer))
 {
@@ -69,19 +76,65 @@ builder.Services
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
-/*            ValidateIssuerSigningKey = true*/
+
+            ValidateIssuerSigningKey = true
+        };
+
+        //
+        // 🔥 JWT DEBUG EVENTS
+        //
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                Console.WriteLine("🔵 OnMessageReceived");
+                Console.WriteLine("Authorization Header: " + context.Request.Headers["Authorization"]);
+                return Task.CompletedTask;
+            },
+
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("🟢 TOKEN VALIDATED SUCCESSFULLY");
+
+                var claims = context.Principal?.Claims;
+                if (claims != null)
+                {
+                    foreach (var claim in claims)
+                    {
+                        Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+                    }
+                }
+
+                return Task.CompletedTask;
+            },
+
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("🔴 AUTHENTICATION FAILED");
+                Console.WriteLine("Exception: " + context.Exception);
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = context =>
+            {
+                Console.WriteLine("🟠 ON CHALLENGE");
+                Console.WriteLine("Error: " + context.Error);
+                Console.WriteLine("Description: " + context.ErrorDescription);
+                return Task.CompletedTask;
+            }
         };
     });
 
 builder.Services.AddScoped<IAuthorizationHandler, SuperAdminHandler>();
 
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SuperAdminOnly", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.AddRequirements(new SuperAdminRequirement());
-    });
+options.AddPolicy("SuperAdminOnly", policy =>
+{
+policy.RequireAuthenticatedUser();
+policy.AddRequirements(new SuperAdminRequirement());
+});
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -92,7 +145,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
 app.UseCors(FrontendCorsPolicy);
