@@ -35,9 +35,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-//
-// 🔎 CLERK CONFIG DEBUG
-//
+// 🔎 CLERK CONFIG
 var clerkIssuer = builder.Configuration["Clerk:Issuer"];
 var clerkAudience = builder.Configuration["Clerk:Audience"];
 
@@ -65,6 +63,8 @@ builder.Services
         options.Authority = normalizedClerkIssuer;
         options.RequireHttpsMetadata = true;
         options.SaveToken = true;
+
+        // важливо для Clerk – зберегти оригінальні назви клеймів
         options.MapInboundClaims = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
@@ -75,9 +75,9 @@ builder.Services
             ValidateAudience = true,
             ValidAudiences = new[]
             {
-        clerkAudience,
-        "laboratory-api"
-    },
+                clerkAudience,
+                "laboratory-api"
+            },
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
@@ -162,6 +162,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
+// 🔥 Головний лог усіх HTTP-запитів
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"➡️ REQUEST: {context.Request.Method} {context.Request.Path}");

@@ -32,6 +32,7 @@ namespace Api.Controllers
             _sender = sender;
         }
 
+        // 🔍 Пошук нашого Guid по Clerk sub
         private async Task<Guid?> GetCurrentUserGuidAsync(CancellationToken ct)
         {
             var clerkId =
@@ -123,6 +124,7 @@ namespace Api.Controllers
                 },
                 e => e.ToObjectResult());
         }
+
         [HttpPut]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<CategoryDto>> UpdateCategory(
