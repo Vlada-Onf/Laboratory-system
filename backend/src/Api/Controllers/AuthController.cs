@@ -22,23 +22,47 @@ namespace Api.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            Console.WriteLine("[AuthController] /auth/me hit");
+            Console.WriteLine("========== /auth/me ==========");
 
-            var userId = User.FindFirstValue("sub") ?? User.FindFirstValue("user_id");
-            var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email_address");
-            var firstName = User.FindFirstValue("given_name") ?? User.FindFirstValue("first_name") ?? "";
-            var lastName = User.FindFirstValue("family_name") ?? User.FindFirstValue("last_name") ?? "";
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+            }
 
-            Console.WriteLine($"[AuthController] claims: sub={userId}, email={email}, firstName={firstName}, lastName={lastName}");
+            var userId =
+                User.FindFirstValue("sub") ??
+                User.FindFirstValue("user_id");
+
+            var email =
+                User.FindFirstValue("email") ??              // Clerk JWT template
+                User.FindFirstValue(ClaimTypes.Email) ??    // стандарт .NET
+                User.FindFirstValue("email_address");       // fallback
+
+            var firstName =
+                User.FindFirstValue("first_name") ??
+                User.FindFirstValue("given_name") ??
+                "";
+
+            var lastName =
+                User.FindFirstValue("last_name") ??
+                User.FindFirstValue("family_name") ??
+                "";
+
+            Console.WriteLine($"Resolved user:");
+            Console.WriteLine($"sub = {userId}");
+            Console.WriteLine($"email = {email}");
+            Console.WriteLine($"firstName = {firstName}");
+            Console.WriteLine($"lastName = {lastName}");
 
             if (userId is null || email is null)
-                return Unauthorized("Invalid Clerk token claims");
+                return Unauthorized("Invalid token claims");
 
             var command = new SyncUserFromClerkCommand(
                 ClerkId: userId,
                 Email: email,
                 FirstName: firstName,
-                LastName: lastName);
+                LastName: lastName
+            );
 
             var user = await _mediator.Send(command, cancellationToken);
 

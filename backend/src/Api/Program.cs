@@ -6,6 +6,7 @@ using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +73,11 @@ builder.Services
             ValidIssuers = validIssuers,
 
             ValidateAudience = true,
-            ValidAudience = clerkAudience,
+            ValidAudiences = new[]
+            {
+        clerkAudience,
+        "laboratory-api"
+    },
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
@@ -80,15 +85,36 @@ builder.Services
             ValidateIssuerSigningKey = true
         };
 
-        //
-        // 🔥 JWT DEBUG EVENTS
-        //
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
                 Console.WriteLine("🔵 OnMessageReceived");
-                Console.WriteLine("Authorization Header: " + context.Request.Headers["Authorization"]);
+
+                var authHeader = context.Request.Headers["Authorization"].ToString();
+                Console.WriteLine("Authorization Header: " + authHeader);
+
+                if (authHeader?.StartsWith("Bearer ") == true)
+                {
+                    var token = authHeader.Substring("Bearer ".Length);
+
+                    try
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwt = handler.ReadJwtToken(token);
+
+                        Console.WriteLine("------ TOKEN DEBUG ------");
+                        Console.WriteLine("ISS: " + jwt.Issuer);
+                        Console.WriteLine("AUD: " + string.Join(",", jwt.Audiences));
+                        Console.WriteLine("EXP: " + jwt.ValidTo);
+                        Console.WriteLine("-------------------------");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Token parse error: " + ex.Message);
+                    }
+                }
+
                 return Task.CompletedTask;
             },
 
@@ -96,13 +122,9 @@ builder.Services
             {
                 Console.WriteLine("🟢 TOKEN VALIDATED SUCCESSFULLY");
 
-                var claims = context.Principal?.Claims;
-                if (claims != null)
+                foreach (var claim in context.Principal.Claims)
                 {
-                    foreach (var claim in claims)
-                    {
-                        Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
-                    }
+                    Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
                 }
 
                 return Task.CompletedTask;
@@ -111,13 +133,13 @@ builder.Services
             OnAuthenticationFailed = context =>
             {
                 Console.WriteLine("🔴 AUTHENTICATION FAILED");
-                Console.WriteLine("Exception: " + context.Exception);
+                Console.WriteLine(context.Exception.ToString());
                 return Task.CompletedTask;
             },
 
             OnChallenge = context =>
             {
-                Console.WriteLine("🟠 ON CHALLENGE");
+                Console.WriteLine("🟠 CHALLENGE TRIGGERED");
                 Console.WriteLine("Error: " + context.Error);
                 Console.WriteLine("Description: " + context.ErrorDescription);
                 return Task.CompletedTask;
@@ -127,19 +149,24 @@ builder.Services
 
 builder.Services.AddScoped<IAuthorizationHandler, SuperAdminHandler>();
 
-
 builder.Services.AddAuthorization(options =>
 {
-options.AddPolicy("SuperAdminOnly", policy =>
-{
-policy.RequireAuthenticatedUser();
-policy.AddRequirements(new SuperAdminRequirement());
-});
+    options.AddPolicy("SuperAdminOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddRequirements(new SuperAdminRequirement());
+    });
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"➡️ REQUEST: {context.Request.Method} {context.Request.Path}");
+    await next();
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();
