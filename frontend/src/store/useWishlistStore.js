@@ -55,6 +55,8 @@ export const useWishlistStore = create((set, get) => ({
         priority: importancesStore.importances?.find(i => i.id === wishlist.importanceId)?.name || 'Низька',
         importanceId: wishlist.importanceId,
         requestedAt: wishlist.requestedAt || new Date().toISOString(),
+        completionReason: wishlist.completionReason || '—',
+      completedAt: wishlist.completedAt || null,
       }));
 
       set({ 
@@ -72,13 +74,14 @@ export const useWishlistStore = create((set, get) => ({
       const payload = {
         name: formData.name || "string",
         description: formData.description || "string",
-        quantityNeeded: Number(formData.quantity) || 0,
+        quantityNeeded: Number(formData.quantityNeeded) || 0, 
         requestedBy: USER_ID,
         importanceId: formData.importanceId,
         statusId: formData.statusId,
       };
 
       const { data } = await apiClient.post('/wishlists', payload);
+      await get().fetchWishlists(); 
       return data;
     } catch (error) {
       console.error('Помилка створення wishlist:', error.response?.data || error.message);
@@ -92,7 +95,7 @@ export const useWishlistStore = create((set, get) => ({
         id: wishlistId,
         name: details.name,
         description: details.description,
-        quantityNeeded: Number(details.quantity),
+        quantityNeeded: Number(details.quantityNeeded) || 0,
         importanceId: details.importanceId,
       };
       

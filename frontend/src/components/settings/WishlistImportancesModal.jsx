@@ -61,22 +61,32 @@ const WishlistImportancesModal = ({ open, onClose }) => {
       
       <DialogContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'end', mb: 3 }}>
-          <TextField 
-            label="Назва рівня"
-            value={newImportanceName} 
-            onChange={(e) => setNewImportanceName(e.target.value)}
-            size="small" 
-            fullWidth 
-          />
-          <TextField 
-            label="Рівень (число)"
-            type="number"
-            value={newImportanceLevel} 
-            onChange={(e) => setNewImportanceLevel(e.target.value)}
-            size="small" 
-            fullWidth 
-            inputProps={{ min: 0, step: 1 }}
-          />
+           <Box sx={{ flex: 1 }}>
+    <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+      Назва рівня
+    </Typography>
+    <TextField 
+      value={newImportanceName} 
+      onChange={(e) => setNewImportanceName(e.target.value)}
+      size="small" 
+      fullWidth 
+      placeholder="Введіть назву"
+    />
+  </Box>
+           <Box sx={{ flex: 1 }}>
+    <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+      Рівень (число)
+    </Typography>
+    <TextField 
+      type="number"
+      value={newImportanceLevel} 
+      onChange={(e) => setNewImportanceLevel(e.target.value)}
+      size="small" 
+      fullWidth 
+      placeholder="0"
+      inputProps={{ min: 0, step: 1 }}
+    />
+  </Box>
           <IconButton 
             onClick={() => handleSaveImportance(null, newImportanceName, newImportanceLevel)}
             disabled={isAddDisabled}

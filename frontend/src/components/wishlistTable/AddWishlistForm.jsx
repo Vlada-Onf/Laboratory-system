@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {Box, TextField, Button, Stack, Typography, FormControl, Select, MenuItem, InputLabel} from '@mui/material';
-import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
-import { useNeedStatusesStore } from '@store/useNeedStatusesStore';
+import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
+import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
 
 const getInitialForm = (initialData) => ({
-  componentId: initialData?.componentId || '',
+  name: initialData?.name || '',
   quantity: initialData?.quantity || 1,
   description: initialData?.description || '',
   importanceId: initialData?.importanceId || '',
@@ -13,9 +13,8 @@ const getInitialForm = (initialData) => ({
 });
 
 const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
-  const { importances, fetchImportances } = useNeedImportancesStore();
-  const { statuses, fetchStatuses } = useNeedStatusesStore();
-
+  const { importances, fetchImportances } = useWishlistImportancesStore();
+  const { statuses, fetchStatuses } = useWishlistStatusesStore();
   const [form, setForm] = useState(() => getInitialForm(initialData));
   const [errors, setErrors] = useState({});
 
@@ -39,9 +38,9 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.componentId) {
-      newErrors.componentId = 'Компонент обов’язковий';
-    }
+     if (!form.name.trim()) {
+      newErrors.name = 'Назва обов’язкова';
+     }
     if (!form.importanceId) {
       newErrors.importanceId = 'Важливість обов’язкова';
     }
@@ -61,8 +60,8 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
     if (!validate()) return;
 
     const data = {
-      componentId: form.componentId,
-      quantity: Number(form.quantity),
+      name: form.name.trim(),
+      quantityNeeded: Number(form.quantity),
       description: form.description.trim(),
       importanceId: form.importanceId,
       statusId: form.statusId,
@@ -78,16 +77,15 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
       <Stack spacing={2} mt={1}>
         <Box>
           <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Компонент *
+            Назва компонента *
           </Typography>
           <TextField
-            value={form.componentId}
-            onChange={handleChange('componentId')}
-            error={!!errors.componentId}
-            helperText={errors.componentId}
+            value={form.name}
+            onChange={handleChange('name')}
+            error={!!errors.name}
+            helperText={errors.name}
             fullWidth
             required
-            placeholder="Введіть ID компонента"
           />
         </Box>
 
@@ -120,18 +118,6 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
           />
         </Box>
 
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-            Причина завершення
-          </Typography>
-          <TextField
-            value={form.completionReason}
-            onChange={handleChange('completionReason')}
-            multiline
-            rows={2}
-            fullWidth
-          />
-        </Box>
 
         <Box>
           <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>

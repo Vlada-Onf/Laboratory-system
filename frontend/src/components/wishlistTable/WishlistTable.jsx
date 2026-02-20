@@ -41,7 +41,7 @@ const WishlistTable = () => {
       flex: 1,
       minWidth: 100,
       renderCell: ({ row }) => (
-        <PriorityChip priority={wishlistTableData.getImportanceName(row.importanceId)} />
+        <PriorityChip priority={row.importanceId} />
       )
     },
     { field: 'description', headerName: 'Опис', flex: 2, minWidth: 200 },
@@ -58,6 +58,7 @@ const WishlistTable = () => {
         />
       )
     },
+    
     {
       field: 'actions',
       type: 'actions',
