@@ -1,7 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
+using Application.HistoryEntries.Observers;
 using Infrastructure.Files;
+using Infrastructure.History;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -136,6 +139,11 @@ namespace Infrastructure.Persistence
             services.AddScoped<SchematicUsefulLinkRepository>();
             services.AddScoped<ISchematicUsefulLinkRepository>(p => p.GetRequiredService<SchematicUsefulLinkRepository>());
             services.AddScoped<ISchematicUsefulLinkQueries>(p => p.GetRequiredService<SchematicUsefulLinkRepository>());
+
+            //History
+            services.AddScoped<IHistoryRepository, HistoryRepository>();
+            services.AddScoped<IHistoryQueries, HistoryRepository>();
+            services.AddScoped<IHistoryObserver, HistoryObserver>();
 
             // Wishlists
             services.AddScoped<WishlistRepository>();

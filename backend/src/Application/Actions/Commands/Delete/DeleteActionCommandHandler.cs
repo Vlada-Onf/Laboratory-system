@@ -1,19 +1,17 @@
 ﻿using Application.Actions.Exceptions;
 using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Domain.History.Actions;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.Actions.Commands.Delete
 {
     public sealed class DeleteActionCommandHandler(
-         IActionRepository actionRepository)
-         : IRequestHandler<DeleteActionCommand, Either<ActionException, Action>>
+        IActionRepository actionRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<DeleteActionCommand, Either<ActionException, Action>>
     {
         public async Task<Either<ActionException, Action>> Handle(
             DeleteActionCommand request,
@@ -34,7 +32,24 @@ namespace Application.Actions.Commands.Delete
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    action.Id,
+                    action.Name,
+                    action.Description,
+                    action.CreatedAt
+                });
+
                 var deleted = await actionRepository.DeleteAsync(action, cancellationToken);
+
+                var userId = Guid.Empty;
+                await historyObserver.EntityDeletedAsync(
+                    userId: userId,
+                    entityTypeName: "Action",
+                    entityId: action.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    cancellationToken: cancellationToken);
+
                 return deleted;
             }
             catch (Exception ex)
