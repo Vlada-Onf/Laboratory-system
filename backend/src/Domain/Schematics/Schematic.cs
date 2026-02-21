@@ -14,7 +14,6 @@ namespace Domain.Schematics
         public string? PhotoUrl { get; private set; }
         public string? DocumentUrl { get; private set; }
         public string? AdditionalLinks { get; private set; }
-
         public UserId CreatedBy { get; }
         public DateTime CreatedAt { get; }
         public UserId? UpdatedBy { get; private set; }

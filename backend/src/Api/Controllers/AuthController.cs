@@ -1,5 +1,5 @@
 ﻿using Api.Dtos;
-using Application.Users.Queries;
+using Application.Users.Commands.SyncUserFromClerk;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,20 +34,33 @@ namespace Api.Controllers
                 User.FindFirstValue("user_id");
 
             if (string.IsNullOrWhiteSpace(clerkId))
-            {
                 return Unauthorized("Invalid token claims: missing clerk id");
-            }
 
-            var query = new GetUserByClerkIdQuery(clerkId);
-            var userOption = await _mediator.Send(query, cancellationToken);
+            var email =
+                User.FindFirstValue("email") ??
+                User.FindFirstValue(ClaimTypes.Email) ??
+                User.FindFirstValue("email_address");
 
-            if (userOption.IsNone)
-            {
-                return NotFound("User not found in database");
-            }
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized("Invalid token claims: missing email");
 
-            var user = userOption.First();
+            var firstName =
+                User.FindFirstValue("first_name") ??
+                User.FindFirstValue("given_name") ??
+                "";
 
+            var lastName =
+                User.FindFirstValue("last_name") ??
+                User.FindFirstValue("family_name") ??
+                "";
+            var command = new SyncUserFromClerkCommand(
+                ClerkId: clerkId,
+                Email: email,
+                FirstName: firstName,
+                LastName: lastName
+            );
+
+            var user = await _mediator.Send(command, cancellationToken);
             var dto = new UserDto(
                 Id: user.Id.Value,
                 Email: user.Email,
