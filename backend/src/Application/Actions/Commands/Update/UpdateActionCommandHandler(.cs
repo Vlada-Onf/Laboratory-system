@@ -44,6 +44,7 @@ namespace Application.Actions.Commands.Update
                 action.Update(request.Name, request.Description);
 
                 var updated = await actionRepository.UpdateAsync(action, cancellationToken);
+
                 var newValues = JsonSerializer.Serialize(new
                 {
                     action.Id,

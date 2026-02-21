@@ -14,5 +14,6 @@ namespace Application.Actions.Commands.Create
     {
         public required string Name { get; init; }
         public string? Description { get; init; }
+        public Guid UserId { get; init; }
     }
 }

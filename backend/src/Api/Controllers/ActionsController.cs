@@ -38,10 +38,15 @@ namespace Api.Controllers
             [FromBody] CreateActionDto request,
             CancellationToken cancellationToken)
         {
+            var userIdClaim = User.FindFirst("sub")?.Value;
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
             var input = new CreateActionCommand
             {
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                UserId = userId
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -50,6 +55,7 @@ namespace Api.Controllers
                 a => ActionDto.FromDomainModel(a),
                 e => e.ToObjectResult());
         }
+
 
         [HttpPut]
         public async Task<ActionResult<ActionDto>> UpdateAction(
