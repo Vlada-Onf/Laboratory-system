@@ -142,4 +142,37 @@ public class AdminController : ControllerBase
             _ => NoContent(),
             e => BadRequest(e.Message));
     }
+    [HttpPatch("{id:guid}/status")]
+    public async Task<ActionResult<UserProfileDto>> ChangeUserStatus(
+    [FromRoute] Guid id,
+    [FromBody] ChangeUserStatusDto request,
+    CancellationToken cancellationToken)
+    {
+        var current = await GetCurrentUserAsync(cancellationToken);
+        if (current is null)
+            return Unauthorized("User not found");
+
+        if (!IsAdminOrSuperAdmin(current))
+            return Forbid();
+
+        // не даємо змінювати самого себе через цей ендпоінт (опційно)
+        if (current.Id.Value == id)
+            return BadRequest("You cannot change your own status via this endpoint");
+
+        var option = await _userQueries.GetByIdAsync(new UserId(id), cancellationToken);
+        if (option.IsNone)
+            return NotFound("User not found");
+
+        var user = option.First();
+
+        if (request.IsActive)
+            user.Activate();
+        else
+            user.Deactivate();
+
+        var updated = await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return UserProfileDto.FromDomainModel(updated);
+    }
+
 }

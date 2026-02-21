@@ -62,6 +62,8 @@ namespace Domain.Users
             RoleId roleId,
             string? photoUrl = null)
         {
+            var now = DateTime.UtcNow;
+
             return new User(
                 UserId.New(),
                 clerkId,
@@ -71,7 +73,9 @@ namespace Domain.Users
                 roleId,
                 isActive: true,
                 photoUrl,
-                DateTime.UtcNow);
+                createdAt: now,
+                updatedAt: null,
+                lastActivityAt: now);
         }
 
         public void UpdateProfile(

@@ -8,4 +8,8 @@
             string? PhotoUrl,
             Guid RoleId
         );
+    public class ChangeUserStatusDto
+    {
+        public bool IsActive { get; set; }
+    }
 }
