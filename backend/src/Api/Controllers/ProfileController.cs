@@ -91,4 +91,16 @@ public class ProfileController : ControllerBase
 
         return NoContent();
     }
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout(
+    CancellationToken cancellationToken)
+    {
+        var user = await GetCurrentUserAsync(cancellationToken);
+        if (user is null)
+            return Unauthorized("User not found");
+        user.RecordActivity();
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        return NoContent();
+    }
+
 }
