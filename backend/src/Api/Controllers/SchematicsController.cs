@@ -20,6 +20,8 @@ namespace Api.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
+            Console.WriteLine($"[SchematicsController] GET /schematics/{id}");
+
             var result = await sender.Send(new GetSchematicByIdQuery(id), cancellationToken);
 
             return result.Match<ActionResult<SchematicDto>>(
@@ -33,6 +35,8 @@ namespace Api.Controllers
             [FromRoute] Guid componentId,
             CancellationToken cancellationToken)
         {
+            Console.WriteLine($"[SchematicsController] GET /schematics/by-component/{componentId}");
+
             var schematics = await sender.Send(
                 new GetSchematicsByComponentIdQuery(componentId),
                 cancellationToken);
@@ -52,10 +56,21 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
-            if (image is null || image.Length == 0)
-                return BadRequest("Image is required");
+            Console.WriteLine("[SchematicsController] POST /schematics");
+            Console.WriteLine($"[SchematicsController] Request: " +
+                              $"ComponentId={request.ComponentId}, " +
+                              $"Title={request.Title}, " +
+                              $"CreatedBy={request.CreatedBy}, " +
+                              $"UsefulLinkId={request.UsefulLinkId}");
 
-            // фото
+            if (image is null || image.Length == 0)
+            {
+                Console.WriteLine("[SchematicsController] Image is null or empty");
+                return BadRequest("Image is required");
+            }
+
+            Console.WriteLine($"[SchematicsController] Image: Name={image.FileName}, Size={image.Length}, ContentType={image.ContentType}");
+
             await using var imageStream = image.OpenReadStream();
             var photoUrl = await fileStorage.UploadAsync(
                 imageStream,
@@ -63,16 +78,25 @@ namespace Api.Controllers
                 image.ContentType,
                 cancellationToken);
 
-            // документ (якщо є)
+            Console.WriteLine($"[SchematicsController] Image uploaded. PhotoUrl={photoUrl}");
+
             string? documentUrl = null;
             if (document is not null && document.Length > 0)
             {
+                Console.WriteLine($"[SchematicsController] Document: Name={document.FileName}, Size={document.Length}, ContentType={document.ContentType}");
+
                 await using var docStream = document.OpenReadStream();
                 documentUrl = await fileStorage.UploadAsync(
                     docStream,
                     document.FileName,
                     document.ContentType,
                     cancellationToken);
+
+                Console.WriteLine($"[SchematicsController] Document uploaded. DocumentUrl={documentUrl}");
+            }
+            else
+            {
+                Console.WriteLine("[SchematicsController] No document provided");
             }
 
             var input = new CreateSchematicCommand
@@ -86,11 +110,23 @@ namespace Api.Controllers
                 CreatedBy = request.CreatedBy
             };
 
+            Console.WriteLine("[SchematicsController] Sending CreateSchematicCommand to MediatR");
+
             var result = await sender.Send(input, cancellationToken);
 
+            Console.WriteLine("[SchematicsController] CreateSchematicCommand handled");
+
             return result.Match<ActionResult<SchematicDto>>(
-                s => SchematicDto.FromDomainModel(s),
-                e => e.ToObjectResult());
+                s =>
+                {
+                    Console.WriteLine($"[SchematicsController] Created schematic Id={s.Id}");
+                    return SchematicDto.FromDomainModel(s);
+                },
+                e =>
+                {
+                    Console.WriteLine($"[SchematicsController] Error: {e.GetType().Name} - {e.Message}");
+                    return e.ToObjectResult();
+                });
         }
 
         // PUT /schematics
@@ -103,9 +139,15 @@ namespace Api.Controllers
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
+            Console.WriteLine("[SchematicsController] PUT /schematics");
+            Console.WriteLine($"[SchematicsController] Request: Id={request.Id}, Title={request.Title}, UpdatedBy={request.UpdatedBy}, UsefulLinkId={request.UsefulLinkId}");
+
             var option = await sender.Send(new GetSchematicByIdQuery(request.Id), cancellationToken);
             if (option.IsNone)
+            {
+                Console.WriteLine("[SchematicsController] Schematic not found");
                 return NotFound();
+            }
 
             var schematic = option.First();
 
@@ -114,22 +156,30 @@ namespace Api.Controllers
 
             if (image is not null && image.Length > 0)
             {
+                Console.WriteLine($"[SchematicsController] New image: Name={image.FileName}, Size={image.Length}, ContentType={image.ContentType}");
+
                 await using var imageStream = image.OpenReadStream();
                 photoUrl = await fileStorage.UploadAsync(
                     imageStream,
                     image.FileName,
                     image.ContentType,
                     cancellationToken);
+
+                Console.WriteLine($"[SchematicsController] New photoUrl={photoUrl}");
             }
 
             if (document is not null && document.Length > 0)
             {
+                Console.WriteLine($"[SchematicsController] New document: Name={document.FileName}, Size={document.Length}, ContentType={document.ContentType}");
+
                 await using var docStream = document.OpenReadStream();
                 documentUrl = await fileStorage.UploadAsync(
                     docStream,
                     document.FileName,
                     document.ContentType,
                     cancellationToken);
+
+                Console.WriteLine($"[SchematicsController] New documentUrl={documentUrl}");
             }
 
             var input = new UpdateSchematicCommand
@@ -143,11 +193,23 @@ namespace Api.Controllers
                 UpdatedBy = request.UpdatedBy
             };
 
+            Console.WriteLine("[SchematicsController] Sending UpdateSchematicCommand to MediatR");
+
             var result = await sender.Send(input, cancellationToken);
 
+            Console.WriteLine("[SchematicsController] UpdateSchematicCommand handled");
+
             return result.Match<ActionResult<SchematicDto>>(
-                s => SchematicDto.FromDomainModel(s),
-                e => e.ToObjectResult());
+                s =>
+                {
+                    Console.WriteLine($"[SchematicsController] Updated schematic Id={s.Id}");
+                    return SchematicDto.FromDomainModel(s);
+                },
+                e =>
+                {
+                    Console.WriteLine($"[SchematicsController] Error: {e.GetType().Name} - {e.Message}");
+                    return e.ToObjectResult();
+                });
         }
 
         // DELETE /schematics/{id}
