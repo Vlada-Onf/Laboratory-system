@@ -1,11 +1,11 @@
 ﻿using Api.Dtos;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
+using Domain.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Domain.Users;
-
 
 [ApiController]
 [Route("me")]
@@ -29,19 +29,11 @@ public class UserProfileController : ControllerBase
             User.FindFirstValue("sub") ??
             User.FindFirstValue("user_id");
 
-        Console.WriteLine($"🔍 Current user ClerkId: {clerkId}");
-
         if (string.IsNullOrWhiteSpace(clerkId))
             return null;
 
         var option = await _userQueries.GetByClerkIdAsync(clerkId, ct);
-        if (option.IsNone)
-        {
-            Console.WriteLine("❌ User with this ClerkId not found in DB");
-            return null;
-        }
-
-        return option.First();
+        return option.IsSome ? option.First() : null;
     }
 
     [HttpGet]
@@ -56,15 +48,30 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpPut]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserProfileDto>> UpdateMyProfile(
-        [FromBody] UpdateSelfProfileDto request,
-        CancellationToken cancellationToken)
+        [FromForm] UpdateSelfProfileDto request,
+        IFormFile? image,
+        CancellationToken cancellationToken,
+        [FromServices] IFileStorageService fileStorage)
     {
         var user = await GetCurrentUserAsync(cancellationToken);
         if (user is null)
             return Unauthorized("User not found");
 
-        user.UpdateProfile(request.FirstName, request.LastName, request.PhotoUrl);
+        string? photoUrl = user.PhotoUrl;
+
+        if (image is not null && image.Length > 0)
+        {
+            await using var stream = image.OpenReadStream();
+            photoUrl = await fileStorage.UploadAsync(
+                stream,
+                image.FileName,
+                image.ContentType,
+                cancellationToken);
+        }
+
+        user.UpdateProfile(request.FirstName, request.LastName, photoUrl);
 
         var updated = await _userRepository.UpdateAsync(user, cancellationToken);
 
@@ -79,11 +86,8 @@ public class UserProfileController : ControllerBase
         if (user is null)
             return Unauthorized("User not found");
 
-        // м’яке видалення
         user.Deactivate();
         await _userRepository.UpdateAsync(user, cancellationToken);
-        // або ж жорстке:
-        // await _userRepository.DeleteAsync(user, cancellationToken);
 
         return NoContent();
     }
