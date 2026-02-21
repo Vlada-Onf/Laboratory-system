@@ -23,11 +23,11 @@ namespace Application.Users.Commands.SyncUserFromClerk
 
             if (existing.IsSome)
             {
-                Console.WriteLine("[SyncUserFromClerk] Existing user, updating");
+                Console.WriteLine("[SyncUserFromClerk] Existing user, updating ONLY role");
 
                 var user = existing.First();
-                user.UpdateProfile(request.FirstName, request.LastName, photoUrl: null);
                 user.UpdateRole(roleId);
+
                 return await userRepository.UpdateAsync(user, cancellationToken);
             }
 
