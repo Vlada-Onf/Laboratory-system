@@ -5,7 +5,7 @@ using Domain.Users;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.History
+namespace Infrastructure.HistoryOfAction
 {
     public class HistoryObserver : IHistoryObserver
     {

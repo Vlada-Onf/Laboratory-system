@@ -4,7 +4,7 @@ using Application.Common.Interfaces.Repositories;
 using Application.HistoryEntries;
 using Application.HistoryEntries.Observers;
 using Infrastructure.Files;
-using Infrastructure.History;
+using Infrastructure.HistoryOfAction;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
