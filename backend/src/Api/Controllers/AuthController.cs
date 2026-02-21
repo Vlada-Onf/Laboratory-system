@@ -1,5 +1,5 @@
 ﻿using Api.Dtos;
-using Application.Users.Commands.SyncUserFromClerk;
+using Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,35 +29,24 @@ namespace Api.Controllers
                 Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
             }
 
-            var userId =
+            var clerkId =
                 User.FindFirstValue("sub") ??
                 User.FindFirstValue("user_id");
 
-            var email =
-                User.FindFirstValue("email") ??              
-                User.FindFirstValue(ClaimTypes.Email) ??   
-                User.FindFirstValue("email_address"); 
+            if (string.IsNullOrWhiteSpace(clerkId))
+            {
+                return Unauthorized("Invalid token claims: missing clerk id");
+            }
 
-            var firstName =
-                User.FindFirstValue("first_name") ??
-                User.FindFirstValue("given_name") ??
-                "";
+            var query = new GetUserByClerkIdQuery(clerkId);
+            var userOption = await _mediator.Send(query, cancellationToken);
 
-            var lastName =
-                User.FindFirstValue("last_name") ??
-                User.FindFirstValue("family_name") ??
-                "";
-            if (userId is null || email is null)
-                return Unauthorized("Invalid token claims");
+            if (userOption.IsNone)
+            {
+                return NotFound("User not found in database");
+            }
 
-            var command = new SyncUserFromClerkCommand(
-                ClerkId: userId,
-                Email: email,
-                FirstName: firstName,
-                LastName: lastName
-            );
-
-            var user = await _mediator.Send(command, cancellationToken);
+            var user = userOption.First();
 
             var dto = new UserDto(
                 Id: user.Id.Value,
@@ -65,7 +54,8 @@ namespace Api.Controllers
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 PhotoUrl: user.PhotoUrl,
-                RoleId: user.RoleId.Value);
+                RoleId: user.RoleId.Value
+            );
 
             return Ok(dto);
         }
