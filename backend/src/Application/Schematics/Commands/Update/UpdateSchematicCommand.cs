@@ -13,7 +13,7 @@ namespace Application.Schematics.Commands.Update
         public string? Description { get; init; }
         public string? PhotoUrl { get; init; }
         public string? DocumentUrl { get; init; }
-        public required Guid UsefulLinkId { get; init; }
+        public required Guid? UsefulLinkId { get; init; }
         public required Guid UpdatedBy { get; init; }
     }
 }
