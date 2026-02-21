@@ -9,7 +9,7 @@ namespace Api.Dtos
         string? Description,
         string? PhotoUrl,
         string? DocumentUrl,
-        string? AdditionalLinks,
+        Guid UsefulLinkId,
         Guid CreatedBy,
         DateTime CreatedAt,
         Guid? UpdatedBy,
@@ -23,7 +23,7 @@ namespace Api.Dtos
                 schematic.Description,
                 schematic.PhotoUrl,
                 schematic.DocumentUrl,
-                schematic.AdditionalLinks,
+                schematic.SchematicUsefulLinkId.Value,
                 schematic.CreatedBy.Value,
                 schematic.CreatedAt,
                 schematic.UpdatedBy?.Value,
@@ -35,7 +35,9 @@ namespace Api.Dtos
         public Guid ComponentId { get; set; }
         public string Title { get; set; } = "";
         public string? Description { get; set; }
-        public string? AdditionalLinks { get; set; }
+        public string? PhotoUrl { get; set; }
+        public string? DocumentUrl { get; set; }
+        public Guid UsefulLinkId { get; set; }
         public Guid CreatedBy { get; set; }
     }
 
@@ -44,7 +46,9 @@ namespace Api.Dtos
         public Guid Id { get; set; }
         public string Title { get; set; } = "";
         public string? Description { get; set; }
-        public string? AdditionalLinks { get; set; }
+        public string? PhotoUrl { get; set; }
+        public string? DocumentUrl { get; set; }
+        public Guid UsefulLinkId { get; set; }
         public Guid UpdatedBy { get; set; }
     }
 }

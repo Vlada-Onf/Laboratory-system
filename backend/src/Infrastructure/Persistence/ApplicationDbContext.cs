@@ -12,6 +12,7 @@ using Domain.Needs.Importance;
 using Domain.Needs.Status;
 using Domain.Roles;
 using Domain.Schematics;
+using Domain.Schematics.UsefulLink;
 using Domain.Tags;
 using Domain.Users;
 using Domain.Wishlists;
@@ -49,6 +50,7 @@ namespace Infrastructure.Persistence
         public DbSet<User> Users { get; init; }
         public DbSet<Role> Roles { get; init; }
         public DbSet<Schematic> Schematics { get; init; }
+        public DbSet<SchematicUsefulLink> SchematicUsefulLinks { get; set; } = null!;
         public DbSet<Wishlist> Wishlists { get; init; }
         public DbSet<WishlistImportance> WishlistImportances { get; init; }
         public DbSet<WishlistStatus> WishlistStatuses { get; init; }

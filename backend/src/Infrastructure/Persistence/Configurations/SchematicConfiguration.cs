@@ -1,6 +1,7 @@
 ﻿using Domain.Components;
 using Domain.Schematics;
 using Domain.Schematics.Schematics;
+using Domain.Schematics.UsefulLink;
 using Domain.Users;
 using Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +39,16 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("varchar(500)")
                 .HasColumnName("photo_url");
 
-            builder.Property(s => s.AdditionalLinks)
-                .HasColumnType("varchar(2000)")
-                .HasColumnName("additional_links");
+            builder.Property(s => s.DocumentUrl)
+                .HasColumnType("varchar(500)")
+                .HasColumnName("document_url");
+
+            builder.Property(s => s.SchematicUsefulLinkId)
+                .HasConversion(x => x.Value, x => new SchematicUsefulLinkId(x))
+                .HasColumnName("schematic_useful_link_id");
 
             builder.Property(s => s.CreatedBy)
-                .HasConversion(x => x.Value, x => new UserId(x))  
+                .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("created_by")
                 .IsRequired();
 
@@ -54,7 +59,7 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(s => s.UpdatedBy)
-                .HasConversion(x => x.Value, x => new UserId(x)) 
+                .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("updated_by");
 
             builder.Property(s => s.UpdatedAt)

@@ -1,5 +1,6 @@
 ﻿using Domain.Components;
 using Domain.Schematics.Schematics;
+using Domain.Schematics.UsefulLink;
 using Domain.Users;
 
 namespace Domain.Schematics
@@ -8,12 +9,11 @@ namespace Domain.Schematics
     {
         public SchematicId Id { get; }
         public ComponentId ComponentId { get; private set; }
-
+        public SchematicUsefulLinkId SchematicUsefulLinkId { get; private set; }
         public string Title { get; private set; }
         public string? Description { get; private set; }
         public string? PhotoUrl { get; private set; }
         public string? DocumentUrl { get; private set; }
-        public string? AdditionalLinks { get; private set; }
         public UserId CreatedBy { get; }
         public DateTime CreatedAt { get; }
         public UserId? UpdatedBy { get; private set; }
@@ -26,14 +26,14 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? documentUrl,
-            string? additionalLinks,
+            SchematicUsefulLinkId schematicUsefulLinkId,
             UserId createdBy,
             DateTime createdAt,
             UserId? updatedBy = null,
             DateTime? updatedAt = null)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Назва не може бути порожнім");
+                throw new ArgumentException("Назва не може бути порожньою");
 
             Id = id;
             ComponentId = componentId;
@@ -41,7 +41,7 @@ namespace Domain.Schematics
             Description = description;
             PhotoUrl = photoUrl;
             DocumentUrl = documentUrl;
-            AdditionalLinks = additionalLinks;
+            SchematicUsefulLinkId = schematicUsefulLinkId;
             CreatedBy = createdBy;
             CreatedAt = createdAt;
             UpdatedBy = updatedBy;
@@ -51,11 +51,11 @@ namespace Domain.Schematics
         public static Schematic Create(
             ComponentId componentId,
             string title,
-            string? description = null,
-            string? photoUrl = null,
-            string? documentUrl = null,
-            string? additionalLinks = null,
-            UserId? createdBy = null)
+            string? description,
+            string? photoUrl,
+            string? documentUrl,
+            SchematicUsefulLinkId schematicUsefulLinkId,
+            UserId createdBy)
         {
             return new Schematic(
                 SchematicId.New(),
@@ -64,8 +64,8 @@ namespace Domain.Schematics
                 description,
                 photoUrl,
                 documentUrl,
-                additionalLinks,
-                createdBy ?? throw new ArgumentException("Дані про користувача не можуть бути порожніми"),
+                schematicUsefulLinkId,
+                createdBy,
                 DateTime.UtcNow);
         }
 
@@ -74,7 +74,7 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? documentUrl,
-            string? additionalLinks,
+            SchematicUsefulLinkId schematicUsefulLinkId,
             UserId updatedBy)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -84,7 +84,7 @@ namespace Domain.Schematics
             Description = description;
             PhotoUrl = photoUrl;
             DocumentUrl = documentUrl;
-            AdditionalLinks = additionalLinks;
+            SchematicUsefulLinkId = schematicUsefulLinkId;
             UpdatedBy = updatedBy;
             UpdatedAt = DateTime.UtcNow;
         }

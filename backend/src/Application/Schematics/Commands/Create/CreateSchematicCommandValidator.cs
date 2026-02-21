@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Application.Schematics.Commands.Create
 {
     public sealed class CreateSchematicCommandValidator
-            : AbstractValidator<CreateSchematicCommand>
+    : AbstractValidator<CreateSchematicCommand>
     {
         public CreateSchematicCommandValidator()
         {
@@ -31,9 +31,8 @@ namespace Application.Schematics.Commands.Create
                 .MaximumLength(500)
                 .When(x => x.DocumentUrl is not null);
 
-            RuleFor(x => x.AdditionalLinks)
-                .MaximumLength(1000)
-                .When(x => x.AdditionalLinks is not null);
+            RuleFor(x => x.UsefulLinkId)
+                .NotEmpty().WithMessage("UsefulLinkId є обов'язковим");
 
             RuleFor(x => x.CreatedBy)
                 .NotEmpty().WithMessage("CreatedBy є обов'язковим");

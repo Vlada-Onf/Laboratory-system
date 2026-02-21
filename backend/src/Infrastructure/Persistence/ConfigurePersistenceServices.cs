@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
 using Infrastructure.Files;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -130,6 +131,11 @@ namespace Infrastructure.Persistence
             services.AddScoped<SchematicRepository>();
             services.AddScoped<ISchematicRepository>(p => p.GetRequiredService<SchematicRepository>());
             services.AddScoped<ISchematicQueries>(p => p.GetRequiredService<SchematicRepository>());
+
+            // Schematic useful links
+            services.AddScoped<SchematicUsefulLinkRepository>();
+            services.AddScoped<ISchematicUsefulLinkRepository>(p => p.GetRequiredService<SchematicUsefulLinkRepository>());
+            services.AddScoped<ISchematicUsefulLinkQueries>(p => p.GetRequiredService<SchematicUsefulLinkRepository>());
 
             // Wishlists
             services.AddScoped<WishlistRepository>();

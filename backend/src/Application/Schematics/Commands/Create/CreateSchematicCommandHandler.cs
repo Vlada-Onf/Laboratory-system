@@ -3,6 +3,7 @@ using Application.Schematics.Exceptions;
 using Domain.Components;
 using Domain.Schematics;
 using Domain.Schematics.Schematics;
+using Domain.Schematics.UsefulLink;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
@@ -41,7 +42,7 @@ namespace Application.Schematics.Commands.Create
                     description: request.Description,
                     photoUrl: request.PhotoUrl,
                     documentUrl: request.DocumentUrl,
-                    additionalLinks: request.AdditionalLinks,
+                    schematicUsefulLinkId: new SchematicUsefulLinkId(request.UsefulLinkId),
                     createdBy: createdBy);
 
                 id = schematic.Id;

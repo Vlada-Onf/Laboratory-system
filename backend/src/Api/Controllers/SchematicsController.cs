@@ -82,7 +82,7 @@ namespace Api.Controllers
                 Description = request.Description,
                 PhotoUrl = photoUrl,
                 DocumentUrl = documentUrl,
-                AdditionalLinks = request.AdditionalLinks,
+                UsefulLinkId = request.UsefulLinkId,
                 CreatedBy = request.CreatedBy
             };
 
@@ -139,7 +139,7 @@ namespace Api.Controllers
                 Description = request.Description,
                 PhotoUrl = photoUrl,
                 DocumentUrl = documentUrl,
-                AdditionalLinks = request.AdditionalLinks,
+                UsefulLinkId = request.UsefulLinkId,
                 UpdatedBy = request.UpdatedBy
             };
 

@@ -1,5 +1,4 @@
-﻿using Domain.Components.UsefulLink;
-using Domain.Schematics.Schematics;
+﻿using Domain.Schematics.Schematics;
 using Domain.Users;
 
 namespace Domain.Schematics.UsefulLink
