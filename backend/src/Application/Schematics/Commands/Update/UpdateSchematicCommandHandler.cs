@@ -6,22 +6,25 @@ using Domain.Schematics.UsefulLink;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Schematics.Commands.Update
 {
     public sealed class UpdateSchematicCommandHandler(
-            ISchematicRepository schematicRepository)
-            : IRequestHandler<UpdateSchematicCommand, Either<SchematicException, Schematic>>
+        ISchematicRepository schematicRepository)
+        : IRequestHandler<UpdateSchematicCommand, Either<SchematicException, Schematic>>
     {
         public async Task<Either<SchematicException, Schematic>> Handle(
             UpdateSchematicCommand request,
             CancellationToken cancellationToken)
         {
+            Console.WriteLine(
+                $"[UpdateSchematic] START Id={request.Id}, " +
+                $"Title={request.Title}, " +
+                $"UpdatedBy={request.UpdatedBy}, " +
+                $"UsefulLinkId={request.UsefulLinkId}, " +
+                $"PhotoUrl={request.PhotoUrl}, " +
+                $"DocumentUrl={request.DocumentUrl}");
+
             var id = new SchematicId(request.Id);
             var option = await schematicRepository.GetByIdAsync(id, cancellationToken);
 
@@ -39,21 +42,39 @@ namespace Application.Schematics.Commands.Update
             try
             {
                 var updatedBy = new UserId(request.UpdatedBy);
+                Console.WriteLine("[UpdateSchematic] UserId created");
+
+                SchematicUsefulLinkId? usefulLinkId = null;
+                if (request.UsefulLinkId.HasValue)
+                {
+                    usefulLinkId = new SchematicUsefulLinkId(request.UsefulLinkId.Value);
+                    Console.WriteLine("[UpdateSchematic] UsefulLinkId created");
+                }
+                else
+                {
+                    Console.WriteLine("[UpdateSchematic] UsefulLinkId is null");
+                }
 
                 schematic.Update(
                     title: request.Title,
                     description: request.Description,
                     photoUrl: request.PhotoUrl,
                     documentUrl: request.DocumentUrl,
-                    schematicUsefulLinkId: new SchematicUsefulLinkId(request.UsefulLinkId),
+                    schematicUsefulLinkId: usefulLinkId,
                     updatedBy: updatedBy);
 
+                Console.WriteLine("[UpdateSchematic] schematic.Update OK");
+
                 var updated = await schematicRepository.UpdateAsync(schematic, cancellationToken);
+                Console.WriteLine("[UpdateSchematic] Repository.UpdateAsync OK");
 
                 return updated;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[UpdateSchematic] ERROR: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+
                 return new UnhandledSchematicException(schematic.Id, ex);
             }
         }
