@@ -27,6 +27,10 @@ namespace Application.Schematics.Commands.Create
                 .MaximumLength(500)
                 .When(x => x.PhotoUrl is not null);
 
+            RuleFor(x => x.DocumentUrl)
+                .MaximumLength(500)
+                .When(x => x.DocumentUrl is not null);
+
             RuleFor(x => x.AdditionalLinks)
                 .MaximumLength(1000)
                 .When(x => x.AdditionalLinks is not null);

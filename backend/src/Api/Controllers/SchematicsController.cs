@@ -42,23 +42,38 @@ namespace Api.Controllers
                 .ToList();
         }
 
+        // POST /schematics
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<SchematicDto>> Create(
             [FromForm] CreateSchematicDto request,
             IFormFile image,
+            IFormFile? document,
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
             if (image is null || image.Length == 0)
                 return BadRequest("Image is required");
 
-            await using var stream = image.OpenReadStream();
+            // фото
+            await using var imageStream = image.OpenReadStream();
             var photoUrl = await fileStorage.UploadAsync(
-                stream,
+                imageStream,
                 image.FileName,
                 image.ContentType,
                 cancellationToken);
+
+            // документ (якщо є)
+            string? documentUrl = null;
+            if (document is not null && document.Length > 0)
+            {
+                await using var docStream = document.OpenReadStream();
+                documentUrl = await fileStorage.UploadAsync(
+                    docStream,
+                    document.FileName,
+                    document.ContentType,
+                    cancellationToken);
+            }
 
             var input = new CreateSchematicCommand
             {
@@ -66,6 +81,7 @@ namespace Api.Controllers
                 Title = request.Title,
                 Description = request.Description,
                 PhotoUrl = photoUrl,
+                DocumentUrl = documentUrl,
                 AdditionalLinks = request.AdditionalLinks,
                 CreatedBy = request.CreatedBy
             };
@@ -77,11 +93,13 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
+        // PUT /schematics
         [HttpPut]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<SchematicDto>> Update(
             [FromForm] UpdateSchematicDto request,
             IFormFile? image,
+            IFormFile? document,
             CancellationToken cancellationToken,
             [FromServices] IFileStorageService fileStorage)
         {
@@ -92,14 +110,25 @@ namespace Api.Controllers
             var schematic = option.First();
 
             string? photoUrl = schematic.PhotoUrl;
+            string? documentUrl = schematic.DocumentUrl;
 
             if (image is not null && image.Length > 0)
             {
-                await using var stream = image.OpenReadStream();
+                await using var imageStream = image.OpenReadStream();
                 photoUrl = await fileStorage.UploadAsync(
-                    stream,
+                    imageStream,
                     image.FileName,
                     image.ContentType,
+                    cancellationToken);
+            }
+
+            if (document is not null && document.Length > 0)
+            {
+                await using var docStream = document.OpenReadStream();
+                documentUrl = await fileStorage.UploadAsync(
+                    docStream,
+                    document.FileName,
+                    document.ContentType,
                     cancellationToken);
             }
 
@@ -109,6 +138,7 @@ namespace Api.Controllers
                 Title = request.Title,
                 Description = request.Description,
                 PhotoUrl = photoUrl,
+                DocumentUrl = documentUrl,
                 AdditionalLinks = request.AdditionalLinks,
                 UpdatedBy = request.UpdatedBy
             };

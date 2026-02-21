@@ -1,5 +1,4 @@
-﻿using Domain.Categories;
-using Domain.Schematics;
+﻿using Domain.Schematics;
 
 namespace Api.Dtos
 {
@@ -9,6 +8,7 @@ namespace Api.Dtos
         string Title,
         string? Description,
         string? PhotoUrl,
+        string? DocumentUrl,
         string? AdditionalLinks,
         Guid CreatedBy,
         DateTime CreatedAt,
@@ -22,6 +22,7 @@ namespace Api.Dtos
                 schematic.Title,
                 schematic.Description,
                 schematic.PhotoUrl,
+                schematic.DocumentUrl,
                 schematic.AdditionalLinks,
                 schematic.CreatedBy.Value,
                 schematic.CreatedAt,
@@ -37,6 +38,7 @@ namespace Api.Dtos
         public string? AdditionalLinks { get; set; }
         public Guid CreatedBy { get; set; }
     }
+
     public class UpdateSchematicDto
     {
         public Guid Id { get; set; }

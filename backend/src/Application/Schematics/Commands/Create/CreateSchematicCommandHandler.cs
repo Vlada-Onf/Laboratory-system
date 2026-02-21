@@ -40,6 +40,7 @@ namespace Application.Schematics.Commands.Create
                     title: request.Title,
                     description: request.Description,
                     photoUrl: request.PhotoUrl,
+                    documentUrl: request.DocumentUrl,
                     additionalLinks: request.AdditionalLinks,
                     createdBy: createdBy);
 

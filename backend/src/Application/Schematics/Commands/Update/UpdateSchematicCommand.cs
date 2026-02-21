@@ -17,6 +17,7 @@ namespace Application.Schematics.Commands.Update
         public required string Title { get; init; }
         public string? Description { get; init; }
         public string? PhotoUrl { get; init; }
+        public string? DocumentUrl { get; init; }
         public string? AdditionalLinks { get; init; }
         public required Guid UpdatedBy { get; init; }
     }

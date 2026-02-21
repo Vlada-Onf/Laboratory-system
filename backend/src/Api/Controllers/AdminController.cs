@@ -16,13 +16,13 @@ namespace Api.Controllers;
 [ApiController]
 [Route("users")]
 [Authorize]
-public class UsersController : ControllerBase
+public class AdminController : ControllerBase
 {
     private readonly IUserQueries _userQueries;
     private readonly IUserRepository _userRepository;
     private readonly ISender _sender;
 
-    public UsersController(
+    public AdminController(
         IUserQueries userQueries,
         IUserRepository userRepository,
         ISender sender)
@@ -100,7 +100,6 @@ public class UsersController : ControllerBase
         if (!IsAdminOrSuperAdmin(current))
             return Forbid();
 
-        // Заборонити адмінам міняти супер-адмінів, якщо хочеш
         if (!IsSuperAdmin(current) && request.RoleId == RoleIds.SuperAdmin.Value)
             return Forbid("Only SuperAdmin can assign SuperAdmin role");
 
@@ -120,6 +119,7 @@ public class UsersController : ControllerBase
             u => UserProfileDto.FromDomainModel(u),
             e => BadRequest(e.Message));
     }
+
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> DeleteUser(
         [FromRoute] Guid id,
@@ -132,7 +132,6 @@ public class UsersController : ControllerBase
         if (!IsAdminOrSuperAdmin(current))
             return Forbid();
 
-        // Не даємо юзеру видалити сам себе через цей endpoint
         if (current.Id.Value == id)
             return BadRequest("You cannot delete yourself via this endpoint");
 

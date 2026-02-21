@@ -34,7 +34,6 @@ namespace Infrastructure.Persistence.Repositories
         {
             var entity = await context.Users
                 .Include(u => u.Role)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
             return entity ?? Option<User>.None;

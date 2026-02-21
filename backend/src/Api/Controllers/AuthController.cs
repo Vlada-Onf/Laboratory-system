@@ -34,9 +34,9 @@ namespace Api.Controllers
                 User.FindFirstValue("user_id");
 
             var email =
-                User.FindFirstValue("email") ??              // Clerk JWT template
-                User.FindFirstValue(ClaimTypes.Email) ??    // стандарт .NET
-                User.FindFirstValue("email_address");       // fallback
+                User.FindFirstValue("email") ??              
+                User.FindFirstValue(ClaimTypes.Email) ??   
+                User.FindFirstValue("email_address"); 
 
             var firstName =
                 User.FindFirstValue("first_name") ??
@@ -47,13 +47,6 @@ namespace Api.Controllers
                 User.FindFirstValue("last_name") ??
                 User.FindFirstValue("family_name") ??
                 "";
-
-            Console.WriteLine($"Resolved user:");
-            Console.WriteLine($"sub = {userId}");
-            Console.WriteLine($"email = {email}");
-            Console.WriteLine($"firstName = {firstName}");
-            Console.WriteLine($"lastName = {lastName}");
-
             if (userId is null || email is null)
                 return Unauthorized("Invalid token claims");
 

@@ -43,8 +43,10 @@ namespace Application.Schematics.Commands.Update
                     title: request.Title,
                     description: request.Description,
                     photoUrl: request.PhotoUrl,
+                    documentUrl: request.DocumentUrl,
                     additionalLinks: request.AdditionalLinks,
                     updatedBy: updatedBy);
+
 
                 var updated = await schematicRepository.UpdateAsync(schematic, cancellationToken);
 

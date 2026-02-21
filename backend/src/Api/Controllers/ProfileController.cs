@@ -10,12 +10,12 @@ using System.Security.Claims;
 [ApiController]
 [Route("me")]
 [Authorize]
-public class UserProfileController : ControllerBase
+public class ProfileController : ControllerBase
 {
     private readonly IUserQueries _userQueries;
     private readonly IUserRepository _userRepository;
 
-    public UserProfileController(
+    public ProfileController(
         IUserQueries userQueries,
         IUserRepository userRepository)
     {
