@@ -12,6 +12,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("schematics")]
+
     public class SchematicsController(ISender sender) : ControllerBase
     {
         // GET /schematics/{id}

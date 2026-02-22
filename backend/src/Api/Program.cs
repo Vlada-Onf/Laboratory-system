@@ -132,7 +132,16 @@ var app = builder.Build();
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"➡️ REQUEST: {context.Request.Method} {context.Request.Path}");
-    await next();
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"💥 ERROR: {ex.GetType().Name} - {ex.Message}");
+        Console.WriteLine(ex.StackTrace);
+        throw;
+    }
 });
 
 app.UseSwagger();
