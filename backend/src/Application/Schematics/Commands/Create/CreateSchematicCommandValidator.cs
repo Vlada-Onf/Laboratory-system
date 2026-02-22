@@ -31,9 +31,6 @@ namespace Application.Schematics.Commands.Create
                 .MaximumLength(500)
                 .When(x => x.DocumentUrl is not null);
 
-            RuleFor(x => x.UsefulLinkId)
-                .NotEmpty().WithMessage("UsefulLinkId є обов'язковим");
-
             RuleFor(x => x.CreatedBy)
                 .NotEmpty().WithMessage("CreatedBy є обов'язковим");
         }

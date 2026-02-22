@@ -6,13 +6,14 @@ using Application.Schematics.Commands.Delete;
 using Application.Schematics.Commands.Update;
 using Application.Schematics.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("schematics")]
-
+    [Authorize]
     public class SchematicsController(ISender sender) : ControllerBase
     {
         // GET /schematics/{id}
