@@ -132,6 +132,12 @@ var app = builder.Build();
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"➡️ REQUEST: {context.Request.Method} {context.Request.Path}");
+
+    if (context.Request.Path.StartsWithSegments("/schematics"))
+    {
+        Console.WriteLine("📐 Schematic request hit API");
+    }
+
     try
     {
         await next();
