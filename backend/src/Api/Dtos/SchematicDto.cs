@@ -35,8 +35,6 @@ namespace Api.Dtos
         public Guid ComponentId { get; set; }
         public string Title { get; set; } = "";
         public string? Description { get; set; }
-        public string? PhotoUrl { get; set; }
-        public string? DocumentUrl { get; set; }
 
         public Guid? UsefulLinkId { get; set; }
         public Guid CreatedBy { get; set; }
@@ -47,10 +45,6 @@ namespace Api.Dtos
         public Guid Id { get; set; }
         public string Title { get; set; } = "";
         public string? Description { get; set; }
-
-        public string? PhotoUrl { get; set; }
-        public string? DocumentUrl { get; set; }
-
         public Guid? UsefulLinkId { get; set; }
         public Guid UpdatedBy { get; set; }
     }
