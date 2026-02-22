@@ -9,7 +9,9 @@ namespace Domain.Schematics
     {
         public SchematicId Id { get; }
         public ComponentId ComponentId { get; private set; }
-        public SchematicUsefulLinkId SchematicUsefulLinkId { get; private set; }
+
+        public SchematicUsefulLinkId? SchematicUsefulLinkId { get; private set; }
+
         public string Title { get; private set; }
         public string? Description { get; private set; }
         public string? PhotoUrl { get; private set; }
@@ -26,7 +28,7 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? documentUrl,
-            SchematicUsefulLinkId schematicUsefulLinkId,
+            SchematicUsefulLinkId? schematicUsefulLinkId,
             UserId createdBy,
             DateTime createdAt,
             UserId? updatedBy = null,
@@ -54,7 +56,7 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? documentUrl,
-            SchematicUsefulLinkId schematicUsefulLinkId,
+            SchematicUsefulLinkId? schematicUsefulLinkId,
             UserId createdBy)
         {
             return new Schematic(
@@ -74,7 +76,7 @@ namespace Domain.Schematics
             string? description,
             string? photoUrl,
             string? documentUrl,
-            SchematicUsefulLinkId schematicUsefulLinkId,
+            SchematicUsefulLinkId? schematicUsefulLinkId,
             UserId updatedBy)
         {
             if (string.IsNullOrWhiteSpace(title))
