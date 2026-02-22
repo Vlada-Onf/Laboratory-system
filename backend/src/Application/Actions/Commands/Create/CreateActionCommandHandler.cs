@@ -28,8 +28,8 @@ namespace Application.Actions.Commands.Create
         }
 
         private async Task<Either<ActionException, Action>> CreateEntity(
-    CreateActionCommand request,
-    CancellationToken cancellationToken)
+            CreateActionCommand request,
+            CancellationToken cancellationToken)
         {
             ActionId? actionId = null;
 
@@ -42,7 +42,6 @@ namespace Application.Actions.Commands.Create
                 actionId = action.Id;
 
                 var created = await actionRepository.AddAsync(action, cancellationToken);
-
                 var newValues = JsonSerializer.Serialize(new
                 {
                     action.Id,
@@ -50,7 +49,6 @@ namespace Application.Actions.Commands.Create
                     action.Description,
                     action.CreatedAt
                 });
-
                 await historyObserver.EntityCreatedAsync(
                     userId: request.UserId,
                     entityTypeName: "Action",
@@ -67,6 +65,5 @@ namespace Application.Actions.Commands.Create
                     ex);
             }
         }
-
     }
 }

@@ -9,9 +9,9 @@ using System.Text.Json;
 namespace Application.Actions.Commands.Delete
 {
     public sealed class DeleteActionCommandHandler(
-        IActionRepository actionRepository,
-        IHistoryObserver historyObserver)
-        : IRequestHandler<DeleteActionCommand, Either<ActionException, Action>>
+     IActionRepository actionRepository,
+     IHistoryObserver historyObserver)
+     : IRequestHandler<DeleteActionCommand, Either<ActionException, Action>>
     {
         public async Task<Either<ActionException, Action>> Handle(
             DeleteActionCommand request,
@@ -21,13 +21,14 @@ namespace Application.Actions.Commands.Delete
             var option = await actionRepository.GetByIdAsync(actionId, cancellationToken);
 
             return await option.MatchAsync(
-                Some: action => DeleteEntity(action, cancellationToken),
+                Some: action => DeleteEntity(action, request, cancellationToken),
                 None: () => Task.FromResult<Either<ActionException, Action>>(
                     new ActionNotFoundException(actionId)));
         }
 
         private async Task<Either<ActionException, Action>> DeleteEntity(
             Action action,
+            DeleteActionCommand request,
             CancellationToken cancellationToken)
         {
             try
@@ -42,9 +43,8 @@ namespace Application.Actions.Commands.Delete
 
                 var deleted = await actionRepository.DeleteAsync(action, cancellationToken);
 
-                var userId = Guid.Empty;
                 await historyObserver.EntityDeletedAsync(
-                    userId: userId,
+                    userId: request.UserId, 
                     entityTypeName: "Action",
                     entityId: action.Id.Value.ToString(),
                     oldValues: oldValues,

@@ -1,5 +1,4 @@
-﻿// Infrastructure/HistoryOfAction/HistoryObserver.cs
-using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Repositories;
 using Application.HistoryEntries;
 using Domain.History;
 using Domain.History.Actions;
@@ -82,33 +81,26 @@ namespace Infrastructure.HistoryOfAction
             string entityId,
             string? oldValues,
             string? newValues,
-            CancellationToken cancellationToken)
+    CancellationToken cancellationToken)
         {
-            // шукаємо Action по Name в таблиці actions
             var action = await _context.Set<Action>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.Name == actionName, cancellationToken);
 
-            if (action is null)
-                throw new InvalidOperationException($"Action with Name='{actionName}' not found.");
-
-            // шукаємо EntityType по Name в таблиці entity_types
             var entityType = await _context.Set<EntityType>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Name == entityTypeName, cancellationToken);
 
-            if (entityType is null)
-                throw new InvalidOperationException($"EntityType with Name='{entityTypeName}' not found.");
-
-            var entry = History.Create(
+            var entry = Domain.History.History.Create(
                 userId: new UserId(userId),
-                actionId: action.Id,
-                entityTypeId: entityType.Id,
+                actionId: action!.Id,
+                entityTypeId: entityType!.Id,
                 entityId: entityId,
                 oldValues: oldValues,
                 newValues: newValues);
 
             await _historyRepository.AddAsync(entry, cancellationToken);
         }
+
     }
 }

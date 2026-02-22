@@ -1,18 +1,35 @@
 ﻿using Api.Dtos;
+using Api.Dtos.Api.Dtos;
 using Api.Modules.Errors;
 using Application.Actions.Commands.Create;
 using Application.Actions.Commands.Delete;
 using Application.Actions.Commands.Update;
 using Application.Actions.Queries;
+using Application.Common.Interfaces.Queries;
+using Domain.Users;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("actions")]
-    public class ActionsController(ISender sender) : ControllerBase
+    public class ActionsController(ISender sender, IUserQueries userQueries) : ControllerBase
     {
+        private async Task<User?> GetCurrentUserAsync(CancellationToken ct)
+        {
+            var clerkId =
+                User.FindFirstValue("sub") ??
+                User.FindFirstValue("user_id");
+
+            if (string.IsNullOrWhiteSpace(clerkId))
+                return null;
+
+            var option = await userQueries.GetByClerkIdAsync(clerkId, ct);
+            return option.IsSome ? option.First() : null;
+        }
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ActionDto>>> GetActions(
             CancellationToken cancellationToken)
@@ -34,19 +51,20 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ActionDto>> CreateAction(
             [FromBody] CreateActionDto request,
             CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirst("sub")?.Value;
-            if (!Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized();
+            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            if (currentUser is null)
+                return Unauthorized("User not found");
 
             var input = new CreateActionCommand
             {
                 Name = request.Name,
                 Description = request.Description,
-                UserId = userId
+                UserId = currentUser.Id.Value
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -56,17 +74,22 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-
         [HttpPut]
+        [Authorize]
         public async Task<ActionResult<ActionDto>> UpdateAction(
             [FromBody] UpdateActionDto request,
             CancellationToken cancellationToken)
         {
+            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            if (currentUser is null)
+                return Unauthorized("User not found");
+
             var input = new UpdateActionCommand
             {
                 Id = request.Id,
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                UserId = currentUser.Id.Value
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -77,11 +100,16 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<ActionResult> DeleteAction(
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteActionCommand(id);
+            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            if (currentUser is null)
+                return Unauthorized("User not found");
+
+            var input = new DeleteActionCommand(id, currentUser.Id.Value);
 
             var result = await sender.Send(input, cancellationToken);
 
@@ -89,5 +117,6 @@ namespace Api.Controllers
                 _ => NoContent(),
                 e => e.ToObjectResult());
         }
+
     }
 }

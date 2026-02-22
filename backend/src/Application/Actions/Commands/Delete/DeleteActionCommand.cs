@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 
 namespace Application.Actions.Commands.Delete
 {
-    public sealed record DeleteActionCommand(Guid Id)
+    public sealed record DeleteActionCommand(Guid Id, Guid UserId)
             : IRequest<Either<ActionException, Action>>;
 }

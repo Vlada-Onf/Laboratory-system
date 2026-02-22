@@ -25,7 +25,6 @@ namespace Application.Actions.Commands.Update
                 None: () => Task.FromResult<Either<ActionException, Action>>(
                     new ActionNotFoundException(actionId)));
         }
-
         private async Task<Either<ActionException, Action>> UpdateEntity(
             Action action,
             UpdateActionCommand request,
@@ -53,9 +52,8 @@ namespace Application.Actions.Commands.Update
                     action.CreatedAt
                 });
 
-                var userId = Guid.Empty;
                 await historyObserver.EntityUpdatedAsync(
-                    userId: userId,
+                    userId: request.UserId,
                     entityTypeName: "Action",
                     entityId: action.Id.Value.ToString(),
                     oldValues: oldValues,
