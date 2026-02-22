@@ -1,26 +1,23 @@
 ﻿using Application.Categories.Exceptions;
 using Application.Common.Interfaces.Repositories;
-// using Application.HistoryEntries.Commands.Create;
+using Application.HistoryEntries;
 using Domain.Categories;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Categories.Commands.Create
 {
     public class CreateCategoryCommandHandler(
         ICategoryRepository categoryRepository,
-        IActionRepository actionRepository,
-        IEntityTypeRepository entityTypeRepository,
-        ISender sender)
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateCategoryCommand, Either<CategoryException, Category>>
     {
         public async Task<Either<CategoryException, Category>> Handle(
             CreateCategoryCommand request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine("⚙️ CreateCategoryCommandHandler.Handle START");
-            Console.WriteLine($"Name={request.Name}, Color={request.CardColor}");
 
             var existingCategory = await categoryRepository.GetByNameAsync(
                 request.Name,
@@ -51,35 +48,23 @@ namespace Application.Categories.Commands.Create
                 categoryId = category.Id;
 
                 var created = await categoryRepository.AddAsync(category, cancellationToken);
-                Console.WriteLine($"✅ Category created: {created.Id.Value}");
 
-                // ІСТОРІЯ тимчасово відключена
-                // var actionOption = await actionRepository.GetByNameAsync(
-                //     "Create category", cancellationToken);
-                // if (actionOption.IsNone)
-                //     throw new InvalidOperationException("Action 'Create category' not found");
-                // var action = actionOption.First();
-                //
-                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                //     "Category", cancellationToken);
-                // if (entityTypeOption.IsNone)
-                //     throw new InvalidOperationException("EntityType 'Category' not found");
-                // var entityType = entityTypeOption.First();
-                //
-                // var historyCommand = new CreateHistoryCommand
-                // {
-                //     UserId = request.PerformedBy,
-                //     ActionId = action.Id.Value,
-                //     EntityTypeId = entityType.Id.Value,
-                //     EntityId = created.Id.Value.ToString(),
-                //     OldValues = null,
-                //     NewValues =
-                //         $"Name={created.Name}, Description={created.Description}, " +
-                //         $"PhotoUrl={created.PhotoUrl}, CardColor={created.CardColor}"
-                // };
-                //
-                // var historyResult = await sender.Send(historyCommand, cancellationToken);
-                // historyResult.IfLeft(e => throw e);
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    category.Id,
+                    category.Name,
+                    category.Description,
+                    category.PhotoUrl,
+                    category.CardColor,
+                    category.CreatedAt
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Category",
+                    entityId: category.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

@@ -73,7 +73,6 @@ namespace Api.Controllers
                 .ToList();
         }
 
-        // GET /needs
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<NeedDto>>> GetAll(
             CancellationToken cancellationToken)
@@ -102,7 +101,6 @@ namespace Api.Controllers
                 PerformedBy = request.PerformedBy
             };
 
-
             var result = await sender.Send(input, cancellationToken);
 
             return result.Match<ActionResult<NeedDto>>(
@@ -125,7 +123,6 @@ namespace Api.Controllers
                 StatusId = request.StatusId,
                 PerformedBy = request.PerformedBy
             };
-
 
             var result = await sender.Send(input, cancellationToken);
 

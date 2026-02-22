@@ -13,8 +13,8 @@ namespace Api.Controllers
     [ApiController]
     [Route("damaged-components")]
     public class DamagedComponentsController(
-            IDamagedComponentQueries queries,
-            ISender sender) : ControllerBase
+                IDamagedComponentQueries queries,
+                ISender sender) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<DamagedComponentDto>>> GetAll(
@@ -46,7 +46,8 @@ namespace Api.Controllers
                 ComponentId = request.ComponentId,
                 ReasonId = request.ReasonId,
                 Quantity = request.Quantity,
-                RecordedBy = request.RecordedBy
+                RecordedBy = request.RecordedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -67,7 +68,8 @@ namespace Api.Controllers
                 ComponentId = request.ComponentId,
                 ReasonId = request.ReasonId,
                 Quantity = request.Quantity,
-                LastUpdatedBy = request.UpdatedBy
+                LastUpdatedBy = request.UpdatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);

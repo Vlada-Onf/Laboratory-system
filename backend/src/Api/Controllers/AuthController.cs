@@ -22,8 +22,6 @@ namespace Api.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            Console.WriteLine("========== /auth/me ==========");
-
             foreach (var claim in User.Claims)
             {
                 Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");

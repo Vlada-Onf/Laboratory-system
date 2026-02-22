@@ -3,18 +3,18 @@
 namespace Api.Dtos
 {
     public record ComponentDto(
-        Guid Id,
-        Guid CategoryId,
-        string Name,
-        string? Description,
-        int Quantity,
-        decimal Price,
-        string PhotoUrl,
-        string SupplierLink,
-        string? DocumentationLink,
-        DateTime CreatedAt,
-        DateTime? LastUpdatedAt,
-        IReadOnlyList<TagDto> Tags)
+            Guid Id,
+            Guid CategoryId,
+            string Name,
+            string? Description,
+            int Quantity,
+            decimal Price,
+            string PhotoUrl,
+            string SupplierLink,
+            string? DocumentationLink,
+            DateTime CreatedAt,
+            DateTime? LastUpdatedAt,
+            IReadOnlyList<TagDto> Tags)
     {
         public static ComponentDto FromDomainModel(Component component)
             => new(
@@ -42,7 +42,9 @@ namespace Api.Dtos
         public string? DocumentationLink { get; set; }
         public List<Guid> TagIds { get; set; } = new();
         public Guid CreatedBy { get; set; }
+        // public Guid PerformedBy { get; set; }
     }
+
     public class UpdateComponentDto
     {
         public Guid Id { get; set; }
@@ -55,5 +57,6 @@ namespace Api.Dtos
         public string? DocumentationLink { get; set; }
         public List<Guid> TagIds { get; set; } = new();
         public Guid LastUpdatedBy { get; set; }
+        // public Guid PerformedBy { get; set; }
     }
 }

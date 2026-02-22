@@ -1,17 +1,20 @@
 ﻿using Application.Common.Interfaces.Repositories;
 using Application.Components.Exceptions;
+using Application.HistoryEntries;
 using Domain.Categories;
 using Domain.Components;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Components.Commands.Update
 {
     public class UpdateComponentCommandHandler(
         IComponentRepository componentRepository,
         ICategoryRepository categoryRepository,
-        ITagRepository tagRepository)
+        ITagRepository tagRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<UpdateComponentCommand, Either<ComponentException, Component>>
     {
         public async Task<Either<ComponentException, Component>> Handle(
@@ -41,6 +44,24 @@ namespace Application.Components.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    component.Id,
+                    component.CategoryId,
+                    component.Name,
+                    component.Description,
+                    component.Quantity,
+                    component.Price,
+                    component.TotalCost,
+                    component.PhotoUrl,
+                    component.SupplierLink,
+                    component.DocumentationLink,
+                    component.CreatedAt,
+                    component.CreatedBy,
+                    component.LastUpdatedAt,
+                    component.LastUpdatedBy
+                });
+
                 var lastUpdatedBy = new UserId(request.LastUpdatedBy);
 
                 component.Update(
@@ -64,6 +85,32 @@ namespace Application.Components.Commands.Update
                 }
 
                 var updated = await componentRepository.UpdateAsync(component, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    component.Id,
+                    component.CategoryId,
+                    component.Name,
+                    component.Description,
+                    component.Quantity,
+                    component.Price,
+                    component.TotalCost,
+                    component.PhotoUrl,
+                    component.SupplierLink,
+                    component.DocumentationLink,
+                    component.CreatedAt,
+                    component.CreatedBy,
+                    component.LastUpdatedAt,
+                    component.LastUpdatedBy
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Component",
+                    entityId: component.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

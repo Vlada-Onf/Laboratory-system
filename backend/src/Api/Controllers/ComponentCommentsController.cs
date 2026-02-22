@@ -26,7 +26,6 @@ namespace Api.Controllers
             _userQueries = userQueries;
         }
 
-        // GET /component-comments/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ComponentCommentDto>> GetById(
             [FromRoute] Guid id,
@@ -46,7 +45,6 @@ namespace Api.Controllers
             return ComponentCommentDto.FromDomainModel(comment, author);
         }
 
-        // GET /component-comments/by-component/{componentId}
         [HttpGet("by-component/{componentId:guid}")]
         public async Task<ActionResult<IReadOnlyList<ComponentCommentDto>>> GetByComponentId(
             [FromRoute] Guid componentId,
@@ -71,7 +69,6 @@ namespace Api.Controllers
             return result;
         }
 
-        // POST /component-comments
         [HttpPost]
         public async Task<ActionResult<ComponentCommentDto>> Create(
             [FromBody] CreateComponentCommentDto request,
@@ -81,21 +78,17 @@ namespace Api.Controllers
             {
                 ComponentId = request.ComponentId,
                 Content = request.Content,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await _sender.Send(command, cancellationToken);
 
             return result.Match<ActionResult<ComponentCommentDto>>(
-                c =>
-                {
-                    // після створення тягнемо автора
-                    return BuildDtoWithAuthorAsync(c, cancellationToken).Result;
-                },
+                c => BuildDtoWithAuthorAsync(c, cancellationToken).Result,
                 e => e.ToObjectResult());
         }
 
-        // PUT /component-comments
         [HttpPut]
         public async Task<ActionResult<ComponentCommentDto>> Update(
             [FromBody] UpdateComponentCommentDto request,
@@ -104,26 +97,24 @@ namespace Api.Controllers
             var command = new UpdateComponentCommentCommand
             {
                 Id = request.Id,
-                Content = request.Content
+                Content = request.Content,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await _sender.Send(command, cancellationToken);
 
             return result.Match<ActionResult<ComponentCommentDto>>(
-                c =>
-                {
-                    return BuildDtoWithAuthorAsync(c, cancellationToken).Result;
-                },
+                c => BuildDtoWithAuthorAsync(c, cancellationToken).Result,
                 e => e.ToObjectResult());
         }
 
-        // DELETE /component-comments/{id}
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var command = new DeleteComponentCommentCommand(id);
+            var command = new DeleteComponentCommentCommand(id, performedBy);
 
             var result = await _sender.Send(command, cancellationToken);
 
@@ -132,7 +123,6 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-        // допоміжний метод
         private async Task<ComponentCommentDto> BuildDtoWithAuthorAsync(
             ComponentComment comment,
             CancellationToken ct)

@@ -2,14 +2,9 @@
 using Domain.DamagedComponents.Reason;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.DamagedComponentReasons.Commands.Delete
 {
-    public sealed record DeleteDamagedComponentReasonCommand(Guid Id)
-            : IRequest<Either<DamagedComponentReasonException, DamagedComponentReason>>;
+    public sealed record DeleteDamagedComponentReasonCommand(Guid Id, Guid PerformedBy)
+        : IRequest<Either<DamagedComponentReasonException, DamagedComponentReason>>;
 }

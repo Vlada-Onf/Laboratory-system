@@ -15,6 +15,6 @@ public record UpdateComponentCommand : IRequest<Either<ComponentException, Compo
     public required string SupplierLink { get; init; }
     public string? DocumentationLink { get; init; }
     public required Guid LastUpdatedBy { get; init; }
-
+    public required Guid PerformedBy { get; init; }
     public required List<Guid> TagIds { get; init; }
 }

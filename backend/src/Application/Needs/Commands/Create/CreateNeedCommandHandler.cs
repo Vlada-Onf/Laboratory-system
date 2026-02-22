@@ -1,6 +1,6 @@
 ﻿using Application.Common.Interfaces.Repositories;
-// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
+using Application.HistoryEntries;
 using Domain.Components;
 using Domain.Needs;
 using Domain.Needs.Importance;
@@ -8,15 +8,14 @@ using Domain.Needs.Status;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Needs.Commands.Create
 {
     public sealed class CreateNeedCommandHandler(
-            INeedRepository needRepository,
-            IComponentRepository componentRepository,
-            IActionRepository actionRepository,
-            IEntityTypeRepository entityTypeRepository,
-            ISender sender)
+        INeedRepository needRepository,
+        IComponentRepository componentRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateNeedCommand, Either<NeedException, Need>>
     {
         public async Task<Either<NeedException, Need>> Handle(
@@ -52,36 +51,25 @@ namespace Application.Needs.Commands.Create
 
                 var created = await needRepository.AddAsync(need, cancellationToken);
 
-                // ІСТОРІЯ тимчасово відключена
-                // var actionOption = await actionRepository.GetByNameAsync(
-                //     "Create need", cancellationToken);
-                // if (actionOption.IsNone)
-                //     throw new InvalidOperationException("Action 'Create need' not found");
-                // var action = actionOption.First();
-                //
-                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                //     "Need", cancellationToken);
-                // if (entityTypeOption.IsNone)
-                //     throw new InvalidOperationException("EntityType 'Need' not found");
-                // var entityType = entityTypeOption.First();
-                //
-                // var historyCommand = new CreateHistoryCommand
-                // {
-                //     UserId = request.PerformedBy,
-                //     ActionId = action.Id.Value,
-                //     EntityTypeId = entityType.Id.Value,
-                //     EntityId = created.Id.Value.ToString(),
-                //     OldValues = null,
-                //     NewValues =
-                //         $"ComponentId={need.ComponentId.Value}, " +
-                //         $"Quantity={need.QuantityNeeded}, " +
-                //         $"StatusId={need.StatusId.Value}, " +
-                //         $"ImportanceId={need.ImportanceId.Value}, " +
-                //         $"Description={need.Description}"
-                // };
-                //
-                // var historyResult = await sender.Send(historyCommand, cancellationToken);
-                // historyResult.IfLeft(e => throw e);
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    need.Id,
+                    need.ComponentId,
+                    need.QuantityNeeded,
+                    need.RequestedBy,
+                    need.RequestedAt,
+                    need.Description,
+                    need.ImportanceId,
+                    need.StatusId,
+                    need.CompletionReason
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Need",
+                    entityId: need.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

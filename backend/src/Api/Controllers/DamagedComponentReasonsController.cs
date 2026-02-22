@@ -44,7 +44,8 @@ namespace Api.Controllers
             var input = new CreateDamagedComponentReasonCommand
             {
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -63,7 +64,8 @@ namespace Api.Controllers
             {
                 Id = request.Id,
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -76,9 +78,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteDamagedComponentReasonCommand(id);
+            var input = new DeleteDamagedComponentReasonCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

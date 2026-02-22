@@ -1,25 +1,22 @@
 ﻿using Application.Categories.Exceptions;
 using Application.Common.Interfaces.Repositories;
-// using Application.HistoryEntries.Commands.Create;
+using Application.HistoryEntries;
 using Domain.Categories;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Categories.Commands.Delete
 {
     public class DeleteCategoryCommandHandler(
         ICategoryRepository categoryRepository,
-        IActionRepository actionRepository,
-        IEntityTypeRepository entityTypeRepository,
-        ISender sender)
+        IHistoryObserver historyObserver)
         : IRequestHandler<DeleteCategoryCommand, Either<CategoryException, Category>>
     {
         public async Task<Either<CategoryException, Category>> Handle(
             DeleteCategoryCommand request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine("⚙️ DeleteCategoryCommandHandler.Handle START");
-            Console.WriteLine($"Id={request.Id}");
 
             var categoryId = new CategoryId(request.Id);
             var option = await categoryRepository.GetByIdAsync(categoryId, cancellationToken);
@@ -37,40 +34,24 @@ namespace Application.Categories.Commands.Delete
         {
             try
             {
-                Console.WriteLine($"🗑️ Deleting category {category.Id.Value}");
-
-                var oldValues =
-                    $"Name={category.Name}, Description={category.Description}, " +
-                    $"PhotoUrl={category.PhotoUrl}, CardColor={category.CardColor}";
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    category.Id,
+                    category.Name,
+                    category.Description,
+                    category.PhotoUrl,
+                    category.CardColor,
+                    category.CreatedAt
+                });
 
                 var deleted = await categoryRepository.DeleteAsync(category, cancellationToken);
-                Console.WriteLine("✅ Category deleted in repository");
 
-                // ІСТОРІЯ тимчасово відключена
-                // var actionOption = await actionRepository.GetByNameAsync(
-                //     "Delete category", cancellationToken);
-                // if (actionOption.IsNone)
-                //     throw new InvalidOperationException("Action 'Delete category' not found");
-                // var action = actionOption.First();
-                //
-                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                //     "Category", cancellationToken);
-                // if (entityTypeOption.IsNone)
-                //     throw new InvalidOperationException("EntityType 'Category' not found");
-                // var entityType = entityTypeOption.First();
-                //
-                // var historyCommand = new CreateHistoryCommand
-                // {
-                //     UserId = performedBy,
-                //     ActionId = action.Id.Value,
-                //     EntityTypeId = entityType.Id.Value,
-                //     EntityId = category.Id.Value.ToString(),
-                //     OldValues = oldValues,
-                //     NewValues = null
-                // };
-                //
-                // var historyResult = await sender.Send(historyCommand, cancellationToken);
-                // historyResult.IfLeft(e => throw e);
+                await historyObserver.EntityDeletedAsync(
+                    userId: performedBy,
+                    entityTypeName: "Category",
+                    entityId: category.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    cancellationToken: cancellationToken);
 
                 return deleted;
             }

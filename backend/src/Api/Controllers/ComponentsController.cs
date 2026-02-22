@@ -86,7 +86,8 @@ namespace Api.Controllers
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
                 TagIds = request.TagIds,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = request.CreatedBy
             };
 
             var result = await _sender.Send(input, cancellationToken);
@@ -135,6 +136,7 @@ namespace Api.Controllers
                 SupplierLink = request.SupplierLink,
                 DocumentationLink = request.DocumentationLink,
                 LastUpdatedBy = request.LastUpdatedBy,
+                PerformedBy = request.LastUpdatedBy,
                 TagIds = request.TagIds
             };
 

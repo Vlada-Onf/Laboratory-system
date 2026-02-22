@@ -1,18 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
-// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
+using Application.HistoryEntries;
 using Domain.Needs;
 using Domain.Needs.Importance;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Needs.Commands.Update
 {
     public sealed class UpdateNeedImportanceCommandHandler(
         INeedRepository needRepository,
-        IActionRepository actionRepository,
-        IEntityTypeRepository entityTypeRepository,
-        ISender sender)
+        IHistoryObserver historyObserver)
         : IRequestHandler<UpdateNeedImportanceCommand, Either<NeedException, Need>>
     {
         public async Task<Either<NeedException, Need>> Handle(
@@ -35,38 +34,31 @@ namespace Application.Needs.Commands.Update
         {
             try
             {
-                // var oldImportanceId = need.ImportanceId;
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    need.Id,
+                    need.ImportanceId
+                });
+
                 var importanceId = new NeedImportanceId(request.ImportanceId);
 
                 need.UpdateImportance(importanceId);
 
                 var updated = await needRepository.UpdateAsync(need, cancellationToken);
 
-                // ІСТОРІЯ тимчасово відключена
-                // var actionOption = await actionRepository.GetByNameAsync(
-                //     "Update need importance", cancellationToken);
-                // if (actionOption.IsNone)
-                //     throw new InvalidOperationException("Action 'Update need importance' not found");
-                // var action = actionOption.First();
-                //
-                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                //     "Need", cancellationToken);
-                // if (entityTypeOption.IsNone)
-                //     throw new InvalidOperationException("EntityType 'Need' not found");
-                // var entityType = entityTypeOption.First();
-                //
-                // var historyCommand = new CreateHistoryCommand
-                // {
-                //     UserId = request.PerformedBy,
-                //     ActionId = action.Id.Value,
-                //     EntityTypeId = entityType.Id.Value,
-                //     EntityId = need.Id.Value.ToString(),
-                //     OldValues = $"ImportanceId={oldImportanceId.Value}",
-                //     NewValues = $"ImportanceId={need.ImportanceId.Value}"
-                // };
-                //
-                // var historyResult = await sender.Send(historyCommand, cancellationToken);
-                // historyResult.IfLeft(e => throw e);
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    need.Id,
+                    need.ImportanceId
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Need",
+                    entityId: need.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

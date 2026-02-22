@@ -1,22 +1,20 @@
 ﻿using Application.Common.Interfaces.Repositories;
 using Application.DamagedComponents.Exceptions;
+using Application.HistoryEntries;
 using Domain.Components;
 using Domain.DamagedComponents;
 using Domain.DamagedComponents.Reason;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.DamagedComponents.Commands.Update
 {
     public sealed class UpdateDamagedComponentCommandHandler(
         IDamagedComponentRepository damagedComponentRepository,
-        IComponentRepository componentRepository)
+        IComponentRepository componentRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<UpdateDamagedComponentCommand, Either<DamagedComponentException, DamagedComponent>>
     {
         public async Task<Either<DamagedComponentException, DamagedComponent>> Handle(
@@ -39,6 +37,18 @@ namespace Application.DamagedComponents.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    damaged.Id,
+                    damaged.ComponentId,
+                    damaged.ReasonId,
+                    damaged.Quantity,
+                    damaged.RecordedAt,
+                    damaged.RecordedBy,
+                    damaged.LastUpdatedAt,
+                    damaged.LastUpdatedBy
+                });
+
                 var componentId = new ComponentId(request.ComponentId);
                 var reasonId = new DamagedComponentReasonId(request.ReasonId);
                 var lastUpdatedBy = new UserId(request.LastUpdatedBy);
@@ -50,6 +60,26 @@ namespace Application.DamagedComponents.Commands.Update
                     lastUpdatedBy: lastUpdatedBy);
 
                 var updated = await damagedComponentRepository.UpdateAsync(damaged, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    damaged.Id,
+                    damaged.ComponentId,
+                    damaged.ReasonId,
+                    damaged.Quantity,
+                    damaged.RecordedAt,
+                    damaged.RecordedBy,
+                    damaged.LastUpdatedAt,
+                    damaged.LastUpdatedBy
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "DamagedComponent",
+                    entityId: damaged.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

@@ -3,16 +3,16 @@
 namespace Api.Dtos
 {
     public record NeedDto(
-        Guid Id,
-        Guid ComponentId,
-        Guid StatusId,
-        int QuantityNeeded,
-        Guid RequestedBy,
-        DateTime RequestedAt,
-        string? Description,
-        DateTime? CompletedAt,
-        string? CompletionReason,
-        Guid ImportanceId)
+            Guid Id,
+            Guid ComponentId,
+            Guid StatusId,
+            int QuantityNeeded,
+            Guid RequestedBy,
+            DateTime RequestedAt,
+            string? Description,
+            DateTime? CompletedAt,
+            string? CompletionReason,
+            Guid ImportanceId)
     {
         public static NeedDto FromDomainModel(Need need)
             => new(
@@ -42,7 +42,6 @@ namespace Api.Dtos
         public required Guid PerformedBy { get; init; }
     }
 
-
     public record UpdateNeedDetailsDto
     {
         public required Guid Id { get; init; }
@@ -53,7 +52,6 @@ namespace Api.Dtos
         public required Guid StatusId { get; init; }
         public required Guid PerformedBy { get; init; }
     }
-
     public record UpdateNeedImportanceDto
     {
         public required Guid Id { get; init; }

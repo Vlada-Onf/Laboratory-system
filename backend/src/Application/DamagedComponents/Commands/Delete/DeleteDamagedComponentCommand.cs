@@ -1,10 +1,10 @@
 ﻿using Application.DamagedComponents.Exceptions;
+using Domain.DamagedComponents;
 using LanguageExt;
 using MediatR;
-using System;
+
 namespace Application.DamagedComponents.Commands.Delete
 {
-    public sealed record DeleteDamagedComponentCommand(Guid Id, Guid DeletedBy)
+    public sealed record DeleteDamagedComponentCommand(Guid Id, Guid PerformedBy)
         : IRequest<Either<DamagedComponentException, DamagedComponent>>;
-
 }

@@ -1,19 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
 using Application.DamagedComponentReasons.Exceptions;
+using Application.HistoryEntries;
 using Domain.DamagedComponents.Reason;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.DamagedComponentReasons.Commands.Create
 {
     public sealed class CreateDamagedComponentReasonCommandHandler(
-            IDamagedComponentReasonRepository reasonRepository)
-            : IRequestHandler<CreateDamagedComponentReasonCommand, Either<DamagedComponentReasonException, DamagedComponentReason>>
+        IDamagedComponentReasonRepository reasonRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<CreateDamagedComponentReasonCommand, Either<DamagedComponentReasonException, DamagedComponentReason>>
     {
         public async Task<Either<DamagedComponentReasonException, DamagedComponentReason>> Handle(
             CreateDamagedComponentReasonCommand request,
@@ -30,6 +28,20 @@ namespace Application.DamagedComponentReasons.Commands.Create
                 reasonId = reason.Id;
 
                 var created = await reasonRepository.AddAsync(reason, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    reason.Id,
+                    reason.Name,
+                    reason.Description
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "DamagedComponentReason",
+                    entityId: reason.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

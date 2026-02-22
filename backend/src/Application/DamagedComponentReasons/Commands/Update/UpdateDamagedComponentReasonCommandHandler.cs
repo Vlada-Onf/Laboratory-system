@@ -1,18 +1,16 @@
 ﻿using Application.Common.Interfaces.Repositories;
 using Application.DamagedComponentReasons.Exceptions;
+using Application.HistoryEntries;
 using Domain.DamagedComponents.Reason;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.DamagedComponentReasons.Commands.Update
 {
     public sealed class UpdateDamagedComponentReasonCommandHandler(
-        IDamagedComponentReasonRepository reasonRepository)
+        IDamagedComponentReasonRepository reasonRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<UpdateDamagedComponentReasonCommand, Either<DamagedComponentReasonException, DamagedComponentReason>>
     {
         public async Task<Either<DamagedComponentReasonException, DamagedComponentReason>> Handle(
@@ -35,9 +33,31 @@ namespace Application.DamagedComponentReasons.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    reason.Id,
+                    reason.Name,
+                    reason.Description
+                });
+
                 reason.Update(request.Name, request.Description);
 
                 var updated = await reasonRepository.UpdateAsync(reason, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    reason.Id,
+                    reason.Name,
+                    reason.Description
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "DamagedComponentReason",
+                    entityId: reason.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

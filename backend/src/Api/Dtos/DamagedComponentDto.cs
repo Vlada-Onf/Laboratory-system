@@ -21,17 +21,22 @@
                 d.LastUpdatedAt,
                 d.LastUpdatedBy?.Value);
     }
+    public class CreateDamagedComponentDto
+    {
+        public Guid ComponentId { get; set; }
+        public Guid ReasonId { get; set; }
+        public int Quantity { get; set; }
+        public Guid RecordedBy { get; set; }
+        public Guid PerformedBy { get; set; }
+    }
 
-    public record CreateDamagedComponentDto(
-        Guid ComponentId,
-        Guid ReasonId,
-        int Quantity,
-        Guid RecordedBy);
-
-    public record UpdateDamagedComponentDto(
-        Guid Id,
-        Guid ComponentId,
-        Guid ReasonId,
-        int Quantity,
-        Guid UpdatedBy);
+    public class UpdateDamagedComponentDto
+    {
+        public Guid Id { get; set; }
+        public Guid ComponentId { get; set; }
+        public Guid ReasonId { get; set; }
+        public int Quantity { get; set; }
+        public Guid UpdatedBy { get; set; }
+        public Guid PerformedBy { get; set; }
+    }
 }

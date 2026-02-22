@@ -20,5 +20,6 @@ namespace Application.Components.Commands.Create
         public string? DocumentationLink { get; init; }
         public List<Guid> TagIds { get; init; } = new();
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

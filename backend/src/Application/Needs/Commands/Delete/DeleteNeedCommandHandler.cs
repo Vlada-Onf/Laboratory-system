@@ -1,17 +1,16 @@
 ﻿using Application.Common.Interfaces.Repositories;
-// using Application.HistoryEntries.Commands.Create;
 using Application.Needs.Exceptions;
+using Application.HistoryEntries;
 using Domain.Needs;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Needs.Commands.Delete
 {
     public sealed class DeleteNeedCommandHandler(
         INeedRepository needRepository,
-        IActionRepository actionRepository,
-        IEntityTypeRepository entityTypeRepository,
-        ISender sender)
+        IHistoryObserver historyObserver)
         : IRequestHandler<DeleteNeedCommand, Either<NeedException, Need>>
     {
         public async Task<Either<NeedException, Need>> Handle(
@@ -34,38 +33,28 @@ namespace Application.Needs.Commands.Delete
         {
             try
             {
-                // var oldValues =
-                //     $"NeedId={need.Id.Value}, ComponentId={need.ComponentId.Value}, " +
-                //     $"Quantity={need.QuantityNeeded}, ImportanceId={need.ImportanceId.Value}, " +
-                //     $"StatusId={need.StatusId.Value}";
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    need.Id,
+                    need.ComponentId,
+                    need.QuantityNeeded,
+                    need.RequestedBy,
+                    need.RequestedAt,
+                    need.Description,
+                    need.ImportanceId,
+                    need.StatusId,
+                    need.CompletionReason,
+                    need.CompletedAt
+                });
 
                 var deleted = await needRepository.DeleteAsync(need, cancellationToken);
 
-                // ІСТОРІЯ тимчасово відключена
-                // var actionOption = await actionRepository.GetByNameAsync(
-                //     "Delete need", cancellationToken);
-                // if (actionOption.IsNone)
-                //     throw new InvalidOperationException("Action 'Delete need' not found");
-                // var action = actionOption.First();
-                //
-                // var entityTypeOption = await entityTypeRepository.GetByNameAsync(
-                //     "Need", cancellationToken);
-                // if (entityTypeOption.IsNone)
-                //     throw new InvalidOperationException("EntityType 'Need' not found");
-                // var entityType = entityTypeOption.First();
-                //
-                // var historyCommand = new CreateHistoryCommand
-                // {
-                //     UserId = performedBy,
-                //     ActionId = action.Id.Value,
-                //     EntityTypeId = entityType.Id.Value,
-                //     EntityId = need.Id.Value.ToString(),
-                //     OldValues = oldValues,
-                //     NewValues = null
-                // };
-                //
-                // var historyResult = await sender.Send(historyCommand, cancellationToken);
-                // historyResult.IfLeft(e => throw e);
+                await historyObserver.EntityDeletedAsync(
+                    userId: performedBy,
+                    entityTypeName: "Need",
+                    entityId: need.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    cancellationToken: cancellationToken);
 
                 return deleted;
             }
