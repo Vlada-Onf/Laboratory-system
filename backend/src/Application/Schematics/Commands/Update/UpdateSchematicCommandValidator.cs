@@ -31,9 +31,6 @@ namespace Application.Schematics.Commands.Update
                 .MaximumLength(500)
                 .When(x => x.DocumentUrl is not null);
 
-            RuleFor(x => x.UsefulLinkId)
-                .NotEmpty().WithMessage("UsefulLinkId є обов'язковим");
-
             RuleFor(x => x.UpdatedBy)
                 .NotEmpty().WithMessage("UpdatedBy є обов'язковим");
         }
