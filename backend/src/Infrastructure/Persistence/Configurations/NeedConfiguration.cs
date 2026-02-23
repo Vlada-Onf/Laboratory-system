@@ -3,6 +3,8 @@ using Domain.Needs;
 using Domain.Needs.Importance;
 using Domain.Needs.Status;
 using Domain.Users;
+using Domain.Wishlists.Importance;
+using Domain.Wishlists.Status;
 using Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -56,12 +58,12 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(n => n.ImportanceId)
                 .HasConversion(x => x.Value, x => new NeedImportanceId(x))
                 .HasColumnName("importance_id")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(n => n.StatusId)
                 .HasConversion(x => x.Value, x => new NeedStatusId(x))
                 .HasColumnName("status_id")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.HasOne<Component>()
                 .WithMany()
@@ -73,13 +75,13 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(n => n.ImportanceId)
                 .HasConstraintName("fk_needs_importance_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne<NeedStatus>()
                 .WithMany()
                 .HasForeignKey(n => n.StatusId)
                 .HasConstraintName("fk_needs_status_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasIndex(n => n.ComponentId)
                 .HasDatabaseName("ix_needs_component_id");

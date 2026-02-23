@@ -9,14 +9,14 @@ namespace Domain.Needs
     {
         public NeedId Id { get; private set; }
         public ComponentId ComponentId { get; private set; }
-        public NeedStatusId StatusId { get; private set; }
+        public NeedStatusId? StatusId { get; private set; }
         public int QuantityNeeded { get; private set; }
         public UserId RequestedBy { get; private set; }
         public DateTime RequestedAt { get; private set; }
         public string? Description { get; private set; }
         public DateTime? CompletedAt { get; private set; }
         public string? CompletionReason { get; private set; }
-        public NeedImportanceId ImportanceId { get; private set; }
+        public NeedImportanceId? ImportanceId { get; private set; }
 
         private Need() { }
 

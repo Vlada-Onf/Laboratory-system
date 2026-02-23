@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260223224711_Fix")]
+    partial class Fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -526,7 +529,7 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(1000)")
                         .HasColumnName("description");
 
-                    b.Property<Guid?>("ImportanceId")
+                    b.Property<Guid>("ImportanceId")
                         .HasColumnType("uuid")
                         .HasColumnName("importance_id");
 
@@ -544,7 +547,7 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("requested_by");
 
-                    b.Property<Guid?>("StatusId")
+                    b.Property<Guid>("StatusId")
                         .HasColumnType("uuid")
                         .HasColumnName("status_id");
 
@@ -1046,13 +1049,15 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Needs.Importance.NeedImportance", null)
                         .WithMany()
                         .HasForeignKey("ImportanceId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_needs_importance_id");
 
                     b.HasOne("Domain.Needs.Status.NeedStatus", null)
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_needs_status_id");
                 });
 
