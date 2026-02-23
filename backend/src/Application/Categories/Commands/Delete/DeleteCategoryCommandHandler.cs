@@ -57,9 +57,6 @@ namespace Application.Categories.Commands.Delete
             }
             catch (Exception exception)
             {
-                Console.WriteLine("💥 EXCEPTION in DeleteCategoryCommandHandler:");
-                Console.WriteLine(exception.Message);
-                Console.WriteLine(exception.StackTrace);
 
                 return new UnhandledCategoryException(category.Id, exception);
             }

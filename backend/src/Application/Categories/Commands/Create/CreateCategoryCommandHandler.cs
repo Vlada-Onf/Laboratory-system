@@ -70,9 +70,6 @@ namespace Application.Categories.Commands.Create
             }
             catch (Exception exception)
             {
-                Console.WriteLine("💥 EXCEPTION in CreateCategoryCommandHandler:");
-                Console.WriteLine(exception.Message);
-                Console.WriteLine(exception.StackTrace);
 
                 return new UnhandledCategoryException(
                     categoryId ?? CategoryId.Empty(),

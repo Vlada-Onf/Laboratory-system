@@ -12,7 +12,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("wishlist-importances")]
-    [AllowAnonymous]
+    [Authorize]
     public class WishlistImportancesController(ISender sender) : ControllerBase
     {
         [HttpGet]
