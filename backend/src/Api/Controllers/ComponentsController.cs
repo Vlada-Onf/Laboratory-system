@@ -4,19 +4,16 @@ using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
 using Application.Components.Commands.Create;
 using Application.Components.Commands.Delete;
-using Application.Components.Commands.Update;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("components")]
+    [AllowAnonymous]
     public class ComponentsController : ControllerBase
     {
         private readonly IComponentQueries _componentQueries;

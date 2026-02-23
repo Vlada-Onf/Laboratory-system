@@ -28,7 +28,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(dc => dc.ReasonId)
                 .HasConversion(x => x.Value, x => new DamagedComponentReasonId(x))
                 .HasColumnName("reason_id")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(dc => dc.Quantity)
                 .HasColumnName("quantity")
@@ -41,7 +41,7 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(dc => dc.RecordedBy)
-                .HasConversion(x => x.Value, x => new UserId(x)) 
+                .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("recorded_by")
                 .IsRequired();
 
@@ -50,7 +50,7 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnName("last_updated_at");
 
             builder.Property(dc => dc.LastUpdatedBy)
-                .HasConversion(x => x.Value, x => new UserId(x)) 
+                .HasConversion(x => x.Value, x => new UserId(x))
                 .HasColumnName("last_updated_by");
 
             builder.HasOne<Component>()
@@ -63,7 +63,7 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(dc => dc.ReasonId)
                 .HasConstraintName("fk_damaged_components_reasons_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull); 
 
             builder.HasIndex(dc => dc.ComponentId)
                 .HasDatabaseName("ix_damaged_components_component_id");

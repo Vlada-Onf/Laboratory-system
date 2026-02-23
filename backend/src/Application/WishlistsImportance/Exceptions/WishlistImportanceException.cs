@@ -26,5 +26,11 @@ namespace Application.WishlistsImportance.Exceptions
     public sealed class UnhandledWishlistImportanceException(
         WishlistImportanceId id,
         Exception? innerException = null)
-        : WishlistImportanceException(id, "Unexpected error occurred", innerException);
+        : WishlistImportanceException(
+            id,
+            innerException is null
+                ? "Unexpected error occurred"
+                : $"Unexpected error occurred: {innerException.Message}",
+            innerException);
+
 }

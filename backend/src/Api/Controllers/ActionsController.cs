@@ -16,6 +16,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("actions")]
+    [Authorize]
     public class ActionsController(ISender sender, IUserQueries userQueries) : ControllerBase
     {
         private async Task<User?> GetCurrentUserAsync(CancellationToken ct)

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Schematics.Exceptions;
 using Domain.Schematics;
 using Domain.Schematics.Schematics;
@@ -6,25 +7,19 @@ using Domain.Schematics.UsefulLink;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Schematics.Commands.Update
 {
     public sealed class UpdateSchematicCommandHandler(
-        ISchematicRepository schematicRepository)
+        ISchematicRepository schematicRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<UpdateSchematicCommand, Either<SchematicException, Schematic>>
     {
         public async Task<Either<SchematicException, Schematic>> Handle(
             UpdateSchematicCommand request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine(
-                $"[UpdateSchematic] START Id={request.Id}, " +
-                $"Title={request.Title}, " +
-                $"UpdatedBy={request.UpdatedBy}, " +
-                $"UsefulLinkId={request.UsefulLinkId}, " +
-                $"PhotoUrl={request.PhotoUrl}, " +
-                $"DocumentUrl={request.DocumentUrl}");
-
             var id = new SchematicId(request.Id);
             var option = await schematicRepository.GetByIdAsync(id, cancellationToken);
 
@@ -42,17 +37,24 @@ namespace Application.Schematics.Commands.Update
             try
             {
                 var updatedBy = new UserId(request.UpdatedBy);
-                Console.WriteLine("[UpdateSchematic] UserId created");
+
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    schematic.Id,
+                    schematic.ComponentId,
+                    schematic.Title,
+                    schematic.Description,
+                    schematic.PhotoUrl,
+                    schematic.DocumentUrl,
+                    schematic.SchematicUsefulLinkId,
+                    schematic.CreatedAt,
+                    schematic.UpdatedAt
+                });
 
                 SchematicUsefulLinkId? usefulLinkId = null;
                 if (request.UsefulLinkId.HasValue)
                 {
                     usefulLinkId = new SchematicUsefulLinkId(request.UsefulLinkId.Value);
-                    Console.WriteLine("[UpdateSchematic] UsefulLinkId created");
-                }
-                else
-                {
-                    Console.WriteLine("[UpdateSchematic] UsefulLinkId is null");
                 }
 
                 schematic.Update(
@@ -63,18 +65,33 @@ namespace Application.Schematics.Commands.Update
                     schematicUsefulLinkId: usefulLinkId,
                     updatedBy: updatedBy);
 
-                Console.WriteLine("[UpdateSchematic] schematic.Update OK");
-
                 var updated = await schematicRepository.UpdateAsync(schematic, cancellationToken);
-                Console.WriteLine("[UpdateSchematic] Repository.UpdateAsync OK");
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    schematic.Id,
+                    schematic.ComponentId,
+                    schematic.Title,
+                    schematic.Description,
+                    schematic.PhotoUrl,
+                    schematic.DocumentUrl,
+                    schematic.SchematicUsefulLinkId,
+                    schematic.CreatedAt,
+                    schematic.UpdatedAt
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Schematic",
+                    entityId: schematic.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[UpdateSchematic] ERROR: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-
                 return new UnhandledSchematicException(schematic.Id, ex);
             }
         }

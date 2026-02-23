@@ -6,7 +6,7 @@ public class DamagedComponent
 {
     public DamagedComponentId Id { get; }
     public ComponentId ComponentId { get; private set; }
-    public DamagedComponentReasonId ReasonId { get; private set; }
+    public DamagedComponentReasonId? ReasonId { get; private set; }
     public int Quantity { get; private set; }
 
     public DateTime RecordedAt { get; }

@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.SchematicsUsefulLinks.Commands.Delete
 {
-    public sealed record DeleteSchematicUsefulLinkCommand(Guid Id)
+    public sealed record DeleteSchematicUsefulLinkCommand(Guid Id, Guid PerformedBy)
             : IRequest<Either<SchematicUsefulLinkException, SchematicUsefulLink>>;
 }

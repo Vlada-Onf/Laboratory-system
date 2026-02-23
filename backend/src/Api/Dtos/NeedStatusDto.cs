@@ -20,6 +20,7 @@ namespace Api.Dtos
     {
         public required string Name { get; init; }
         public string? Description { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 
     public record UpdateNeedStatusDto
@@ -27,5 +28,7 @@ namespace Api.Dtos
         public required Guid Id { get; init; }
         public required string Name { get; init; }
         public string? Description { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
+
 }

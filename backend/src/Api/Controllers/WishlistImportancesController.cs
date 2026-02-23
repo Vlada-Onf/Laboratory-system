@@ -5,12 +5,14 @@ using Application.WishlistsImportance.Commands.Delete;
 using Application.WishlistsImportance.Commands.Update;
 using Application.WishlistsImportance.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("wishlist-importances")]
+    [Authorize]
     public class WishlistImportancesController(ISender sender) : ControllerBase
     {
         [HttpGet]

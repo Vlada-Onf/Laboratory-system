@@ -5,12 +5,14 @@ using Application.NeedsStatus.Commands.Delete;
 using Application.NeedsStatus.Commands.Update;
 using Application.NeedsStatus.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("need-statuses")]
+    [Authorize]
     public class NeedStatusesController(ISender sender) : ControllerBase
     {
         [HttpGet]
@@ -56,7 +58,8 @@ namespace Api.Controllers
             var input = new CreateNeedStatusCommand
             {
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -75,7 +78,8 @@ namespace Api.Controllers
             {
                 Id = request.Id,
                 Name = request.Name,
-                Description = request.Description
+                Description = request.Description,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -88,9 +92,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteNeedStatusCommand(id);
+            var input = new DeleteNeedStatusCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

@@ -11,9 +11,10 @@ using System.Threading.Tasks;
 namespace Application.NeedsStatus.Commands.Create
 {
     public sealed record CreateNeedStatusCommand
-            : IRequest<Either<NeedStatusException, NeedStatus>>
+        : IRequest<Either<NeedStatusException, NeedStatus>>
     {
         public required string Name { get; init; }
         public string? Description { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

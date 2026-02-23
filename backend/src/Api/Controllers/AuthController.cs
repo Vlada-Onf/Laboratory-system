@@ -9,6 +9,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;

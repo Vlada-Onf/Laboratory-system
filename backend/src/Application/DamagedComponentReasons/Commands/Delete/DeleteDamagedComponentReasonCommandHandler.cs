@@ -31,30 +31,53 @@ namespace Application.DamagedComponentReasons.Commands.Delete
             Guid performedBy,
             CancellationToken cancellationToken)
         {
+            // 1. Безпечна підготовка oldValues ДО видалення
+            string oldValues;
             try
             {
-                var oldValues = JsonSerializer.Serialize(new
+                var safeSnapshot = new
                 {
-                    reason.Id,
-                    reason.Name,
-                    reason.Description
-                });
+                    Id = reason.Id.Value.ToString(),
+                    Name = reason.Name ?? string.Empty,
+                    Description = reason.Description ?? string.Empty
+                };
 
-                var deleted = await reasonRepository.DeleteAsync(reason, cancellationToken);
+                oldValues = JsonSerializer.Serialize(safeSnapshot);
+            }
+            catch (Exception ex)
+            {
+                // Якщо навіть серіалізація впала – не валимо delete, просто логування буде пустим
+                oldValues = $"\"SerializationFailed: {ex.GetType().Name}\"";
+            }
 
+            DamagedComponentReason? deletedEntity;
+            try
+            {
+                // 2. Реальне видалення з репозиторію
+                deletedEntity = await reasonRepository.DeleteAsync(reason, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // 3. Якщо саме видалення не вдалось – це вже реальна помилка
+                return new UnhandledDamagedComponentReasonException(reason.Id, ex);
+            }
+
+            // 4. Логування історії НЕ повинно валити бізнес-операцію
+            try
+            {
                 await historyObserver.EntityDeletedAsync(
                     userId: performedBy,
                     entityTypeName: "DamagedComponentReason",
                     entityId: reason.Id.Value.ToString(),
                     oldValues: oldValues,
                     cancellationToken: cancellationToken);
-
-                return deleted;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new UnhandledDamagedComponentReasonException(reason.Id, ex);
+
             }
+
+            return deletedEntity!;
         }
     }
 }

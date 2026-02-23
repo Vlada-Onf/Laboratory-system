@@ -6,7 +6,7 @@ using MediatR;
 namespace Application.Schematics.Commands.Update
 {
     public sealed record UpdateSchematicCommand
-        : IRequest<Either<SchematicException, Schematic>>
+            : IRequest<Either<SchematicException, Schematic>>
     {
         public required Guid Id { get; init; }
         public required string Title { get; init; }
@@ -15,5 +15,6 @@ namespace Application.Schematics.Commands.Update
         public string? DocumentUrl { get; init; }
         public Guid? UsefulLinkId { get; init; }
         public required Guid UpdatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

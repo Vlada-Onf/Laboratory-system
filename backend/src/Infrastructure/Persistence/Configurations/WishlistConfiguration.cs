@@ -48,12 +48,12 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(w => w.ImportanceId)
                 .HasConversion(x => x.Value, x => new WishlistImportanceId(x))
                 .HasColumnName("importance_id")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(w => w.StatusId)
                 .HasConversion(x => x.Value, x => new WishlistStatusId(x))
                 .HasColumnName("status_id")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(w => w.CompletedAt)
                 .HasConversion(new DateTimeUtcConverter())
@@ -67,13 +67,14 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(w => w.ImportanceId)
                 .HasConstraintName("fk_wishlists_importances_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne<WishlistStatus>()
                 .WithMany()
                 .HasForeignKey(w => w.StatusId)
                 .HasConstraintName("fk_wishlists_statuses_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
+
             builder.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(w => w.RequestedBy)

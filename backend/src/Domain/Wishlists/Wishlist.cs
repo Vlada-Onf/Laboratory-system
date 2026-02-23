@@ -10,13 +10,10 @@ namespace Domain.Wishlists
         public string Name { get; private set; }
         public string? Description { get; private set; }
         public int QuantityNeeded { get; private set; }
-
         public UserId RequestedBy { get; }
         public DateTime RequestedAt { get; }
-
-        public WishlistImportanceId ImportanceId { get; private set; }
-        public WishlistStatusId StatusId { get; private set; }
-
+        public WishlistImportanceId? ImportanceId { get; private set; }
+        public WishlistStatusId? StatusId { get; private set; }
         public DateTime? CompletedAt { get; private set; }
         public string? CompletionReason { get; private set; }
 

@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.NeedsImportance.Commands.Delete
 {
-    public sealed record DeleteNeedImportanceCommand(Guid Id)
-           : IRequest<Either<NeedImportanceException, NeedImportance>>;
+    public sealed record DeleteNeedImportanceCommand(Guid Id, Guid PerformedBy)
+       : IRequest<Either<NeedImportanceException, NeedImportance>>;
 }

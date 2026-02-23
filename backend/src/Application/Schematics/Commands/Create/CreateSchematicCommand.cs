@@ -6,7 +6,7 @@ using MediatR;
 namespace Application.Schematics.Commands.Create
 {
     public sealed record CreateSchematicCommand
-        : IRequest<Either<SchematicException, Schematic>>
+            : IRequest<Either<SchematicException, Schematic>>
     {
         public required Guid ComponentId { get; init; }
         public required string Title { get; init; }
@@ -15,6 +15,7 @@ namespace Application.Schematics.Commands.Create
         public string? DocumentUrl { get; init; }
         public Guid? UsefulLinkId { get; init; }
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }
 

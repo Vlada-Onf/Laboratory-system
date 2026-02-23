@@ -1,14 +1,9 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Comment.Commands.Create
 {
     public sealed class CreateComponentCommentCommandValidator
-            : AbstractValidator<CreateComponentCommentCommand>
+        : AbstractValidator<CreateComponentCommentCommand>
     {
         public CreateComponentCommentCommandValidator()
         {
@@ -21,6 +16,9 @@ namespace Application.Comment.Commands.Create
 
             RuleFor(x => x.CreatedBy)
                 .NotEmpty().WithMessage("CreatedBy є обов'язковим");
+
+            RuleFor(x => x.PerformedBy)
+                .NotEmpty().WithMessage("PerformedBy є обов'язковим");
         }
     }
 }

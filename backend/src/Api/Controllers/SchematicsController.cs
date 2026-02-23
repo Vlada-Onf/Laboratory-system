@@ -109,8 +109,10 @@ namespace Api.Controllers
                 PhotoUrl = photoUrl,
                 DocumentUrl = documentUrl,
                 UsefulLinkId = request.UsefulLinkId,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = request.PerformedBy
             };
+
 
             Console.WriteLine("[SchematicsController] Sending CreateSchematicCommand to MediatR");
 
@@ -192,7 +194,8 @@ namespace Api.Controllers
                 PhotoUrl = photoUrl,
                 DocumentUrl = documentUrl,
                 UsefulLinkId = request.UsefulLinkId,
-                UpdatedBy = request.UpdatedBy
+                UpdatedBy = request.UpdatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             Console.WriteLine("[SchematicsController] Sending UpdateSchematicCommand to MediatR");
@@ -214,13 +217,14 @@ namespace Api.Controllers
                 });
         }
 
-        // DELETE /schematics/{id}
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteSchematicCommand(id);
+            var performedBy = Guid.Parse(User.FindFirst("sub")!.Value);
+
+            var input = new DeleteSchematicCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

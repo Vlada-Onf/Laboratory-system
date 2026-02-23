@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Schematics.Exceptions;
 using Domain.Components;
 using Domain.Schematics;
@@ -7,53 +8,37 @@ using Domain.Schematics.UsefulLink;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Schematics.Commands.Create
 {
     public sealed class CreateSchematicCommandHandler(
         ISchematicRepository schematicRepository,
-        IComponentRepository componentRepository)
+        IComponentRepository componentRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateSchematicCommand, Either<SchematicException, Schematic>>
     {
         public async Task<Either<SchematicException, Schematic>> Handle(
             CreateSchematicCommand request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine(
-                $"[CreateSchematic] START " +
-                $"ComponentId={request.ComponentId}, " +
-                $"Title={request.Title}, " +
-                $"CreatedBy={request.CreatedBy}, " +
-                $"UsefulLinkId={request.UsefulLinkId}, " +
-                $"PhotoUrl={request.PhotoUrl}, " +
-                $"DocumentUrl={request.DocumentUrl}");
-
-            SchematicId? id = null;
+            SchematicId? schematicId = null;
 
             try
             {
                 var componentId = new ComponentId(request.ComponentId);
-                Console.WriteLine("[CreateSchematic] ComponentId created");
-
                 var componentOption = await componentRepository.GetByIdAsync(componentId, cancellationToken);
                 if (componentOption.IsNone)
                 {
-                    Console.WriteLine("[CreateSchematic] Component not found");
-                    return new UnhandledSchematicException(SchematicId.Empty());
+                    return new SchematicNotFoundException(SchematicId.Empty());
                 }
 
                 var createdBy = new UserId(request.CreatedBy);
-                Console.WriteLine("[CreateSchematic] UserId created");
 
                 SchematicUsefulLinkId? usefulLinkId = null;
                 if (request.UsefulLinkId.HasValue)
                 {
                     usefulLinkId = new SchematicUsefulLinkId(request.UsefulLinkId.Value);
-                    Console.WriteLine("[CreateSchematic] UsefulLinkId created");
-                }
-                else
-                {
-                    Console.WriteLine("[CreateSchematic] UsefulLinkId is null");
                 }
 
                 var schematic = Schematic.Create(
@@ -65,22 +50,35 @@ namespace Application.Schematics.Commands.Create
                     schematicUsefulLinkId: usefulLinkId,
                     createdBy: createdBy);
 
-                Console.WriteLine("[CreateSchematic] Schematic.Create OK");
-
-                id = schematic.Id;
+                schematicId = schematic.Id;
 
                 var created = await schematicRepository.AddAsync(schematic, cancellationToken);
-                Console.WriteLine($"[CreateSchematic] Repository.AddAsync OK. New Id={schematic.Id.Value}");
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    schematic.Id,
+                    schematic.ComponentId,
+                    schematic.Title,
+                    schematic.Description,
+                    schematic.PhotoUrl,
+                    schematic.DocumentUrl,
+                    schematic.SchematicUsefulLinkId,
+                    schematic.CreatedAt
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Schematic",
+                    entityId: schematic.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CreateSchematic] ERROR: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-
                 return new UnhandledSchematicException(
-                    id ?? SchematicId.Empty(),
+                    schematicId ?? SchematicId.Empty(),
                     ex);
             }
         }

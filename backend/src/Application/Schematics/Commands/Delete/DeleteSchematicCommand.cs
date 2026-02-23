@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.Schematics.Commands.Delete
 {
-    public sealed record DeleteSchematicCommand(Guid Id)
+    public sealed record DeleteSchematicCommand(Guid Id, Guid PerformedBy)
             : IRequest<Either<SchematicException, Schematic>>;
 }

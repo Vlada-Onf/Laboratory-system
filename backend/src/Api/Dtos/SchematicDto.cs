@@ -38,7 +38,8 @@ namespace Api.Dtos
 
         public Guid? UsefulLinkId { get; set; }
         public Guid CreatedBy { get; set; }
-    }
+        public Guid PerformedBy { get; set; }
+}
 
     public class UpdateSchematicDto
     {
@@ -47,5 +48,6 @@ namespace Api.Dtos
         public string? Description { get; set; }
         public Guid? UsefulLinkId { get; set; }
         public Guid UpdatedBy { get; set; }
+        public Guid PerformedBy { get; set; }
     }
 }

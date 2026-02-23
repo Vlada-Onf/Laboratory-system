@@ -5,12 +5,14 @@ using Application.UsefulLink.Commands.Delete;
 using Application.UsefulLink.Commands.Update;
 using Application.UsefulLink.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("component-useful-links")]
+    [Authorize]
     public class ComponentUsefulLinksController(ISender sender) : ControllerBase
     {
         // GET /component-useful-links/{id}

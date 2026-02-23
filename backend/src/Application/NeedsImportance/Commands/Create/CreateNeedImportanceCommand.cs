@@ -15,5 +15,6 @@ namespace Application.NeedsImportance.Commands.Create
     {
         public required string Name { get; init; }
         public required int Level { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

@@ -5,12 +5,14 @@ using Application.Wishlists.Commands.Delete;
 using Application.Wishlists.Commands.Update;
 using Application.Wishlists.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("wishlists")]
+    [Authorize]
     public class WishlistsController(ISender sender) : ControllerBase
     {
         [HttpGet("{id:guid}")]

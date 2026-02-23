@@ -2,11 +2,12 @@
 using Domain.Wishlists.Status;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 
 namespace Infrastructure.Persistence.Repositories
 {
-    public class WishlistStatusRepository(ApplicationDbContext context)
+    public class WishlistStatusRepository(ApplicationDbContext context, ILogger<WishlistStatusRepository> logger)
         : IWishlistStatusRepository
     {
         public async Task<WishlistStatus> AddAsync(WishlistStatus status, CancellationToken cancellationToken)
@@ -39,9 +40,23 @@ namespace Infrastructure.Persistence.Repositories
         }
         public async Task<WishlistStatus> DeleteAsync(WishlistStatus status, CancellationToken cancellationToken)
         {
-            context.WishlistStatuses.Remove(status);
-            await context.SaveChangesAsync(cancellationToken);
-            return status;
+            logger.LogInformation("Repository: removing WishlistStatus Id={Id}, Name={Name}",
+                status.Id.Value, status.Name);
+
+            try
+            {
+                context.WishlistStatuses.Remove(status);
+                await context.SaveChangesAsync(cancellationToken);
+
+                logger.LogInformation("Repository: WishlistStatus removed Id={Id}", status.Id.Value);
+
+                return status;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Repository: error while removing WishlistStatus Id={Id}", status.Id.Value);
+                throw;
+            }
         }
     }
 }

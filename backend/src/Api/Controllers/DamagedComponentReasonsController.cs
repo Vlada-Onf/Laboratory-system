@@ -5,12 +5,14 @@ using Application.DamagedComponentReasons.Commands.Delete;
 using Application.DamagedComponentReasons.Commands.Update;
 using Application.DamagedComponentReasons.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("damaged-component-reasons")]
+    [Authorize]
     public class DamagedComponentReasonsController(ISender sender) : ControllerBase
     {
         [HttpGet]

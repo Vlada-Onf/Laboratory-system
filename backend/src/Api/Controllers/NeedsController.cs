@@ -5,12 +5,14 @@ using Application.Needs.Commands.Delete;
 using Application.Needs.Commands.Update;
 using Application.Needs.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("needs")]
+    [Authorize]
     public class NeedsController(ISender sender) : ControllerBase
     {
         [HttpGet("{id:guid}")]

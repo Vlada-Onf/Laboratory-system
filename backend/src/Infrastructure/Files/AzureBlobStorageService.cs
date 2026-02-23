@@ -21,10 +21,6 @@ namespace Infrastructure.Files
             var containerName = configuration["AzureBlob:Container"]
                 ?? throw new InvalidOperationException("AzureBlob:Container is missing");
 
-            // тимчасовий лог, щоб перевірити, що взагалі читається з конфігів
-            Console.WriteLine($"[AzureBlob] ConnectionString = '{connectionString}'");
-            Console.WriteLine($"[AzureBlob] Container = '{containerName}'");
-
             var serviceClient = new BlobServiceClient(connectionString);
             _container = serviceClient.GetBlobContainerClient(containerName);
         }

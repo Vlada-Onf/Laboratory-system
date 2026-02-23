@@ -3,6 +3,7 @@ using Application.WishlistsImportance.Exceptions;
 using Domain.Wishlists.Importance;
 using LanguageExt;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace Application.WishlistsImportance.Commands.Delete
 {
     public sealed class DeleteWishlistImportanceCommandHandler(
-        IWishlistImportanceRepository importanceRepository)
+        IWishlistImportanceRepository importanceRepository,
+        ILogger<DeleteWishlistImportanceCommandHandler> logger)
         : IRequestHandler<DeleteWishlistImportanceCommand, Either<WishlistImportanceException, WishlistImportance>>
     {
         public async Task<Either<WishlistImportanceException, WishlistImportance>> Handle(
@@ -24,8 +26,12 @@ namespace Application.WishlistsImportance.Commands.Delete
 
             return await option.MatchAsync(
                 Some: importance => DeleteEntity(importance, cancellationToken),
-                None: () => Task.FromResult<Either<WishlistImportanceException, WishlistImportance>>(
-                    new WishlistImportanceNotFoundException(id)));
+                None: () =>
+                {
+                    logger.LogWarning("WishlistImportance not found for Id={Id}", id.Value);
+                    return Task.FromResult<Either<WishlistImportanceException, WishlistImportance>>(
+                        new WishlistImportanceNotFoundException(id));
+                });
         }
 
         private async Task<Either<WishlistImportanceException, WishlistImportance>> DeleteEntity(

@@ -6,12 +6,14 @@ using Application.DamagedComponents.Commands.Delete;
 using Application.DamagedComponents.Commands.Update;
 using Domain.DamagedComponents;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("damaged-components")]
+    [Authorize]
     public class DamagedComponentsController(
                 IDamagedComponentQueries queries,
                 ISender sender) : ControllerBase

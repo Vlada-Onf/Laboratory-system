@@ -5,12 +5,14 @@ using Application.DashboardStatistics.Commands.Delete;
 using Application.DashboardStatistics.Commands.Update;
 using Application.DashboardStatistics.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("dashboard-statistics")]
+    [Authorize]
     public class DashboardStatisticsController(ISender sender) : ControllerBase
     {
         [HttpGet]

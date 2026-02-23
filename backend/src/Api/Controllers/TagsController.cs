@@ -5,12 +5,14 @@ using Application.Tags.Commands.Delete;
 using Application.Tags.Commands.Update;
 using Application.Tags.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("tags")]
+    [Authorize]
     public class TagsController(ISender sender) : ControllerBase
     {
         [HttpGet]

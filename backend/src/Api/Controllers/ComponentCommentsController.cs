@@ -7,12 +7,14 @@ using Application.Comment.Queries;
 using Application.Common.Interfaces.Queries;
 using Domain.Components.Comment;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("component-comments")]
+    [AllowAnonymous]
     public class ComponentCommentsController : ControllerBase
     {
         private readonly ISender _sender;

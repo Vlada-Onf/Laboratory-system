@@ -5,12 +5,14 @@ using Application.NeedsImportance.Commands.Delete;
 using Application.NeedsImportance.Commands.Update;
 using Application.NeedsImportance.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("need-importances")]
+    [Authorize]
     public class NeedImportancesController(ISender sender) : ControllerBase
     {
         [HttpGet]
@@ -44,7 +46,8 @@ namespace Api.Controllers
             var input = new CreateNeedImportanceCommand
             {
                 Name = request.Name,
-                Level = request.Level
+                Level = request.Level,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -63,7 +66,8 @@ namespace Api.Controllers
             {
                 Id = request.Id,
                 Name = request.Name,
-                Level = request.Level
+                Level = request.Level,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -76,9 +80,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteNeedImportanceCommand(id);
+            var input = new DeleteNeedImportanceCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

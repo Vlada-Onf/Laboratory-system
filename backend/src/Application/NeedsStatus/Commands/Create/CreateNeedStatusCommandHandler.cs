@@ -1,18 +1,16 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.NeedsStatus.Exceptions;
 using Domain.Needs.Status;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.NeedsStatus.Commands.Create
 {
     public sealed class CreateNeedStatusCommandHandler(
-        INeedStatusRepository statusRepository)
+        INeedStatusRepository statusRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateNeedStatusCommand, Either<NeedStatusException, NeedStatus>>
     {
         public async Task<Either<NeedStatusException, NeedStatus>> Handle(
@@ -44,6 +42,21 @@ namespace Application.NeedsStatus.Commands.Create
                 id = status.Id;
 
                 var created = await statusRepository.AddAsync(status, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    status.Id,
+                    status.Name,
+                    status.Description,
+                    status.CreatedAt
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "NeedStatus",
+                    entityId: status.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

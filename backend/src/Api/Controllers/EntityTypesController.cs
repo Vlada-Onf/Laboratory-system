@@ -5,12 +5,14 @@ using Application.EntityTypes.Commands.Delete;
 using Application.EntityTypes.Commands.Update;
 using Application.EntityTypes.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("entity-types")]
+    [Authorize]
     public class EntityTypesController(ISender sender) : ControllerBase
     {
         [HttpGet]

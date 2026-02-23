@@ -44,12 +44,15 @@ namespace Api.Controllers
             [FromBody] CreateSchematicUsefulLinkDto request,
             CancellationToken ct)
         {
+            var performedBy = Guid.Parse(User.FindFirst("sub")!.Value);
+
             var command = new CreateSchematicUsefulLinkCommand
             {
                 SchematicId = request.SchematicId,
                 Title = request.Title,
                 Url = request.Url,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = performedBy
             };
 
             var result = await sender.Send(command, ct);
@@ -68,12 +71,15 @@ namespace Api.Controllers
             if (id != request.Id)
                 return BadRequest("Mismatched ids");
 
+            var performedBy = Guid.Parse(User.FindFirst("sub")!.Value);
+
             var command = new UpdateSchematicUsefulLinkCommand
             {
                 Id = request.Id,
                 Title = request.Title,
                 Url = request.Url,
-                UpdatedBy = request.UpdatedBy
+                UpdatedBy = request.UpdatedBy,
+                PerformedBy = performedBy
             };
 
             var result = await sender.Send(command, ct);
@@ -88,7 +94,9 @@ namespace Api.Controllers
             [FromRoute] Guid id,
             CancellationToken ct)
         {
-            var command = new DeleteSchematicUsefulLinkCommand(id);
+            var performedBy = Guid.Parse(User.FindFirst("sub")!.Value);
+
+            var command = new DeleteSchematicUsefulLinkCommand(id, performedBy);
             var result = await sender.Send(command, ct);
 
             return result.Match<ActionResult>(

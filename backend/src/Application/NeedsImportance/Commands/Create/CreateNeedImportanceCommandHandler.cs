@@ -1,13 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.NeedsImportance.Exceptions;
 using Domain.Needs.Importance;
+using Domain.Users;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.NeedsImportance.Commands.Create
 {
     public sealed class CreateNeedImportanceCommandHandler(
-        INeedImportanceRepository importanceRepository)
+        INeedImportanceRepository importanceRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateNeedImportanceCommand, Either<NeedImportanceException, NeedImportance>>
     {
         public async Task<Either<NeedImportanceException, NeedImportance>> Handle(
@@ -39,6 +43,21 @@ namespace Application.NeedsImportance.Commands.Create
                 id = importance.Id;
 
                 var created = await importanceRepository.AddAsync(importance, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    importance.Id,
+                    importance.Name,
+                    importance.Level,
+                    importance.CreatedAt
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "NeedImportance",
+                    entityId: importance.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }
