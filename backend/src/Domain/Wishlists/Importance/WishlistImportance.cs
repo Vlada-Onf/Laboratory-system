@@ -17,8 +17,8 @@
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name не може бути порожнім");
 
-            if (level < 1 || level > 3)
-                throw new ArgumentException("Level мусить бути від 1 до 3");
+            if (level < 1 || level > 10)
+                throw new ArgumentException("Level мусить бути від 1 до 10");
 
             Id = id;
             Name = name;
@@ -34,8 +34,8 @@
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name не може бути порожнім");
 
-            if (level < 1 || level > 3)
-                throw new ArgumentException("Level мусить бути від 1 до 3");
+            if (level < 1 || level > 10)
+                throw new ArgumentException("Level мусить бути від 1 до 10");
 
             Name = name;
             Level = level;

@@ -20,7 +20,7 @@ namespace Application.WishlistsImportance.Commands.Update
                 .MaximumLength(200);
 
             RuleFor(x => x.Level)
-                .InclusiveBetween(1, 3).WithMessage("Level мусить бути від 1 до 3");
+                .InclusiveBetween(1, 10).WithMessage("Level мусить бути від 1 до 10");
         }
     }
 }
