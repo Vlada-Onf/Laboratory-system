@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Wishlists.Exceptions;
 using Domain.Users;
 using Domain.Wishlists;
@@ -6,11 +7,13 @@ using Domain.Wishlists.Importance;
 using Domain.Wishlists.Status;
 using LanguageExt;
 using MediatR;
+using System.Text.Json;
 
 namespace Application.Wishlists.Commands.Create
 {
     public sealed class CreateWishlistCommandHandler(
-            IWishlistRepository wishlistRepository)
+        IWishlistRepository wishlistRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateWishlistCommand, Either<WishlistException, Wishlist>>
     {
         public async Task<Either<WishlistException, Wishlist>> Handle(
@@ -36,6 +39,27 @@ namespace Application.Wishlists.Commands.Create
                 id = wishlist.Id;
 
                 var created = await wishlistRepository.AddAsync(wishlist, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    wishlist.Id,
+                    wishlist.Name,
+                    wishlist.Description,
+                    wishlist.QuantityNeeded,
+                    wishlist.RequestedBy,
+                    wishlist.RequestedAt,
+                    wishlist.ImportanceId,
+                    wishlist.StatusId,
+                    wishlist.CompletedAt,
+                    wishlist.CompletionReason
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Wishlist",
+                    entityId: wishlist.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

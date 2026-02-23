@@ -37,14 +37,15 @@ namespace Api.Controllers
 
         [HttpPost]
         public async Task<ActionResult<TagDto>> CreateTag(
-            [FromBody] CreateTagDto request,
-            CancellationToken cancellationToken)
+                [FromBody] CreateTagDto request,
+                CancellationToken cancellationToken)
         {
             var input = new CreateTagCommand
             {
                 Name = request.Name,
                 Color = request.Color,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -63,7 +64,8 @@ namespace Api.Controllers
             {
                 Id = request.Id,
                 Name = request.Name,
-                Color = request.Color
+                Color = request.Color,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -76,9 +78,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> DeleteTag(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteTagCommand(id);
+            var input = new DeleteTagCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 
@@ -86,6 +89,7 @@ namespace Api.Controllers
                 _ => NoContent(),
                 e => e.ToObjectResult());
         }
+
         [HttpGet("by-component/{componentId:guid}")]
         public async Task<ActionResult<IReadOnlyList<TagDto>>> GetTagsByComponentId(
             [FromRoute] Guid componentId,

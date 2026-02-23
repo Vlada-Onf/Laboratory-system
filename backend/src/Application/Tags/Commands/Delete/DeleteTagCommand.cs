@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.Tags.Commands.Delete
 {
-    public record DeleteTagCommand(Guid Id)
+    public record DeleteTagCommand(Guid Id, Guid PerformedBy)
             : IRequest<Either<TagException, Tag>>;
 }

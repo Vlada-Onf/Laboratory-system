@@ -30,6 +30,7 @@ namespace Api.Dtos
         public required string Title { get; init; }
         public required string Url { get; init; }
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 
     public record UpdateComponentUsefulLinkDto
@@ -38,5 +39,6 @@ namespace Api.Dtos
         public required string Title { get; init; }
         public required string Url { get; init; }
         public required Guid UpdatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

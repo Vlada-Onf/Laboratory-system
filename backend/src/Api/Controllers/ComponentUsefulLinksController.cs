@@ -15,7 +15,6 @@ namespace Api.Controllers
     [Authorize]
     public class ComponentUsefulLinksController(ISender sender) : ControllerBase
     {
-        // GET /component-useful-links/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ComponentUsefulLinkDto>> GetById(
             [FromRoute] Guid id,
@@ -28,7 +27,6 @@ namespace Api.Controllers
                 () => NotFound());
         }
 
-        // GET /component-useful-links/by-component/{componentId}
         [HttpGet("by-component/{componentId:guid}")]
         public async Task<ActionResult<IReadOnlyList<ComponentUsefulLinkDto>>> GetByComponentId(
             [FromRoute] Guid componentId,
@@ -43,18 +41,18 @@ namespace Api.Controllers
                 .ToList();
         }
 
-        // POST /component-useful-links
         [HttpPost]
         public async Task<ActionResult<ComponentUsefulLinkDto>> Create(
-            [FromBody] CreateComponentUsefulLinkDto request,
-            CancellationToken cancellationToken)
+                [FromBody] CreateComponentUsefulLinkDto request,
+                CancellationToken cancellationToken)
         {
             var input = new CreateComponentUsefulLinkCommand
             {
                 ComponentId = request.ComponentId,
                 Title = request.Title,
                 Url = request.Url,
-                CreatedBy = request.CreatedBy
+                CreatedBy = request.CreatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -64,7 +62,6 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-        // PUT /component-useful-links
         [HttpPut]
         public async Task<ActionResult<ComponentUsefulLinkDto>> Update(
             [FromBody] UpdateComponentUsefulLinkDto request,
@@ -75,7 +72,8 @@ namespace Api.Controllers
                 Id = request.Id,
                 Title = request.Title,
                 Url = request.Url,
-                UpdatedBy = request.UpdatedBy
+                UpdatedBy = request.UpdatedBy,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -85,13 +83,13 @@ namespace Api.Controllers
                 e => e.ToObjectResult());
         }
 
-        // DELETE /component-useful-links/{id}
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteComponentUsefulLinkCommand(id);
+            var input = new DeleteComponentUsefulLinkCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

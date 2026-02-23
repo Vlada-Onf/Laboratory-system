@@ -1,19 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.WishlistsStatus.Exceptions;
 using Domain.Wishlists.Status;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.WishlistsStatus.Commands.Update
 {
     public sealed class UpdateWishlistStatusCommandHandler(
-            IWishlistStatusRepository statusRepository)
-            : IRequestHandler<UpdateWishlistStatusCommand, Either<WishlistStatusException, WishlistStatus>>
+        IWishlistStatusRepository statusRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<UpdateWishlistStatusCommand, Either<WishlistStatusException, WishlistStatus>>
     {
         public async Task<Either<WishlistStatusException, WishlistStatus>> Handle(
             UpdateWishlistStatusCommand request,
@@ -35,11 +33,35 @@ namespace Application.WishlistsStatus.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    status.Id,
+                    status.Name,
+                    status.Description,
+                    status.CreatedAt
+                });
+
                 status.Update(
                     name: request.Name,
                     description: request.Description);
 
                 var updated = await statusRepository.UpdateAsync(status, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    status.Id,
+                    status.Name,
+                    status.Description,
+                    status.CreatedAt
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "WishlistStatus",
+                    entityId: status.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

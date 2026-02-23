@@ -1,19 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Tags.Exceptions;
 using Domain.Tags;
 using Domain.Users;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.Tags.Commands.Create
 {
     public class CreateTagCommandHandler(
-        ITagRepository tagRepository)
+        ITagRepository tagRepository,
+        IHistoryObserver historyObserver)
         : IRequestHandler<CreateTagCommand, Either<TagException, Tag>>
     {
         public async Task<Either<TagException, Tag>> Handle(
@@ -41,6 +39,20 @@ namespace Application.Tags.Commands.Create
                 tagId = tag.Id;
 
                 var created = await tagRepository.AddAsync(tag, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    tag.Id,
+                    tag.Name,
+                    tag.Color
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Tag",
+                    entityId: tag.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

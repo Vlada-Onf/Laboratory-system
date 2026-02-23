@@ -38,20 +38,15 @@ namespace Api.Controllers
                 User.FindFirstValue("sub") ??
                 User.FindFirstValue("user_id");
 
-            Console.WriteLine($"🔍 Clerk sub: {clerkId}");
-
             if (string.IsNullOrWhiteSpace(clerkId))
                 return null;
 
             var userOption = await _userQueries.GetByClerkIdAsync(clerkId, ct);
             if (userOption.IsNone)
             {
-                Console.WriteLine("❌ User with this ClerkId not found in DB");
                 return null;
             }
-
             var user = userOption.First();
-            Console.WriteLine($"✅ App user id: {user.Id.Value}");
 
             return user.Id.Value;
         }

@@ -18,5 +18,6 @@ namespace Application.Wishlists.Commands.Update
         public string? Description { get; init; }
         public required int QuantityNeeded { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

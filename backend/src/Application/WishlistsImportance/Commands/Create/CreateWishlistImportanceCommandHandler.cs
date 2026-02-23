@@ -1,21 +1,19 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.WishlistsImportance.Exceptions;
 using Domain.Wishlists.Importance;
 using LanguageExt;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.WishlistsImportance.Commands.Create
 {
     public sealed class CreateWishlistImportanceCommandHandler(
         IWishlistImportanceRepository importanceRepository,
+        IHistoryObserver historyObserver,
         ILogger<CreateWishlistImportanceCommandHandler> logger)
-    : IRequestHandler<CreateWishlistImportanceCommand, Either<WishlistImportanceException, WishlistImportance>>
+        : IRequestHandler<CreateWishlistImportanceCommand, Either<WishlistImportanceException, WishlistImportance>>
     {
         public async Task<Either<WishlistImportanceException, WishlistImportance>> Handle(
             CreateWishlistImportanceCommand request,
@@ -58,6 +56,21 @@ namespace Application.WishlistsImportance.Commands.Create
                 var created = await importanceRepository.AddAsync(importance, cancellationToken);
 
                 logger.LogInformation("WishlistImportance created with Id={Id}", created.Id.Value);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    importance.Id,
+                    importance.Name,
+                    importance.Level,
+                    importance.CreatedAt
+                });
+
+                await historyObserver.EntityCreatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "WishlistImportance",
+                    entityId: importance.Id.Value.ToString(),
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return created;
             }

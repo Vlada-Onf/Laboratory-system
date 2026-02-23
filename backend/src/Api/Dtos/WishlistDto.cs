@@ -22,8 +22,8 @@ namespace Api.Dtos
                 wishlist.QuantityNeeded,
                 wishlist.RequestedBy.Value,
                 wishlist.RequestedAt,
-                wishlist.ImportanceId.Value,
-                wishlist.StatusId.Value,
+                wishlist.ImportanceId!.Value,
+                wishlist.StatusId!.Value,
                 wishlist.CompletedAt,
                 wishlist.CompletionReason);
     }
@@ -36,6 +36,7 @@ namespace Api.Dtos
         public required Guid RequestedBy { get; init; }
         public required Guid ImportanceId { get; init; }
         public required Guid StatusId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 
     public record UpdateWishlistDetailsDto
@@ -45,5 +46,6 @@ namespace Api.Dtos
         public string? Description { get; init; }
         public required int QuantityNeeded { get; init; }
         public required Guid ImportanceId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

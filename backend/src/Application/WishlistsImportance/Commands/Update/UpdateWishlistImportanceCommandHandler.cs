@@ -1,19 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.WishlistsImportance.Exceptions;
 using Domain.Wishlists.Importance;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.WishlistsImportance.Commands.Update
 {
     public sealed class UpdateWishlistImportanceCommandHandler(
-            IWishlistImportanceRepository importanceRepository)
-            : IRequestHandler<UpdateWishlistImportanceCommand, Either<WishlistImportanceException, WishlistImportance>>
+        IWishlistImportanceRepository importanceRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<UpdateWishlistImportanceCommand, Either<WishlistImportanceException, WishlistImportance>>
     {
         public async Task<Either<WishlistImportanceException, WishlistImportance>> Handle(
             UpdateWishlistImportanceCommand request,
@@ -35,11 +33,35 @@ namespace Application.WishlistsImportance.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    importance.Id,
+                    importance.Name,
+                    importance.Level,
+                    importance.CreatedAt
+                });
+
                 importance.Update(
                     name: request.Name,
                     level: request.Level);
 
                 var updated = await importanceRepository.UpdateAsync(importance, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    importance.Id,
+                    importance.Name,
+                    importance.Level,
+                    importance.CreatedAt
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "WishlistImportance",
+                    entityId: importance.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

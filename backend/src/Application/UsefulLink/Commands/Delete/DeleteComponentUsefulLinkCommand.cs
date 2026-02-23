@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.UsefulLink.Commands.Delete
 {
-    public sealed record DeleteComponentUsefulLinkCommand(Guid Id)
+    public sealed record DeleteComponentUsefulLinkCommand(Guid Id, Guid PerformedBy)
             : IRequest<Either<ComponentUsefulLinkException, ComponentUsefulLink>>;
 }

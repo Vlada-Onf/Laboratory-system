@@ -17,5 +17,6 @@ namespace Application.UsefulLink.Commands.Update
         public required string Title { get; init; }
         public required string Url { get; init; }
         public required Guid UpdatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

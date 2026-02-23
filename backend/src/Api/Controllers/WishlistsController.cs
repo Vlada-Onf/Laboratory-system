@@ -43,8 +43,8 @@ namespace Api.Controllers
 
         [HttpPost]
         public async Task<ActionResult<WishlistDto>> Create(
-            [FromBody] CreateWishlistDto request,
-            CancellationToken cancellationToken)
+         [FromBody] CreateWishlistDto request,
+         CancellationToken cancellationToken)
         {
             var input = new CreateWishlistCommand
             {
@@ -53,7 +53,8 @@ namespace Api.Controllers
                 QuantityNeeded = request.QuantityNeeded,
                 RequestedBy = request.RequestedBy,
                 ImportanceId = request.ImportanceId,
-                StatusId = request.StatusId
+                StatusId = request.StatusId,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -74,7 +75,8 @@ namespace Api.Controllers
                 Name = request.Name,
                 Description = request.Description,
                 QuantityNeeded = request.QuantityNeeded,
-                ImportanceId = request.ImportanceId
+                ImportanceId = request.ImportanceId,
+                PerformedBy = request.PerformedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -87,13 +89,15 @@ namespace Api.Controllers
         [HttpPut("status")]
         public async Task<ActionResult<WishlistDto>> UpdateStatus(
             [FromBody] ChangeWishlistStatusDto request,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
             var input = new UpdateWishlistStatusCommand
             {
                 Id = request.Id,
                 StatusId = request.StatusId,
-                CompletionReason = request.CompletionReason
+                CompletionReason = request.CompletionReason,
+                PerformedBy = performedBy
             };
 
             var result = await sender.Send(input, cancellationToken);
@@ -106,9 +110,10 @@ namespace Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
             [FromRoute] Guid id,
+            [FromQuery] Guid performedBy,
             CancellationToken cancellationToken)
         {
-            var input = new DeleteWishlistCommand(id);
+            var input = new DeleteWishlistCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
 

@@ -14,5 +14,6 @@ namespace Application.Wishlists.Commands.Create
         public required Guid RequestedBy { get; init; }
         public required Guid ImportanceId { get; init; }
         public required Guid StatusId { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

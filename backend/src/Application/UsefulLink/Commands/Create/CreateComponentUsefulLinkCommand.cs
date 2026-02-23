@@ -17,5 +17,6 @@ namespace Application.UsefulLink.Commands.Create
         public required string Title { get; init; }
         public required string Url { get; init; }
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }

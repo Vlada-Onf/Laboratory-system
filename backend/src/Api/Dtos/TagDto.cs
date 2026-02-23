@@ -14,6 +14,7 @@
         public required string Name { get; init; }
         public required string Color { get; init; }
         public required Guid CreatedBy { get; init; }
+        public required Guid PerformedBy { get; init; } 
     }
 
     public record UpdateTagDto
@@ -21,5 +22,6 @@
         public required Guid Id { get; init; }
         public required string Name { get; init; }
         public required string Color { get; init; }
+        public required Guid PerformedBy { get; init; } 
     }
 }

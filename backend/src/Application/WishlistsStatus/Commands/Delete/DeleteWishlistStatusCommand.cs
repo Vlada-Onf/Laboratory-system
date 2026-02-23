@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace Application.WishlistsStatus.Commands.Delete
 {
-    public sealed record DeleteWishlistStatusCommand(Guid Id)
-            : IRequest<Either<WishlistStatusException, WishlistStatus>>;
+    public sealed record DeleteWishlistStatusCommand(Guid Id, Guid PerformedBy)
+        : IRequest<Either<WishlistStatusException, WishlistStatus>>;
 }

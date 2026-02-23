@@ -1,20 +1,18 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Wishlists.Exceptions;
 using Domain.Wishlists;
 using Domain.Wishlists.Importance;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.Wishlists.Commands.Update
 {
     public sealed class UpdateWishlistDetailsCommandHandler(
-            IWishlistRepository wishlistRepository)
-            : IRequestHandler<UpdateWishlistDetailsCommand, Either<WishlistException, Wishlist>>
+        IWishlistRepository wishlistRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<UpdateWishlistDetailsCommand, Either<WishlistException, Wishlist>>
     {
         public async Task<Either<WishlistException, Wishlist>> Handle(
             UpdateWishlistDetailsCommand request,
@@ -36,6 +34,15 @@ namespace Application.Wishlists.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    wishlist.Id,
+                    wishlist.Name,
+                    wishlist.Description,
+                    wishlist.QuantityNeeded,
+                    wishlist.ImportanceId
+                });
+
                 var importanceId = new WishlistImportanceId(request.ImportanceId);
 
                 wishlist.UpdateDetails(
@@ -45,6 +52,23 @@ namespace Application.Wishlists.Commands.Update
                     importanceId: importanceId);
 
                 var updated = await wishlistRepository.UpdateAsync(wishlist, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    wishlist.Id,
+                    wishlist.Name,
+                    wishlist.Description,
+                    wishlist.QuantityNeeded,
+                    wishlist.ImportanceId
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Wishlist",
+                    entityId: wishlist.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

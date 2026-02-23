@@ -1,19 +1,17 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.HistoryEntries;
 using Application.Tags.Exceptions;
 using Domain.Tags;
 using LanguageExt;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Application.Tags.Commands.Update
 {
     public class UpdateTagCommandHandler(
-         ITagRepository tagRepository)
-         : IRequestHandler<UpdateTagCommand, Either<TagException, Tag>>
+        ITagRepository tagRepository,
+        IHistoryObserver historyObserver)
+        : IRequestHandler<UpdateTagCommand, Either<TagException, Tag>>
     {
         public async Task<Either<TagException, Tag>> Handle(
             UpdateTagCommand request,
@@ -35,10 +33,32 @@ namespace Application.Tags.Commands.Update
         {
             try
             {
+                var oldValues = JsonSerializer.Serialize(new
+                {
+                    tag.Id,
+                    tag.Name,
+                    tag.Color
+                });
+
                 tag.Rename(request.Name);
                 tag.ChangeColor(request.Color);
 
                 var updated = await tagRepository.UpdateAsync(tag, cancellationToken);
+
+                var newValues = JsonSerializer.Serialize(new
+                {
+                    tag.Id,
+                    tag.Name,
+                    tag.Color
+                });
+
+                await historyObserver.EntityUpdatedAsync(
+                    userId: request.PerformedBy,
+                    entityTypeName: "Tag",
+                    entityId: tag.Id.Value.ToString(),
+                    oldValues: oldValues,
+                    newValues: newValues,
+                    cancellationToken: cancellationToken);
 
                 return updated;
             }

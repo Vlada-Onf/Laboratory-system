@@ -11,9 +11,10 @@ using System.Threading.Tasks;
 namespace Application.WishlistsStatus.Commands.Create
 {
     public sealed record CreateWishlistStatusCommand
-            : IRequest<Either<WishlistStatusException, WishlistStatus>>
+        : IRequest<Either<WishlistStatusException, WishlistStatus>>
     {
         public required string Name { get; init; }
         public string? Description { get; init; }
+        public required Guid PerformedBy { get; init; }
     }
 }
