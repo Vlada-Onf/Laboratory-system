@@ -6,9 +6,6 @@ import WishlistImportancesModal from './WishlistImportancesModal';
 import NeedStatusesModal from './NeedStatusesModal';
 import NeedImportancesModal from './NeedImportancesModal';
 import DamagedComponentReasonsModal from './DamagedComponentReasonsModal';
-import EntitiesModal from './EntitiesModal';
-import ActionsModal from './ActionsModal';
-import RolesModal from './RolesModal';
 
 const StyledButton = React.memo(({ onClick, children, sx }) => {
   const themeContext = useTheme();
@@ -44,9 +41,7 @@ const SettingsLayout = ({ children }) => {
   const [needStatusesModalOpen, setNeedStatusesModalOpen] = useState(false);
   const [needImportancesModalOpen, setNeedImportancesModalOpen] = useState(false);
   const [damagedReasonsModalOpen, setDamagedReasonsModalOpen] = useState(false);
-  const [entitiesModalOpen, setEntitiesModalOpen] = useState(false);
-  const [actionsModalOpen, setActionsModalOpen] = useState(false);
-  const [rolesModalOpen, setRolesModalOpen] = useState(false);
+
   return (
     <Box sx={{ width: '100%', maxWidth: 1400, mx: 'auto', p: { xs: 1, md: 3 },minHeight: '100vh'}}>
       <Typography 
@@ -66,7 +61,7 @@ const SettingsLayout = ({ children }) => {
               Статуси
             </StyledButton>
             <StyledButton onClick={() => setImportancesModalOpen(true)}>
-              Рівні важливості
+              Пріоритети
             </StyledButton>
           </Box>
         </Box>
@@ -79,7 +74,7 @@ const SettingsLayout = ({ children }) => {
               Статуси
             </StyledButton>
             <StyledButton onClick={() => setNeedImportancesModalOpen(true)}>
-              Рівні важливості
+              Пріоритети
             </StyledButton>
           </Box>
         </Box>
@@ -91,30 +86,6 @@ const SettingsLayout = ({ children }) => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <StyledButton onClick={() => setDamagedReasonsModalOpen(true)}>
               Причини браку
-            </StyledButton>
-          </Box>
-        </Box>
-
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 500 , fontSize: 20}}>
-            Сутності та дії над ними
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <StyledButton onClick={() => setEntitiesModalOpen(true)}>
-              Сутності
-            </StyledButton>
-            <StyledButton onClick={() => setActionsModalOpen(true)}>
-              Дії
-            </StyledButton>
-          </Box>
-        </Box>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 500 , fontSize: 20}}>
-            Ролі
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <StyledButton onClick={() => setRolesModalOpen(true)}>
-              Список ролей
             </StyledButton>
           </Box>
         </Box>
@@ -142,15 +113,6 @@ const SettingsLayout = ({ children }) => {
         open={damagedReasonsModalOpen}
         onClose={() => setDamagedReasonsModalOpen(false)}
       />
-      <EntitiesModal 
-  open={entitiesModalOpen}
-  onClose={() => setEntitiesModalOpen(false)}
-/>
- <ActionsModal 
-  open={actionsModalOpen}
-  onClose={() => setActionsModalOpen(false)}
-/>
-      <RolesModal open={rolesModalOpen} onClose={() => setRolesModalOpen(false)} />
     </Box>
   );
 };

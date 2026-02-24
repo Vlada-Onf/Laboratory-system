@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import apiClient from '../api/client';
+import { useProfileStore } from './useProfileStore';
 
 export const useDamagedComponentReasonsStore = create((set, get) => ({
   reasons: [],
@@ -23,39 +24,75 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
 
   addReason: async (reasonData) => {
     try {
-      const { data } = await apiClient.post('/damaged-component-reasons', reasonData);
+      const profileStore = useProfileStore.getState();
+      const currentUserId = profileStore.profile?.id;
+      
+      if (!currentUserId) {
+        throw new Error('Потрібна авторизація');
+      }
+
+      const payload = {
+        name: reasonData.name,
+        description: reasonData.description || '',
+        performedBy: currentUserId
+      };
+
+      const { data } = await apiClient.post('/damaged-component-reasons', payload);
       set((state) => ({ reasons: [...state.reasons, data] }));
       return data;
     } catch (error) {
-      console.error('Помилка додавання причини:', error);
+      console.error('CREATE ERROR:', error.response?.data);
       throw error;
     }
   },
 
   updateReason: async (id, reasonData) => {
     try {
-      const { data } = await apiClient.put(`/damaged-component-reasons`, reasonData);
+      const profileStore = useProfileStore.getState();
+      const currentUserId = profileStore.profile?.id;
+      
+      if (!currentUserId) {
+        throw new Error('Потрібна авторизація');
+      }
+
+      const payload = {
+        id,
+        name: reasonData.name,
+        description: reasonData.description || '',
+        performedBy: currentUserId 
+      };
+
+      
+      const { data } = await apiClient.put(`/damaged-component-reasons`, payload);
       set((state) => ({
         reasons: state.reasons.map(reason => 
           reason.id === id ? data : reason
         )
       }));
+      console.log('UPDATE reason:', data);
       return data;
     } catch (error) {
-      console.error('Помилка оновлення причини:', error);
+      console.error('UPDATE ERROR:', error.response?.data);
       throw error;
     }
   },
 
-  deleteReason: async (id) => {
-    try {
-      await apiClient.delete(`/damaged-component-reasons/${id}`);
-      set((state) => ({
-        reasons: state.reasons.filter(reason => reason.id !== id)
-      }));
-    } catch (error) {
-      console.error('Помилка видалення причини:', error);
+ deleteReason: async (id) => {
+  const profileStore = useProfileStore.getState();
+  const currentUserId = profileStore.profile?.id;
+  
+  try {
+    await apiClient.delete(`/damaged-component-reasons/${id}?performedBy=${currentUserId}`);
+  } catch (error) {
+    if (error.response?.status === 500) {
+      console.log('500 = Backend logging fail, record deleted');
+    } else {
       throw error;
     }
   }
+
+  set((state) => state.reasons.filter(r => r.id !== id));
+}
+
+  
 }));
