@@ -12,7 +12,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("needs")]
-    [AllowAnonymous]
+    [Authorize]
     public class NeedsController(ISender sender) : ControllerBase
     {
         [HttpGet("{id:guid}")]
