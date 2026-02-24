@@ -28,6 +28,7 @@
         public string Title { get; set; } = "";
         public string Url { get; set; } = "";
         public Guid CreatedBy { get; set; }
+        public Guid PerformedBy { get; set; }
     }
 
     public class UpdateSchematicUsefulLinkDto
@@ -36,5 +37,6 @@
         public string Title { get; set; } = "";
         public string Url { get; set; } = "";
         public Guid UpdatedBy { get; set; }
+        public Guid PerformedBy { get; set; }   // ← додали
     }
 }
