@@ -215,11 +215,10 @@ namespace Api.Controllers
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(
-            [FromRoute] Guid id,
-            CancellationToken cancellationToken)
+        [FromRoute] Guid id,
+        [FromQuery] Guid performedBy,
+        CancellationToken cancellationToken)
         {
-            var performedBy = Guid.Parse(User.FindFirst("sub")!.Value);
-
             var input = new DeleteSchematicCommand(id, performedBy);
 
             var result = await sender.Send(input, cancellationToken);
@@ -228,5 +227,6 @@ namespace Api.Controllers
                 _ => NoContent(),
                 e => e.ToObjectResult());
         }
+
     }
 }

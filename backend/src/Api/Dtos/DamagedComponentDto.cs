@@ -1,9 +1,11 @@
-﻿namespace Api.Dtos
+﻿using Domain.DamagedComponents;
+
+namespace Api.Dtos
 {
     public record DamagedComponentDto(
         Guid Id,
         Guid ComponentId,
-        Guid ReasonId,
+        Guid? ReasonId,
         int Quantity,
         DateTime RecordedAt,
         Guid RecordedBy,
@@ -14,13 +16,14 @@
             => new(
                 d.Id.Value,
                 d.ComponentId.Value,
-                d.ReasonId.Value,
+                d.ReasonId?.Value,
                 d.Quantity,
                 d.RecordedAt,
                 d.RecordedBy.Value,
                 d.LastUpdatedAt,
                 d.LastUpdatedBy?.Value);
     }
+
     public class CreateDamagedComponentDto
     {
         public Guid ComponentId { get; set; }
