@@ -27,6 +27,10 @@ namespace Application.Schematics.Commands.Update
                 .MaximumLength(500)
                 .When(x => x.PhotoUrl is not null);
 
+            RuleFor(x => x)
+                .Must(x => !string.IsNullOrEmpty(x.PhotoUrl) || !string.IsNullOrEmpty(x.DocumentUrl))
+                .WithMessage("Потрібно надати хоча б фото або документ");
+
             RuleFor(x => x.DocumentUrl)
                 .MaximumLength(500)
                 .When(x => x.DocumentUrl is not null);

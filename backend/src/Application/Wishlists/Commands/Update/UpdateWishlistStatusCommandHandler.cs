@@ -60,7 +60,7 @@ namespace Application.Wishlists.Commands.Update
 
                 await historyObserver.EntityUpdatedAsync(
                     userId: request.PerformedBy,
-                    entityTypeName: "WishlistStatusChange",
+                    entityTypeName: "WishlistStatus",
                     entityId: wishlist.Id.Value.ToString(),
                     oldValues: oldValues,
                     newValues: newValues,

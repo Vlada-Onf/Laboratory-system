@@ -1,9 +1,4 @@
 ﻿using Domain.Wishlists;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Wishlists.Exceptions
 {
@@ -11,7 +6,7 @@ namespace Application.Wishlists.Exceptions
             WishlistId id,
             string message,
             Exception? innerException = null)
-            : Exception(message, innerException)
+        : Exception(message, innerException)
     {
         public WishlistId Id { get; } = id;
     }
@@ -22,5 +17,10 @@ namespace Application.Wishlists.Exceptions
     public sealed class UnhandledWishlistException(
         WishlistId id,
         Exception? innerException = null)
-        : WishlistException(id, "Unexpected error occurred", innerException);
+        : WishlistException(
+            id,
+            innerException is null
+                ? "Unexpected error occurred"
+                : $"Unexpected error occurred: {innerException.Message}",
+            innerException);
 }
