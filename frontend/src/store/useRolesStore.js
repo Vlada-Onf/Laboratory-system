@@ -25,6 +25,7 @@ export const useRolesStore = create((set, get) => ({
     try {
       const { data } = await apiClient.post('/roles', roleData);
       set((state) => ({ roles: [...state.roles, data] }));
+       await get().fetchAdminUsers(); 
       return data;
     } catch (error) {
       console.error('Помилка додавання ролі:', error);
@@ -40,6 +41,7 @@ export const useRolesStore = create((set, get) => ({
           role.id === id ? data : role
         )
       }));
+       await get().fetchAdminUsers(); 
       return data;
     } catch (error) {
       console.error('Помилка оновлення ролі:', error);

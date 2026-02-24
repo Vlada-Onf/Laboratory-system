@@ -8,7 +8,7 @@ const createAppTheme = (isDarkMode) => createTheme({
     },
     background: {
       default: isDarkMode ? 'rgba(11, 28, 45, 0.9)' : '#f5f5f5',
-      paper: isDarkMode ? 'rgba(8, 39, 59, 0.35)' : '#ffffff',
+      paper: isDarkMode ? 'rgba(1, 37, 57, 0.75)' : '#ffffff',
     },
     text: {
       primary: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',

@@ -1,49 +1,44 @@
+import React, { useEffect, memo } from 'react';
 import { Box, CssBaseline } from '@mui/material';
-import HeaderSearch from './header/HeaderSearch';
 import SearchResults from '../general/SearchResults';
-import { useSearchStore } from '../../store/useSearchStore';
+import { useComponentsStore } from '../../store/useComponentsStore';
+import { useSchematicsStore } from '../../store/useSchematicsStore';
 
-const LayoutWithSearch = ({ children }) => {
-  const { searchResults, isSearching } = useSearchStore();
+const LayoutWithSearch = memo(({ children }) => {
+
+  useEffect(() => {
+    const loadSequentially = async () => {
+      const componentsStore = useComponentsStore.getState();
+      
+      if (typeof componentsStore.fetchComponents === 'function' && componentsStore.components.length === 0) {
+        await componentsStore.fetchComponents();
+      }
+
+      const schematicsStore = useSchematicsStore.getState();
+      if (typeof schematicsStore.fetchAllSchematicsForSearch === 'function') {
+        schematicsStore.fetchAllSchematicsForSearch();
+      }
+    };
+
+    loadSequentially().catch(console.error);
+  }, []);
+
 
   return (
     <>
       <CssBaseline />
-      
-      <Box sx={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 1200, 
-        bgcolor: 'background.default' 
-      }}>
-        <Box sx={{ maxWidth: 1200, mx: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-          <HeaderSearch />
-        </Box>
-      </Box>
 
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{
+        position: 'relative',
+        minHeight: '100vh',
+        pt: '72px'
+      }}>
         {children}
       </Box>
 
-      {isSearching && searchResults.length > 0 && (
-        <Box sx={{ 
-          position: 'fixed', 
-          top: 70,
-          left: 0, 
-          right: 0, 
-          zIndex: 1300,
-          mx: 'auto',
-          maxWidth: 1200,
-          pointerEvents: 'none',
-          pb: 2
-        }}>
-          <Box sx={{ width: '100%', pointerEvents: 'auto' }}>
-            <SearchResults results={searchResults} />
-          </Box>
-        </Box>
-      )}
     </>
   );
-};
+});
 
+LayoutWithSearch.displayName = 'LayoutWithSearch';
 export default LayoutWithSearch;

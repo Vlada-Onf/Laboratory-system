@@ -1,9 +1,8 @@
 import React from "react";
 import Layout from "../components/layout/Layout";
-import { Routes, Route, Navigate } from "react-router-dom";
-
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
-
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import SyncBackend from '../components/general/SyncBackend';
 import SignInPage from "../pages/auth/SignInPage";
 import SignUpPage from "../pages/auth/SignUpPage";
 
@@ -20,46 +19,53 @@ import Component from '../pages/general/Component';
 import SchematicDetail from '../pages/general/SchematicDetail';
 import BrokenComponents from '../pages/general/BrokenComponents';
 import Settings from "../pages/general/Settings";
+import Blocked from "../pages/general/Blocked";
 import NotFound from "../pages/general/NotFound";
+import UserStatusGuard from './UserStatusGuard';
+
+const ProtectedLayout = () => {
+  return (
+    <>
+      <SignedIn>
+        <UserStatusGuard>
+        <SyncBackend />  
+        <Layout>
+          <Outlet />
+        </Layout>
+        </UserStatusGuard>
+      </SignedIn>
+      <SignedOut>
+        <Navigate to="/sign-in" replace />
+      </SignedOut>
+    </>
+  );
+};
 
 const AppRoutes = () => {
   return (
     <Routes>
-
       <Route path="/sign-in/*" element={<SignInPage />} />
       <Route path="/sign-up/*" element={<SignUpPage />} />
 
-      <Route
-        element={
-          <>
-            <SignedIn>
-              <Layout />
-            </SignedIn>
-
-            <SignedOut>
-              <RedirectToSignIn />
-            </SignedOut>
-          </>
-        }
-      >
-        <Route path="/" element={<Navigate to="/front-main" />} />
-        <Route path="/front-main" element={<Main />} />
-        <Route path="/front-settings" element={<Settings />} />
-        <Route path="/front-dashboard" element={<Dashboard />} />
-        <Route path="/front-сategories" element={<Categories />} />
-        <Route path="/front-components" element={<Components />} />
-        <Route path="/front-history" element={<History />} />
-        <Route path="/front-needs" element={<Needs />} />
-        <Route path="/front-users" element={<Users />} />
-        <Route path="/front-wishlist" element={<Wishlist />} />
-        <Route path="/front-profile" element={<Profile />} />
-        <Route path="/front-components/:id" element={<Component />} />
-        <Route path="/front-schematics/:id" element={<SchematicDetail />} />
-        <Route path="/front-brokenComponents" element={<BrokenComponents />} />
+      <Route path="/" element={<ProtectedLayout />}>
+        <Route index element={<Navigate to="/front-main" />} />
+        <Route path="front-main" element={<Main />} />
+        <Route path="front-settings" element={<Settings />} />
+        <Route path="front-dashboard" element={<Dashboard />} />
+        <Route path="front-categories" element={<Categories />} />
+        <Route path="front-components" element={<Components />} />
+        <Route path="front-history" element={<History />} />
+        <Route path="front-needs" element={<Needs />} />
+        <Route path="front-users" element={<Users />} />
+        <Route path="front-wishlist" element={<Wishlist />} />
+        <Route path="front-profile" element={<Profile />} />
+        <Route path="front-blocked" element={<Blocked />} />
+        <Route path="front-components/:id" element={<Component />} />
+        <Route path="front-schematics/:id" element={<SchematicDetail />} />
+        <Route path="front-brokenComponents" element={<BrokenComponents />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
-
     </Routes>
   );
 };
