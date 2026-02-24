@@ -46,7 +46,7 @@ namespace Application.Comment.Commands.Delete
 
                 await historyObserver.EntityDeletedAsync(
                     userId: performedBy,
-                    entityTypeName: "ComponentComment",
+                    entityTypeName: "Comment",
                     entityId: comment.Id.Value.ToString(),
                     oldValues: oldValues,
                     cancellationToken: cancellationToken);

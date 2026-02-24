@@ -1,10 +1,15 @@
 ﻿using Domain.History;
+using Domain.Users;
 
 namespace Api.Dtos
 {
     public record HistoryEntryDto(
         Guid Id,
         Guid UserId,
+        string AuthorEmail,
+        string AuthorFirstName,
+        string AuthorLastName,
+        string? AuthorPhotoUrl,
         Guid ActionId,
         Guid EntityTypeId,
         string EntityId,
@@ -12,10 +17,14 @@ namespace Api.Dtos
         string? NewValues,
         DateTime Time)
     {
-        public static HistoryEntryDto FromDomainModel(History entry)
+        public static HistoryEntryDto FromDomainModel(History entry, User author)
             => new(
                 entry.Id.Value,
                 entry.UserId.Value,
+                author.Email,
+                author.FirstName,
+                author.LastName,
+                author.PhotoUrl,
                 entry.ActionId.Value,
                 entry.EntityTypeId.Value,
                 entry.EntityId,

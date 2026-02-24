@@ -135,7 +135,6 @@ app.Use(async (context, next) =>
 
     if (context.Request.Path.StartsWithSegments("/schematics"))
     {
-        Console.WriteLine("📐 Schematic request hit API");
     }
 
     try
@@ -144,8 +143,6 @@ app.Use(async (context, next) =>
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"💥 ERROR: {ex.GetType().Name} - {ex.Message}");
-        Console.WriteLine(ex.StackTrace);
         throw;
     }
 });

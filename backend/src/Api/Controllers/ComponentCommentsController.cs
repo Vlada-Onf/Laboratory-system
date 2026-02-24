@@ -14,7 +14,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("component-comments")]
-    [AllowAnonymous]
+    [Authorize]
     public class ComponentCommentsController : ControllerBase
     {
         private readonly ISender _sender;

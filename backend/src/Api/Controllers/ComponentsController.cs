@@ -13,7 +13,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("components")]
-    [AllowAnonymous]
+    [Authorize]
     public class ComponentsController : ControllerBase
     {
         private readonly IComponentQueries _componentQueries;

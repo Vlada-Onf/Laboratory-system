@@ -16,7 +16,6 @@ namespace Api.Controllers
     [Authorize]
     public class SchematicsController(ISender sender) : ControllerBase
     {
-        // GET /schematics/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<SchematicDto>> GetById(
             [FromRoute] Guid id,
@@ -31,7 +30,6 @@ namespace Api.Controllers
                 () => NotFound());
         }
 
-        // GET /schematics/by-component/{componentId}
         [HttpGet("by-component/{componentId:guid}")]
         public async Task<ActionResult<IReadOnlyList<SchematicDto>>> GetByComponentId(
             [FromRoute] Guid componentId,
@@ -48,7 +46,6 @@ namespace Api.Controllers
                 .ToList();
         }
 
-        // POST /schematics
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<SchematicDto>> Create(
@@ -133,7 +130,6 @@ namespace Api.Controllers
                 });
         }
 
-        // PUT /schematics
         [HttpPut]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<SchematicDto>> Update(

@@ -2,6 +2,8 @@
 using Api.Modules.Errors;
 using Application.HistoryEntries.Commands.Create;
 using Application.HistoryEntries.Queries;
+using Application.Common.Interfaces.Queries;
+using Domain.History;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,51 +11,81 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("history")]
-    public class HistoryController(ISender sender) : ControllerBase
+    public class HistoryController : ControllerBase
     {
-        // GET /history/by-user/{userId}
+        private readonly ISender _sender;
+        private readonly IUserQueries _userQueries;
+
+        public HistoryController(ISender sender, IUserQueries userQueries)
+        {
+            _sender = sender;
+            _userQueries = userQueries;
+        }
+
+        private async Task<HistoryEntryDto> BuildDtoWithAuthorAsync(History entry, CancellationToken ct)
+        {
+            var authorOpt = await _userQueries.GetByIdAsync(entry.UserId, ct);
+            var author = authorOpt.IsSome
+                ? authorOpt.First()
+                : throw new InvalidOperationException("Author not found");
+
+            return HistoryEntryDto.FromDomainModel(entry, author);
+        }
+
         [HttpGet("by-user/{userId:guid}")]
         public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetByUser(
             [FromRoute] Guid userId,
             CancellationToken cancellationToken)
         {
-            var entries = await sender.Send(new GetHistoryByUserQuery(userId), cancellationToken);
+            var entries = await _sender.Send(new GetHistoryByUserQuery(userId), cancellationToken);
 
-            return entries
-                .Select(HistoryEntryDto.FromDomainModel)
-                .ToList();
+            var result = new List<HistoryEntryDto>(entries.Count);
+            foreach (var e in entries)
+            {
+                var dto = await BuildDtoWithAuthorAsync(e, cancellationToken);
+                result.Add(dto);
+            }
+
+            return result;
         }
 
-        // GET /history/by-entity/{entityId}
         [HttpGet("by-entity/{entityId}")]
         public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetByEntity(
             [FromRoute] string entityId,
             CancellationToken cancellationToken)
         {
-            var entries = await sender.Send(new GetHistoryByEntityQuery(entityId), cancellationToken);
+            var entries = await _sender.Send(new GetHistoryByEntityQuery(entityId), cancellationToken);
 
-            return entries
-                .Select(HistoryEntryDto.FromDomainModel)
-                .ToList();
+            var result = new List<HistoryEntryDto>(entries.Count);
+            foreach (var e in entries)
+            {
+                var dto = await BuildDtoWithAuthorAsync(e, cancellationToken);
+                result.Add(dto);
+            }
+
+            return result;
         }
 
-        // GET /history/by-entity-and-type?entityTypeId={guid}&entityId={id}
         [HttpGet("by-entity-and-type")]
         public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetByEntityAndType(
             [FromQuery] Guid entityTypeId,
             [FromQuery] string entityId,
             CancellationToken cancellationToken)
         {
-            var entries = await sender.Send(
+            var entries = await _sender.Send(
                 new GetHistoryByEntityAndTypeQuery(entityTypeId, entityId),
                 cancellationToken);
 
-            return entries
-                .Select(HistoryEntryDto.FromDomainModel)
-                .ToList();
+            var result = new List<HistoryEntryDto>(entries.Count);
+            foreach (var e in entries)
+            {
+                var dto = await BuildDtoWithAuthorAsync(e, cancellationToken);
+                result.Add(dto);
+            }
+
+            return result;
         }
 
-        // POST /history
         [HttpPost]
         public async Task<ActionResult<HistoryEntryDto>> Create(
             [FromBody] CreateHistoryEntryDto request,
@@ -69,35 +101,44 @@ namespace Api.Controllers
                 NewValues = request.NewValues
             };
 
-            var result = await sender.Send(input, cancellationToken);
+            var result = await _sender.Send(input, cancellationToken);
 
             return result.Match<ActionResult<HistoryEntryDto>>(
-                h => HistoryEntryDto.FromDomainModel(h),
+                h => BuildDtoWithAuthorAsync(h, cancellationToken).Result,
                 e => e.ToObjectResult());
         }
-        // GET /history/all
+
         [HttpGet("all")]
         public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetAll(
-        CancellationToken cancellationToken)
+            CancellationToken cancellationToken)
         {
-            var entries = await sender.Send(new GetAllHistoryQuery(), cancellationToken);
+            var entries = await _sender.Send(new GetAllHistoryQuery(), cancellationToken);
 
-            return entries
-                .Select(HistoryEntryDto.FromDomainModel)
-                .ToList();
+            var result = new List<HistoryEntryDto>(entries.Count);
+            foreach (var e in entries)
+            {
+                var dto = await BuildDtoWithAuthorAsync(e, cancellationToken);
+                result.Add(dto);
+            }
+
+            return result;
         }
 
-        // GET /history/my?userId={guid}
         [HttpGet("my")]
         public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetMyHistory(
             [FromQuery] Guid userId,
             CancellationToken cancellationToken)
         {
-            var entries = await sender.Send(new GetHistoryByUserQuery(userId), cancellationToken);
+            var entries = await _sender.Send(new GetHistoryByUserQuery(userId), cancellationToken);
 
-            return entries
-                .Select(HistoryEntryDto.FromDomainModel)
-                .ToList();
+            var result = new List<HistoryEntryDto>(entries.Count);
+            foreach (var e in entries)
+            {
+                var dto = await BuildDtoWithAuthorAsync(e, cancellationToken);
+                result.Add(dto);
+            }
+
+            return result;
         }
     }
 }

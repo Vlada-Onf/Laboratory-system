@@ -57,7 +57,7 @@ namespace Application.Comment.Commands.Update
 
                 await historyObserver.EntityUpdatedAsync(
                     userId: request.PerformedBy,
-                    entityTypeName: "ComponentComment",
+                    entityTypeName: "Comment",
                     entityId: comment.Id.Value.ToString(),
                     oldValues: oldValues,
                     newValues: newValues,
