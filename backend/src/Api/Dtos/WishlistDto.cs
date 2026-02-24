@@ -9,8 +9,8 @@ namespace Api.Dtos
         int QuantityNeeded,
         Guid RequestedBy,
         DateTime RequestedAt,
-        Guid ImportanceId,
-        Guid StatusId,
+        Guid? ImportanceId,
+        Guid? StatusId,
         DateTime? CompletedAt,
         string? CompletionReason)
     {
@@ -22,8 +22,8 @@ namespace Api.Dtos
                 wishlist.QuantityNeeded,
                 wishlist.RequestedBy.Value,
                 wishlist.RequestedAt,
-                wishlist.ImportanceId!.Value,
-                wishlist.StatusId!.Value,
+                wishlist.ImportanceId?.Value,
+                wishlist.StatusId?.Value,
                 wishlist.CompletedAt,
                 wishlist.CompletionReason);
     }

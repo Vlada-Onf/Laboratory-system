@@ -21,15 +21,15 @@ namespace Domain.Needs
         private Need() { }
 
         private Need(
-        NeedId id,
-        ComponentId componentId,
-        NeedStatusId statusId,
-        int quantityNeeded,
-        UserId requestedBy,
-        DateTime requestedAt,
-        string? description,
-        NeedImportanceId importanceId,
-        string? completionReason)
+            NeedId id,
+            ComponentId componentId,
+            NeedStatusId? statusId,
+            int quantityNeeded,
+            UserId requestedBy,
+            DateTime requestedAt,
+            string? description,
+            NeedImportanceId? importanceId,
+            string? completionReason)
         {
             Id = id;
             ComponentId = componentId;

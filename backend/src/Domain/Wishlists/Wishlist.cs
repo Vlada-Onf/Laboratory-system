@@ -24,8 +24,8 @@ namespace Domain.Wishlists
             int quantityNeeded,
             UserId requestedBy,
             DateTime requestedAt,
-            WishlistImportanceId importanceId,
-            WishlistStatusId statusId,
+            WishlistImportanceId? importanceId,
+            WishlistStatusId? statusId,
             DateTime? completedAt = null,
             string? completionReason = null)
         {

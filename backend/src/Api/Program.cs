@@ -158,8 +158,8 @@ app.UseRouting();
 
 app.UseCors(FrontendCorsPolicy);
 
-app.UseAuthentication();
-app.UseAuthorization();
+/*app.UseAuthentication();
+app.UseAuthorization();*/
 
 app.MapControllers().RequireCors(FrontendCorsPolicy);
 
