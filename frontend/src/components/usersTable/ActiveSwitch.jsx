@@ -8,7 +8,6 @@ const ActiveSwitch = ({ active, userId, disabled = false }) => {
     if (disabled){
       return;
     }
-    
     try {
       await toggleUserStatus(userId, checked);
     } catch (error) {

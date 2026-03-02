@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import HistoryBlock from '../../components/historyFragmentBlock/HistoryBlock';
 import PageWrapper from '../../components/layout/PaperWrapper';

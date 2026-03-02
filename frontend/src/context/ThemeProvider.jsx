@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import createAppTheme from '../theme/theme';
 import { ThemeModeContext } from './ThemeContext';

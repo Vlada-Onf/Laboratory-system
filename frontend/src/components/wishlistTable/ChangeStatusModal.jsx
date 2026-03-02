@@ -1,25 +1,25 @@
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Button, 
-  TextField, MenuItem, CircularProgress 
+  Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  TextField, MenuItem, CircularProgress
 } from '@mui/material';
 
-const ChangeStatusModal = ({ 
-  openStatusModal, 
-  statuses, 
-  newStatusId, 
-  currentStatusId, 
-  completionReason, 
+const ChangeStatusModal = ({
+  openStatusModal,
+  statuses,
+  newStatusId,
+  currentStatusId,
+  completionReason,
   isSavingStatus,
   onClose,
   onSubmit,
   onStatusChange,
-  onReasonChange 
+  onReasonChange
 }) => {
   return (
     <Dialog open={openStatusModal} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Змінити статус</DialogTitle>
-      
+
       <DialogContent>
         <TextField
           select

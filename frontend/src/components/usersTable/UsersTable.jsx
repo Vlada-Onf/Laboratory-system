@@ -17,16 +17,16 @@ const UsersTable = () => {
 
   const [deleteDialog, setDeleteDialog] = useState({ open: false, userId: null, userName: '' });
 
-  const { 
-    fetchAdminUsers, 
-    adminUsers: users, 
+  const {
+    fetchAdminUsers,
+    adminUsers: users,
     loading: usersLoading,
     deleteUser
   } = useAdminUsersStore();
-  
+
   const { fetchRoles, isLoading: rolesLoading } = useRolesStore();
   const backendUser = useBackendAuthStore((state) => state.backendUser);
-  
+
   const SUPERADMIN_ROLE_ID = 'ab46f228-ee9f-4849-aacd-98780292fee8';
   const hasSuperAdminAccess = backendUser?.roleId === SUPERADMIN_ROLE_ID;
   const CURRENT_USER_ID = '9e490da1-39fd-4063-8f16-b4f36ab8c2c5';
@@ -42,7 +42,7 @@ const UsersTable = () => {
   if (loading) {
     return <div style={{ padding: 20 }}>Завантаження ролей та користувачів...</div>;
   }
-  
+
   if (!hasSuperAdminAccess) {
     return <div style={{ padding: 20, color: 'red' }}>
     </div>;
@@ -56,7 +56,7 @@ const UsersTable = () => {
     if (!deleteDialog.userId){
       return;
     }
-    
+
     try {
       await deleteUser(deleteDialog.userId);
       setDeleteDialog({ open: false, userId: null, userName: '' });
@@ -104,14 +104,14 @@ const UsersTable = () => {
     if (!value) return 'Немає даних';
 
     const utcDate = new Date(value);
-    
+
     if (isNaN(utcDate.getTime())) {
       return 'Немає даних';
     }
 
     return utcDate.toLocaleString('uk-UA', {
       day: '2-digit',
-      month: '2-digit', 
+      month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
@@ -122,9 +122,9 @@ const UsersTable = () => {
   }
 },
 
-    { 
-      field: 'createdAt', 
-      headerName: 'Дата реєстрації', 
+    {
+      field: 'createdAt',
+      headerName: 'Дата реєстрації',
       flex: 2,
       valueFormatter: (value) => new Date(value).toLocaleDateString('uk-UA'),
       minWidth: 150
@@ -179,7 +179,7 @@ const UsersTable = () => {
           disableRowSelectionOnClick
           loading={loading}
           getRowId={(row) => row.id}
-          sx={{ 
+          sx={{
             '& .MuiDataGrid-cell[data-field="actions"]': {
               justifyContent: 'center'
             }
@@ -201,12 +201,12 @@ const UsersTable = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
+          <Button
             onClick={() => setDeleteDialog({ ...deleteDialog, open: false })}
           >
             Скасувати
           </Button>
-          <Button 
+          <Button
             onClick={handleDeleteConfirm}
             variant="contained"
             color="error"

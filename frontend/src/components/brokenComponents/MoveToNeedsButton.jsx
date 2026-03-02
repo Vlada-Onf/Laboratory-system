@@ -1,4 +1,3 @@
-import React from 'react';
 import { IconButton } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 

@@ -1,6 +1,6 @@
 import { Box, Typography, Button } from '@mui/material';
 
-const PhotoUpload = ({selectedFile, photoName, onFileChange,  isOptional = false 
+const PhotoUpload = ({selectedFile, photoName, onFileChange,  isOptional = false
 }) => (
   <Box>
     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>

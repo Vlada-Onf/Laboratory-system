@@ -33,9 +33,9 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
   }, [reasons]);
 
   const handleNameChange = useCallback((reasonId, value) => {
-    setEditingReasons(prev => 
-      prev.map(reason => 
-        reason.id === reasonId 
+    setEditingReasons(prev =>
+      prev.map(reason =>
+        reason.id === reasonId
           ? { ...reason, localName: value }
           : reason
       )
@@ -43,9 +43,9 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
   }, []);
 
   const handleDescriptionChange = useCallback((reasonId, value) => {
-    setEditingReasons(prev => 
-      prev.map(reason => 
-        reason.id === reasonId 
+    setEditingReasons(prev =>
+      prev.map(reason =>
+        reason.id === reasonId
           ? { ...reason, localDescription: value }
           : reason
       )
@@ -56,9 +56,9 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
     setIsSaving(true);
     try {
       if (newReasonName.trim() && newReasonDescription.trim()) {
-        await addReason({ 
-          name: newReasonName.trim(), 
-          description: newReasonDescription.trim() 
+        await addReason({
+          name: newReasonName.trim(),
+          description: newReasonDescription.trim()
         });
         setNewReasonName('');
         setNewReasonDescription('');
@@ -66,10 +66,10 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
 
       for (const reason of editingReasons) {
         if (reason.localName !== reason.name || reason.localDescription !== reason.description) {
-          await updateReason(reason.id, { 
-            id: reason.id, 
-            name: reason.localName.trim(), 
-            description: reason.localDescription.trim() 
+          await updateReason(reason.id, {
+            id: reason.id,
+            name: reason.localName.trim(),
+            description: reason.localDescription.trim()
           });
         }
       }
@@ -111,7 +111,7 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
           Причини зламаних компонентів
-          <IconButton 
+          <IconButton
             onClick={onClose}
             sx={{ position: 'absolute', right: 8, top: 8 }}
             aria-label="Закрити"
@@ -119,24 +119,24 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        
+
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'end', mb: 3 }}>
-            <TextField 
+            <TextField
               label="Назва причини"
-              value={newReasonName} 
+              value={newReasonName}
               onChange={(e) => setNewReasonName(e.target.value)}
-              size="small" 
-              fullWidth 
+              size="small"
+              fullWidth
             />
-            <TextField 
+            <TextField
               label="Опис"
-              value={newReasonDescription} 
+              value={newReasonDescription}
               onChange={(e) => setNewReasonDescription(e.target.value)}
-              size="small" 
-              fullWidth 
+              size="small"
+              fullWidth
             />
-            <IconButton 
+            <IconButton
               onClick={handleSaveAll}
               disabled={isAddDisabled || isSaving}
               sx={{ height: '40px', width: '40px' }}
@@ -157,29 +157,29 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
               </Typography>
             ) : (
               editingReasons.map((reason) => (
-                <Box 
+                <Box
                   key={reason.id}
-                  sx={{ 
-                    display: 'flex', gap: 1, alignItems: 'center', 
-                    p: 2, border: '1px solid', borderColor: 'divider', 
-                    borderRadius: 1, mb: 1 
+                  sx={{
+                    display: 'flex', gap: 1, alignItems: 'center',
+                    p: 2, border: '1px solid', borderColor: 'divider',
+                    borderRadius: 1, mb: 1
                   }}
                 >
-                  <TextField 
-                    value={reason.localName} 
+                  <TextField
+                    value={reason.localName}
                     onChange={(e) => handleNameChange(reason.id, e.target.value)}
-                    size="small" 
-                    sx={{ flex: 1 }} 
+                    size="small"
+                    sx={{ flex: 1 }}
                   />
-                  <TextField 
-                    value={reason.localDescription} 
+                  <TextField
+                    value={reason.localDescription}
                     onChange={(e) => handleDescriptionChange(reason.id, e.target.value)}
-                    size="small" 
-                    sx={{ flex: 2 }} 
+                    size="small"
+                    sx={{ flex: 2 }}
                   />
-                  <IconButton 
+                  <IconButton
                     onClick={() => handleOpenDeleteConfirm(reason.id, reason.localName)}
-                    size="small" 
+                    size="small"
                     color="error"
                     aria-label="Видалити причину"
                   >
@@ -208,16 +208,16 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
         </DialogContent>
       </Dialog>
 
-      <Dialog 
-        open={deleteConfirmOpen} 
+      <Dialog
+        open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
-        maxWidth="xs" 
+        maxWidth="xs"
         fullWidth
       >
         <DialogTitle>Підтвердити видалення</DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Typography>
-            Ви впевнені, що хочете видалити причину 
+            Ви впевнені, що хочете видалити причину
             <strong> "{reasonToDelete?.name}"</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -225,15 +225,15 @@ const DamagedComponentReasonsModal = ({ open, onClose }) => {
           </Typography>
         </DialogContent>
         <Box sx={{ p: 2, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <IconButton 
+          <IconButton
             onClick={() => setDeleteConfirmOpen(false)}
             size="small"
             aria-label="Скасувати"
           >
             <CloseIcon />
           </IconButton>
-          <IconButton 
-            onClick={handleConfirmDelete} 
+          <IconButton
+            onClick={handleConfirmDelete}
             color="error"
             size="small"
             aria-label="Видалити"

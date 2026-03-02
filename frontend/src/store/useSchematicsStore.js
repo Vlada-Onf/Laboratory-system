@@ -1,141 +1,196 @@
 import { create } from 'zustand';
 import apiClient from '../api/client';
+import { useProfileStore } from './useProfileStore';
+import { useSchematicLinksStore } from './useSchematicLinksStore';
+import { useComponentsStore } from './useComponentsStore';
 
-export const useSchematicsStore = create((set) => ({
+export const useSchematicsStore = create((set, get) => ({
   schematics: [],
   isLoading: false,
   editModal: { open: false, schematic: null },
 
+  waitForUserId: async () => {
+    let userId = useProfileStore.getState().profile?.id;
+    let attempts = 0;
+    while (!userId && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      userId = useProfileStore.getState().profile?.id;
+      attempts++;
+    }
+    return userId;
+  },
+
+  getCurrentUserId: () => useProfileStore.getState().profile?.id || null,
+
   fetchSchematicsByComponent: async (componentId) => {
     set({ isLoading: true });
     try {
+      await useSchematicLinksStore.getState().fetchSchematicLinks(componentId);
+
       const { data } = await apiClient.get(`/schematics/by-component/${componentId}`);
       set({ schematics: data || [] });
-    } catch {
+      console.log('СХЕМИ ЗАВАНТАЖЕНО:', data?.length || 0);
+    } catch (error) {
+      console.error('ПОМИЛКА ЗАВАНТАЖЕННЯ СХЕМ:', error);
       set({ schematics: [] });
     } finally {
       set({ isLoading: false });
     }
   },
 
-  addSchematic: async (formData, file) => {
-  console.log('addSchematic ОТРИМАВ:', {
-    formData: formData.title,
-    fileExists: !!file,
-    fileName: file?.name
-  });
-
-  set({ isLoading: true });
-
-  try {
-    if (!file || !(file instanceof File)) {
-      throw new Error('Фото обов\'язкове! (File object)');
+  fetchAllSchematicsForSearch: async () => {
+    set({ isLoading: true });
+    try {
+      const components = useComponentsStore.getState().components || [];
+      const results = await Promise.all(
+        components.slice(0, 10).map(comp =>
+          apiClient
+            .get(`/schematics/by-component/${comp.id}`)
+            .then(res => res.data || [])
+            .catch(() => [])
+        )
+      );
+      set({ schematics: results.flat().slice(0, 100) });
+    } catch (error) {
+      set({ schematics: [], error });
+    } finally {
+      set({ isLoading: false });
     }
-    const formDataToSend = new FormData();
-    formDataToSend.append('componentId', formData.componentId);
-    formDataToSend.append('Title', formData.title || 'Схема');
-    formDataToSend.append('Description', formData.description || '');
-    formDataToSend.append('CreatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
-    formDataToSend.append('image', file);
+  },
 
-    if (formData.additionalLinks) {
-      formDataToSend.append('AdditionalLinks', formData.additionalLinks);
+  fetchSingleSchematic: async (schematicId) => {
+    try {
+      const { data } = await apiClient.get(`/schematics/${schematicId}`);
+      await useSchematicLinksStore.getState().fetchSchematicLinks(data.componentId);
+      return data;
+    } catch (error) {
+      console.error('fetchSingleSchematic FAILED:', error);
+      throw error;
     }
-    for (let [key, value] of formDataToSend.entries()) {
-  console.log(key, value instanceof File ? value.name : value);
-}
+  },
 
-    const { data } = await apiClient.post('/schematics', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+  addSchematic: async (formData, imageFile, documentFile = null) => {
+    set({ isLoading: true });
+    try {
+      const userId = await get().waitForUserId();
+      if (!userId){
+        throw new Error('Авторизуйтесь для створення схеми!');
       }
-    });
 
-    set((state) => ({
-      schematics: [data, ...state.schematics]
-    }));
-
-    console.log('Схема створена:', data);
-    return data;
-
-  } catch (error) {
-    console.error('addSchematic FAILED:', error.response?.data || error.message);
-    throw error;
-  } finally {
-    set({ isLoading: false });
-  }
-},
-
-
-  updateSchematic: async (formData, file = null) => {
-  console.log('updateSchematic ОТРИМАВ:', {
-    formData: formData.title,
-    fileExists: !!file,
-    fileName: file?.name,
-    schematicId: formData.id
-  });
-
-  set({ isLoading: true });
-
-  try {
-    const formDataToSend = new FormData();
-
-    formDataToSend.append('Id', formData.id);
-    formDataToSend.append('Title', formData.title || 'Схема');
-    formDataToSend.append('Description', formData.description || '');
-    formDataToSend.append('UpdatedBy', '3fa85f64-5717-4562-b3fc-2c963f66afa6');
-
-    if (formData.additionalLinks) {
-      formDataToSend.append('AdditionalLinks', formData.additionalLinks);
-    }
-
-    if (file && file instanceof File) {
-      formDataToSend.append('image', file);
-      console.log('Нове фото додано до FormData');
-    } else {
-      console.log('Залишаємо старе фото');
-    }
-
-    for (let [key, value] of formDataToSend.entries()) {
-      console.log(key, value instanceof File ? value.name : value);
-    }
-
-    const { data } = await apiClient.put('/schematics', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+      if (!imageFile || !(imageFile instanceof File)) {
+        throw new Error('Фото схеми обов\'язкове!');
       }
-    });
 
-    set((state) => ({
-      schematics: state.schematics.map(s =>
-        s.id === formData.id ? data : s
-      )
-    }));
+      const formDataToSend = new FormData();
+      formDataToSend.append('ComponentId', formData.componentId);
+      formDataToSend.append('Title', formData.title);
+      formDataToSend.append('CreatedBy', userId);
+      formDataToSend.append('PerformedBy', userId);
+      if (formData.description){
+        formDataToSend.append('Description', formData.description);
+      }
+      if (formData.usefulLinkId){
+        formDataToSend.append('UsefulLinkId', formData.usefulLinkId);
+      }
+      formDataToSend.append('image', imageFile);
+      if (documentFile instanceof File){
+        formDataToSend.append('document', documentFile);
+      }
 
-    console.log('Схема оновлена:', data);
-    return data;
+      const { data } = await apiClient.post('/schematics', formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000
+      });
 
-  } catch (error) {
-    console.error('updateSchematic FAILED:', error.response?.data || error.message);
-    throw error;
-  } finally {
-    set({ isLoading: false });
-  }
-},
+      await get().fetchSchematicsByComponent(formData.componentId);
+      return data;
+    } catch (error) {
+      console.error('addSchematic FAILED:', error.response?.data || error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateSchematic: async (schematicId, formData, imageFile = null, documentFile = null) => {
+    set({ isLoading: true });
+    try {
+      const userId = await get().waitForUserId();
+      if (!userId){
+        throw new Error('Авторизуйтесь для редагування!');
+      }
+
+      const currentSchematic = get().schematics.find(s => s.id === schematicId);
+      const formDataToSend = new FormData();
+      formDataToSend.append('Id', schematicId);
+      formDataToSend.append('ComponentId', formData.componentId || currentSchematic?.componentId);
+      formDataToSend.append('Title', formData.title || '');
+      formDataToSend.append('UpdatedBy', userId);
+      formDataToSend.append('PerformedBy', userId);
+
+      if (formData.description){
+        formDataToSend.append('Description', formData.description);
+      }
+      if (formData.usefulLinkId){
+        formDataToSend.append('UsefulLinkId', formData.usefulLinkId);
+      }
+      if (imageFile instanceof File){
+        formDataToSend.append('image', imageFile);
+      }
+      if (documentFile instanceof File){
+        formDataToSend.append('document', documentFile);
+      }
+
+      const { data } = await apiClient.put('/schematics', formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000
+      });
+
+      set((state) => ({
+        schematics: state.schematics.map(s => s.id === schematicId ? data : s)
+      }));
+
+      await get().fetchSchematicsByComponent(formData.componentId || currentSchematic?.componentId);
+      return data;
+    } catch (error) {
+      console.error('updateSchematic FAILED:', error.response?.data || error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   deleteSchematic: async (schematicId) => {
-    await apiClient.delete(`/schematics/${schematicId}`);
-    set((state) => ({
-      schematics: state.schematics.filter(s => s.id !== schematicId)
-    }));
+    set({ isLoading: true });
+    try {
+      const userId = await get().waitForUserId();
+      if (!userId){
+        throw new Error('Авторизуйтесь для видалення!');
+      }
+
+      const url = `/schematics/${schematicId}?performedBy=${userId}`;
+      await apiClient.delete(url);
+
+      set((state) => ({
+        schematics: state.schematics.filter(s => s.id !== schematicId)
+      }));
+    } catch (error) {
+      console.error('deleteSchematic FAILED:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+
+      const deletedSchematic = get().schematics.find(s => s.id === schematicId);
+      const componentId = deletedSchematic?.componentId;
+      if (componentId) await get().fetchSchematicsByComponent(componentId);
+
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
-  openEditModal: (schematic) => {
-    set({ editModal: { open: true, schematic } });
-  },
-
-  closeEditModal: () => {
-    set({ editModal: { open: false, schematic: null } });
-  },
+  openEditModal: (schematic) => set({ editModal: { open: true, schematic } }),
+  closeEditModal: () => set({ editModal: { open: false, schematic: null } }),
 }));
-

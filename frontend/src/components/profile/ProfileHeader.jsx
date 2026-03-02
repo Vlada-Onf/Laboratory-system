@@ -3,13 +3,13 @@ import { Edit } from '@mui/icons-material';
 
 const ProfileHeader = ({ user, onEdit }) => {
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: { xs: 'column', md: 'row' }, 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: { xs: 'column', md: 'row' },
       alignItems: { md: 'center' },
-      gap: 3 
+      gap: 3
     }}>
-      <Avatar 
+      <Avatar
         src={user.photoUrl}
         sx={{ width: 100, height: 100 }}
       />
@@ -21,8 +21,8 @@ const ProfileHeader = ({ user, onEdit }) => {
           <Chip label={user.roleName} />
         </Box>
       </Box>
-      <Button 
-        variant="contained" 
+      <Button
+        variant="contained"
         startIcon={<Edit />}
         onClick={onEdit}
       >

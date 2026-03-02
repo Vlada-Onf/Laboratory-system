@@ -48,59 +48,41 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ClearButton = styled('div')(({ theme }) => ({
-  position: 'absolute',
-  right: 8,
-  top: '50%',
-  transform: 'translateY(-50%)',
-  cursor: 'pointer',
-  color: theme.palette.text.secondary,
-  fontSize: '18px',
-  padding: '4px',
-  borderRadius: '50%',
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.1),
-  },
-}));
-
 export default function HeaderSearch() {
   const searchQuery = useSearchStore(state => state.searchQuery);
   const setSearchQuery = useSearchStore(state => state.setSearchQuery);
   const isSearching = useSearchStore(state => state.isSearching);
-  const searchResults = useSearchStore(state => state.searchResults);
 
   const handleSearchChange = useCallback((e) => {
     setSearchQuery(e.target.value);
   }, [setSearchQuery]);
 
-  
+  const showResults = searchQuery?.trim() || isSearching;
+
   return (
     <SearchContainer>
       <Search>
         <SearchIconWrapper>
           <SearchIcon />
         </SearchIconWrapper>
-        <StyledInputBase 
-          placeholder="Компонент або схема..."
+        <StyledInputBase
+          placeholder="Назва компонента.."
           inputProps={{ 'aria-label': 'search' }}
           value={searchQuery}
           onChange={handleSearchChange}
         />
-        
       </Search>
-      
-      {isSearching && searchResults?.length > 0 && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            mt: 1.6,
-            zIndex: 1301,
-          }}
-        >
-          <SearchResults results={searchResults} />
+
+      {showResults && (
+        <Box sx={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          mt: 1.6,
+          zIndex: 1301,
+        }}>
+          <SearchResults />
         </Box>
       )}
     </SearchContainer>

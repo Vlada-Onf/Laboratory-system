@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography} from '@mui/material';
 import PageWrapper from '../../components/layout/PaperWrapper';
 
 const Blocked = () => {

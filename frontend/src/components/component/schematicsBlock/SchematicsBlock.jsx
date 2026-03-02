@@ -1,28 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import SchematicCard from './SchematicCard';
 import AddSchematicCard from './AddSchematicCard';
 import SchematicModal from './SchematicModal';
 import { useSchematicsStore } from '@store/useSchematicsStore';
+import { useAuthStore } from '@store/useAuthStore';
+
+const LAB_ROLE_ID = 'bbc9c32e-8c47-43f4-bc68-c29f81754dac';
 
 const SchematicsBlock = ({ componentId, onAddSchematic }) => {
   const {
     schematics,
     isLoading,
     fetchSchematicsByComponent,
-    editModal,
-    openEditModal,
-    closeEditModal,
-    updateSchematic,
-    deleteSchematic,
-    addSchematic
   } = useSchematicsStore();
+
+  const { user } = useAuthStore();
+  const getUserRoles = () => {
+    const roles = [];
+    if (user?.roleId) roles.push(user.roleId);
+    if (user?.roles && Array.isArray(user.roles)) roles.push(...user.roles);
+    return [...new Set(roles)];
+  };
+  const userRoles = getUserRoles();
+  const isLabRole = userRoles.includes(LAB_ROLE_ID);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [deleteItemTitle, setDeleteItemTitle] = useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (componentId) {
       fetchSchematicsByComponent(componentId);
     }
@@ -32,8 +39,12 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
     String(s.componentId) === String(componentId)
   );
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingSchematic, setEditingSchematic] = useState(null);
+
   const handleEditSchematic = (schematic) => {
-    openEditModal(schematic);
+    setEditingSchematic(schematic);
+    setModalOpen(true);
   };
 
   const handleOpenDeleteConfirm = (id, title) => {
@@ -42,9 +53,14 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
     setDeleteConfirmOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteItemId) {
-      deleteSchematic(deleteItemId);
+      try {
+        await useSchematicsStore.getState().deleteSchematic(deleteItemId);
+        console.log('Схема видалена');
+      } catch (error) {
+        console.error('Помилка видалення:', error);
+      }
     }
     setDeleteConfirmOpen(false);
     setDeleteItemId(null);
@@ -52,27 +68,24 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
   };
 
   const handleAddSchematic = () => {
-    openEditModal(null);
+    setEditingSchematic(null);
+    setModalOpen(true);
     onAddSchematic?.();
   };
 
-  const handleSaveSchematic = async (formData, file) => {
-  try {
-    if (editModal.schematic) {
-      formData.id = editModal.schematic.id;
-      await updateSchematic(formData, file);
-    } else {
-      formData.componentId = String(componentId);
-      await addSchematic(formData, file);
+  const handleCloseModal = async () => {
+    setModalOpen(false);
+    setEditingSchematic(null);
+    if (componentId) {
+      await fetchSchematicsByComponent(componentId);
     }
-    closeEditModal();
-  } catch (error) {
-    console.error('Помилка збереження схеми:', error);
-  }
-};
+  };
+
   if (isLoading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>Завантаження...</Box>;
   }
+
+  const showAddSchematicCard = !isLabRole;
 
   return (
     <>
@@ -98,9 +111,10 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
                 schematic={schematic}
                 onEdit={handleEditSchematic}
                 onDelete={handleOpenDeleteConfirm}
+                isLabRole={isLabRole}
               />
             ))}
-            <AddSchematicCard onAdd={handleAddSchematic} />
+            {showAddSchematicCard && <AddSchematicCard onAdd={handleAddSchematic} />}
           </Box>
         ) : (
           <Box sx={{
@@ -109,21 +123,17 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
             p: 3,
             minHeight: 200
           }}>
-            <AddSchematicCard onAdd={handleAddSchematic} />
+            {showAddSchematicCard && <AddSchematicCard onAdd={handleAddSchematic} />}
           </Box>
         )}
       </Box>
 
-      {editModal.open && (
-        <SchematicModal
-          key={editModal.schematic?.id || `add-${componentId}`}
-          open={editModal.open}
-          schematic={editModal.schematic}
-          componentId={componentId}
-          onClose={closeEditModal}
-          onSave={handleSaveSchematic}
-        />
-      )}
+      <SchematicModal
+        open={modalOpen}
+        schematic={editingSchematic}
+        componentId={componentId}
+        onClose={handleCloseModal}
+      />
 
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
         <DialogTitle>Підтвердити видалення</DialogTitle>

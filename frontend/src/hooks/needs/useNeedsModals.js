@@ -3,10 +3,7 @@ import { useNeedsStore } from '@store/useNeedsStore';
 import { useNeedStatusesStore } from '@store/useNeedStatusesStore';
 import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
 
-const USER_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
-
 export const useNeedsModals = () => {
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteRowId, setDeleteRowId] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -27,6 +24,8 @@ export const useNeedsModals = () => {
   const { fetchNeeds, deleteNeed, createNeed, updateNeedDetails } = useNeedsStore();
   const { statuses } = useNeedStatusesStore();
   const { importances } = useNeedImportancesStore();
+
+  // ✅ Видалено непотрібний useProfileStore - методи store самі беруть currentUserId
 
   const openDeleteModal = useCallback((id, row) => {
     setDeleteRowId(id);
@@ -54,7 +53,6 @@ export const useNeedsModals = () => {
   }, [deleteRowId, deleteNeed, closeDeleteModal, fetchNeeds]);
 
   const openCreateModal = useCallback((componentRow) => {
-
     if (!componentRow?.componentId) {
       console.error('openCreateModal: componentId відсутній!', componentRow);
       alert('Помилка: componentId відсутній');
@@ -82,9 +80,8 @@ export const useNeedsModals = () => {
         description: formData.description || '',
         statusId: formData.statusId,
         importanceId: formData.importanceId,
-        requestedBy: USER_ID,
-        performedBy: USER_ID,
       };
+
       await createNeed(payload);
       closeCreateModal();
       await fetchNeeds();
@@ -113,20 +110,19 @@ export const useNeedsModals = () => {
       if (!editNeed?.id) {
         throw new Error('ID потреби відсутній');
       }
+
       const payload = {
         id: editNeed.id,
         quantityNeeded: Number(formData.quantityNeeded) || 0,
         description: formData.description || '',
         importanceId: formData.importanceId,
         statusId: formData.statusId,
-        performedBy: USER_ID,
         completionReason: formData.completionReason || '',
       };
 
       await updateNeedDetails(editNeed.id, payload);
       closeEditModal();
       await fetchNeeds();
-
     } catch (error) {
       alert(`Помилка редагування: ${error.response?.data?.title || error.message}`);
     }
@@ -179,6 +175,7 @@ export const useNeedsModals = () => {
       setPriorityCompletionReason(value);
     }
   }, []);
+
   return {
     createModal: {
       open: createModalOpen,

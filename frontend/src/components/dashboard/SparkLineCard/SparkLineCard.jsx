@@ -17,7 +17,6 @@ export default function SparkLineCard({
   valueType = 'number',
 }) {
   const length = Math.min(data.length, labels.length);
-  
   const { highlightIndex, onKeyDown, onFocus, handleHighlightChange } = useSparkLineHighlight(length);
 
   const chartColors = useMemo(() => ({
@@ -28,7 +27,7 @@ export default function SparkLineCard({
 
   const displayLabel = highlightIndex !== null ? labels[highlightIndex] : title;
   const displayValue = highlightIndex !== null ? data[highlightIndex] : data[length - 1];
-  
+
   const formattedValue = useMemo(
     () => formatValue(displayValue, valueType),
     [displayValue, valueType]
@@ -76,9 +75,9 @@ export default function SparkLineCard({
               baseline="min"
               xAxis={{ id: 'week-axis', data: labels }}
               margin={{ bottom: 0, top: 5, left: 4, right: 0 }}
-              series={[{ 
-                line: { stroke: chartColors.line, strokeWidth: 2 }, 
-                color: chartColors.area 
+              series={[{
+                line: { stroke: chartColors.line, strokeWidth: 2 },
+                color: chartColors.area
               }]}
               highlightedAxis={
                 highlightIndex === null
@@ -90,14 +89,14 @@ export default function SparkLineCard({
               clipAreaOffset={{ top: 0, bottom: 0 }}
               slotProps={{ lineHighlight: { r: 4, fill: chartColors.line } }}
               sx={{
-                [`& .${lineElementClasses.root}`]: { 
-                  stroke: chartColors.line, 
-                  strokeWidth: 2 
+                [`& .${lineElementClasses.root}`]: {
+                  stroke: chartColors.line,
+                  strokeWidth: 2
                 },
                 [`& .${areaElementClasses.root}`]: { fill: chartColors.area },
-                [`& .${chartsAxisHighlightClasses.root}`]: { 
-                  stroke: chartColors.line, 
-                  strokeWidth: 2 
+                [`& .${chartsAxisHighlightClasses.root}`]: {
+                  stroke: chartColors.line,
+                  strokeWidth: 2
                 },
               }}
             />

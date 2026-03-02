@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BrokenComponentsTable from '../../components/brokenComponents/BrokenComponentsTable';
 import { useNeedsStore } from '../../store/useNeedsStore';

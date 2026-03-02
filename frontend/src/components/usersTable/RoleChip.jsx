@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Chip, Menu, MenuItem } from '@mui/material';
 import { useRolesStore } from '@store/useRolesStore';
 import { useAdminUsersStore } from '@store/useAdminUsersStore';
@@ -11,17 +11,17 @@ export default function RoleChip({ userId, disabled = false }) {
   const adminUsers = useAdminUsersStore(state => state.adminUsers);
 
   const open = Boolean(anchorEl);
-  
-  const currentUser = useMemo(() => 
-    adminUsers.find(user => user.id === userId), 
+
+  const currentUser = useMemo(() =>
+    adminUsers.find(user => user.id === userId),
     [adminUsers, userId]
   );
-  
+
   const displayRole = localRole || currentUser?.roleName || 'User';
 
   const roleColors = {
     SuperAdmin: '#f16731',
-    Admin: '#1976d2', 
+    Admin: '#1976d2',
     Lab: '#5bc522',
     User: '#9e9e9e',
   };
@@ -35,20 +35,16 @@ export default function RoleChip({ userId, disabled = false }) {
 
   const handleClose = async (newRoleName) => {
     setAnchorEl(null);
-    
+
     if (newRoleName && newRoleName !== displayRole && !disabled && userId) {
       const newRole = roles.find(r => r.name === newRoleName);
-      
+
       if (newRole) {
-        console.log(`🔄 ${displayRole} → ${newRoleName}`);
-        
         setLocalRole(newRoleName);
-        
         try {
-          await apiClient.put(`/users/${userId}`, { 
-            roleId: newRole.id 
+          await apiClient.put(`/users/${userId}`, {
+            roleId: newRole.id
           });
-          
         } catch (error) {
           console.error('API помилка:', error)
         }
@@ -77,7 +73,6 @@ export default function RoleChip({ userId, disabled = false }) {
           },
         }}
       />
-      
       {!disabled && (
         <Menu
           anchorEl={anchorEl}
@@ -90,7 +85,7 @@ export default function RoleChip({ userId, disabled = false }) {
               key={role.id}
               selected={role.name === displayRole}
               onClick={() => handleClose(role.name)}
-              sx={{ 
+              sx={{
                 fontSize: '0.875rem',
                 minHeight: 32,
                 justifyContent: 'flex-start'

@@ -81,7 +81,7 @@ export const useNeedStatusesStore = create((set, get) => ({
     }
 
     const url = `/need-statuses/${id}?performedBy=${userId}`;
-    
+
     console.log('DELETE URL:', url);
 
     await apiClient.delete(url);

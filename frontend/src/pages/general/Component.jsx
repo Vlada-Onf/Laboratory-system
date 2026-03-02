@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ComponentLayout from './../../components/component/ComponentLayout';
 import { useComponentsStore } from '../../store/useComponentsStore';
 import { useCategoriesStore } from '../../store/useCategoriesStore';
-import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import ComponentModal from '../../components/component/componentBlock/ComponentModal';
 import AddNeedModal from '../../components/needsTable/AddNeedModal';
-import { eventBus } from '../../utils/eventBus';
 
 const ComponentPage = () => {
   const navigate = useNavigate();
@@ -25,32 +23,93 @@ const ComponentPage = () => {
     deleteComponent,
   } = useComponentsStore();
 
-  const { fetchCategories,  isLoading: categoriesLoading } = useCategoriesStore();
-  
-  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
-
-  const { openEditModal: openSchematicEditModal } = useSchematicsStore();
+  const { fetchCategories, isLoading: categoriesLoading } = useCategoriesStore();
   const addNeed = useNeedsStore(state => state.addNeed);
+
   const [needModalOpen, setNeedModalOpen] = useState(false);
 
   useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        await fetchCategories();
-        setCategoriesLoaded(true);
-
-        await fetchComponents();
-      } catch (error) {
-        console.error('Помилка ComponentPage:', error);
-      }
-    };
-
-    loadAllData();
+    Promise.allSettled([
+      fetchCategories(),
+      fetchComponents()
+    ]).catch(console.error);
   }, [fetchCategories, fetchComponents]);
 
-  const component = components.find(c => c.id === id);
+  const component = useMemo(() =>
+    components.find(c => c.id === id),
+    [components, id]
+  );
 
-  const pageLoading = componentsLoading || categoriesLoading || !categoriesLoaded;
+  const pageLoading = componentsLoading || categoriesLoading;
+
+  const handleComponentSubmit = useCallback(async (formData, selectedFile) => {
+    const componentId = editModal.component?.id || id;
+    try {
+      await updateComponent(componentId, formData, selectedFile);
+      await fetchComponents();
+      closeEditModal();
+    } catch (error) {
+      console.error('Помилка оновлення:', error);
+    }
+  }, [editModal.component?.id, id, updateComponent, fetchComponents, closeEditModal]);
+
+  const handleEditComponent = useCallback(() => {
+    if (component) openEditModal(component);
+  }, [component, openEditModal]);
+
+  const handleDeleteComponent = useCallback(() => {
+    if (component) {
+      deleteComponent(component.id);
+      navigate('/front-components');
+    }
+  }, [component, deleteComponent, navigate]);
+
+  const handleUpdateLinks = useCallback(async (updatedLinks) => {
+    if (component) {
+      try {
+        await updateComponent(component.id, {
+          supplierLink: updatedLinks.buyLink || "string",
+          documentationLink: updatedLinks.docLink || "string",
+        });
+        await fetchComponents();
+      } catch (error) {
+        console.error('Помилка оновлення посилань:', error);
+      }
+    }
+  }, [component, updateComponent, fetchComponents]);
+
+  const handleOpenNeedModal = useCallback(() => {
+    setNeedModalOpen(true);
+  }, []);
+
+  const handleCloseNeedModal = useCallback(() => {
+    setNeedModalOpen(false);
+  }, []);
+
+  const handleAddNeedSubmit = useCallback((formData) => {
+    if (component) {
+      const mappedNeed = {
+        id: crypto.randomUUID(),
+        componentId: component.id,
+        componentName: component.name,
+        componentImage: component.photoUrl,
+        categoryId: component.categoryId,
+        category: component.category,
+        quantity: formData.quantity,
+        price: formData.price,
+        description: formData.description || component.description,
+        reason: formData.reason,
+        priority: formData.priority,
+        status: 'В очікуванні',
+        approvedAt: '',
+      };
+      addNeed(mappedNeed);
+      handleCloseNeedModal();
+    }
+  }, [component, addNeed, handleCloseNeedModal]);
+
+  const handleOpenAddSchematicModal = useCallback(() => {
+  }, []);
 
   if (pageLoading) {
     return (
@@ -72,77 +131,6 @@ const ComponentPage = () => {
       </PageWrapper>
     );
   }
-
-  const handleComponentSubmit = async (formData, selectedFile) => {
-  const componentId = editModal.component?.id || id;
-  try {
-    await updateComponent(componentId, formData, selectedFile);
-    await fetchComponents();
-    closeEditModal();
-  } catch (error) {
-    console.error('Помилка оновлення компонента:', error);
-  }
-};
-
-
-  const handleEditComponent = () => openEditModal(component);
-
-  const handleDeleteComponent = () => {
-    eventBus.emit('entity:deleted', {
-      userId: 'currentUser',
-      userName: 'Дарина',
-      actionName: 'Видалено',
-      entityTypeId: 4,
-      entityTypeName: 'Компонент',
-      entityId: component.id,
-      entityName: component.name
-    });
-
-    deleteComponent(component.id);
-    navigate('/front-components');
-  };
-
-  const handleUpdateLinks = async (updatedLinks) => {
-    try {
-      await updateComponent(component.id, {
-        supplierLink: updatedLinks.buyLink || "string",
-        documentationLink: updatedLinks.docLink || "string",
-      });
-      await fetchComponents();
-    } catch (error) {
-      console.error('Помилка оновлення посилань:', error);
-    }
-  };
-
-  const handleOpenNeedModal = () => setNeedModalOpen(true);
-  const handleCloseNeedModal = () => setNeedModalOpen(false);
-
-  const handleAddNeedSubmit = (formData) => {
-    const mappedNeed = {
-      id: crypto.randomUUID(),
-      componentId: component.id,
-      componentName: component.name,
-      componentImage: component.photoUrl,
-      categoryId: component.categoryId,
-      category: component.category,
-      quantity: formData.quantity,
-      price: formData.price,
-      description: formData.description || component.description,
-      reason: formData.reason,
-      priority: formData.priority,
-      status: 'В очікуванні',
-      approvedAt: '',
-    };
-
-    addNeed(mappedNeed);
-    handleCloseNeedModal();
-  };
-
-  const handleOpenAddSchematicModal = () => {
-    openSchematicEditModal(null);
-  };
-
-
 
   return (
     <PageWrapper>

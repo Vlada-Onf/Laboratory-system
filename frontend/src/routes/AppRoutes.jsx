@@ -1,4 +1,3 @@
-import React from "react";
 import Layout from "../components/layout/Layout";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
@@ -28,7 +27,7 @@ const ProtectedLayout = () => {
     <>
       <SignedIn>
         <UserStatusGuard>
-        <SyncBackend />  
+        <SyncBackend />
         <Layout>
           <Outlet />
         </Layout>

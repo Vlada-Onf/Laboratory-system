@@ -2,23 +2,23 @@ import React from 'react';
 import { Box, TextField, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const LinkList = ({ 
-  usefulLinks = [], 
-  onUpdate, 
-  onDelete 
+const LinkList = ({
+  usefulLinks = [],
+  onUpdate,
+  onDelete
 }) => (
   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
     {usefulLinks.map((link) => (
-      <Box 
-        key={link.id} 
-        sx={{ 
-          display: 'flex', 
-          gap: 1, 
-          alignItems: 'center', 
-          p: 1, 
-          border: '1px solid #e0e0e0', 
-          borderRadius: 1, 
-          mb: 1 
+      <Box
+        key={link.id}
+        sx={{
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
+          p: 1,
+          border: '1px solid #e0e0e0',
+          borderRadius: 1,
+          mb: 1
         }}
       >
         <TextField

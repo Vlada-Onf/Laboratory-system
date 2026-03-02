@@ -4,14 +4,16 @@ import { useUsefulLinksStore } from '@store/useUsefulLinksStore';
 export const useLinkModal = (componentId) => {
   const [newLinkTitle, setNewLinkTitle] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
-  
+
   const { addUsefulLink, updateUsefulLink, deleteUsefulLink } = useUsefulLinksStore();
 
   const handleAddLink = useCallback(async () => {
-    if (!newLinkTitle.trim() || !newLinkUrl.trim()) return;
+    if (!newLinkTitle.trim() || !newLinkUrl.trim()){
+      return;
+    }
     try {
       await addUsefulLink({ componentId, title: newLinkTitle, url: newLinkUrl });
-      setNewLinkTitle(''); 
+      setNewLinkTitle('');
       setNewLinkUrl('');
     } catch (error) {
       console.error('Помилка додавання:', error);
@@ -37,12 +39,12 @@ export const useLinkModal = (componentId) => {
   const isAddDisabled = !newLinkTitle.trim() || !newLinkUrl.trim();
 
   return {
-    newLinkTitle, 
-    newLinkUrl, 
-    setNewLinkTitle, 
+    newLinkTitle,
+    newLinkUrl,
+    setNewLinkTitle,
     setNewLinkUrl,
     handleAddLink,
-    handleUpdateLink, 
+    handleUpdateLink,
     handleDeleteLink,
     isAddDisabled
   };

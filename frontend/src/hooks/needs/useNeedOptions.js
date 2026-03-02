@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useCategoriesStore } from '@store/useCategoriesStore';
 import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
 import { useNeedStatusesStore } from '@store/useNeedStatusesStore';

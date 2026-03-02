@@ -32,7 +32,7 @@ export const useBrokenComponentsData = () => {
       const component = getComponentById(row.componentId);
       const categoryName = categoriesMap.get(component?.categoryId) || '—';
       const reasonName = reasonsMap.get(row.reasonId) || row.reasonId || '—';
-      
+
       return {
         ...row,
         component,

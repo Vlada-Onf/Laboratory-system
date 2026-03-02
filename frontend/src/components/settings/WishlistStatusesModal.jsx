@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, 
-  IconButton, Box, Typography, Button,DialogActions,DialogContentText} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, Button,DialogActions,DialogContentText} from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
@@ -8,12 +7,9 @@ import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
 const WishlistStatusesModal = ({ open, onClose }) => {
   const [newStatusName, setNewStatusName] = useState('');
   const [newStatusDescription, setNewStatusDescription] = useState('');
-  
   const [editingStatuses, setEditingStatuses] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  
   const [refreshKey, setRefreshKey] = useState(0);
-  
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [statusToDelete, setStatusToDelete] = useState(null);
 
@@ -38,9 +34,9 @@ const WishlistStatusesModal = ({ open, onClose }) => {
   }, [statuses, refreshKey]);
 
   const handleNameChange = useCallback((statusId, value) => {
-    setEditingStatuses(prev => 
-      prev.map(status => 
-        status.id === statusId 
+    setEditingStatuses(prev =>
+      prev.map(status =>
+        status.id === statusId
           ? { ...status, localName: value }
           : status
       )
@@ -48,9 +44,9 @@ const WishlistStatusesModal = ({ open, onClose }) => {
   }, []);
 
   const handleDescriptionChange = useCallback((statusId, value) => {
-    setEditingStatuses(prev => 
-      prev.map(status => 
-        status.id === statusId 
+    setEditingStatuses(prev =>
+      prev.map(status =>
+        status.id === statusId
           ? { ...status, localDescription: value }
           : status
       )
@@ -80,9 +76,9 @@ const WishlistStatusesModal = ({ open, onClose }) => {
     setIsSaving(true);
     try {
       if (newStatusName.trim() && newStatusDescription.trim()) {
-        await addStatus({ 
-          name: newStatusName.trim(), 
-          description: newStatusDescription.trim() 
+        await addStatus({
+          name: newStatusName.trim(),
+          description: newStatusDescription.trim()
         });
         setNewStatusName('');
         setNewStatusDescription('');
@@ -90,16 +86,15 @@ const WishlistStatusesModal = ({ open, onClose }) => {
 
       for (const status of editingStatuses) {
         if (status.localName !== status.name || status.localDescription !== status.description) {
-          await updateStatus(status.id, { 
-            id: status.id, 
-            name: status.localName.trim(), 
-            description: status.localDescription.trim() 
+          await updateStatus(status.id, {
+            id: status.id,
+            name: status.localName.trim(),
+            description: status.localDescription.trim()
           });
         }
       }
 
       await fetchStatuses();
-      
     } catch (error) {
       console.error('Помилка збереження:', error);
       await fetchStatuses();
@@ -108,7 +103,7 @@ const WishlistStatusesModal = ({ open, onClose }) => {
     }
   }, [newStatusName, newStatusDescription, editingStatuses, addStatus, updateStatus, fetchStatuses]);
 
-  const hasChanges = editingStatuses.some(s => 
+  const hasChanges = editingStatuses.some(s =>
     s.localName !== s.name || s.localDescription !== s.description
   ) || (newStatusName.trim() && newStatusDescription.trim());
 
@@ -125,7 +120,7 @@ const WishlistStatusesModal = ({ open, onClose }) => {
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>
           Статуси списку бажаного
-          <IconButton 
+          <IconButton
             onClick={handleClose}
             sx={{ position: 'absolute', right: 8, top: 8 }}
             aria-label="Закрити"
@@ -133,24 +128,23 @@ const WishlistStatusesModal = ({ open, onClose }) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'end', mb: 3 }}>
-            <TextField 
+            <TextField
               label="Нова назва статусу"
-              value={newStatusName} 
+              value={newStatusName}
               onChange={(e) => setNewStatusName(e.target.value)}
-              size="small" 
-              fullWidth 
+              size="small"
+              fullWidth
             />
-            <TextField 
+            <TextField
               label="Опис"
-              value={newStatusDescription} 
+              value={newStatusDescription}
               onChange={(e) => setNewStatusDescription(e.target.value)}
-              size="small" 
-              fullWidth 
+              size="small"
+              fullWidth
             />
-            <IconButton 
+            <IconButton
               onClick={handleSaveAll}
               disabled={!newStatusName.trim() || !newStatusDescription.trim() || isSaving}
               sx={{ height: '40px', width: '40px' }}
@@ -169,29 +163,29 @@ const WishlistStatusesModal = ({ open, onClose }) => {
               </Typography>
             ) : (
               editingStatuses.map((status) => (
-                <Box 
+                <Box
                   key={status.id}
-                  sx={{ 
-                    display: 'flex', gap: 1, alignItems: 'center', 
-                    p: 2, border: '1px solid', borderColor: 'divider', 
-                    borderRadius: 1, mb: 1 
+                  sx={{
+                    display: 'flex', gap: 1, alignItems: 'center',
+                    p: 2, border: '1px solid', borderColor: 'divider',
+                    borderRadius: 1, mb: 1
                   }}
                 >
-                  <TextField 
-                    value={status.localName} 
+                  <TextField
+                    value={status.localName}
                     onChange={(e) => handleNameChange(status.id, e.target.value)}
-                    size="small" 
-                    sx={{ flex: 1 }} 
+                    size="small"
+                    sx={{ flex: 1 }}
                   />
-                  <TextField 
-                    value={status.localDescription} 
+                  <TextField
+                    value={status.localDescription}
                     onChange={(e) => handleDescriptionChange(status.id, e.target.value)}
-                    size="small" 
-                    sx={{ flex: 2 }} 
+                    size="small"
+                    sx={{ flex: 2 }}
                   />
-                  <IconButton 
+                  <IconButton
                     onClick={() => handleOpenDeleteConfirm(status.id, status.localName)}
-                    size="small" 
+                    size="small"
                     color="error"
                   >
                     <CloseIcon />
@@ -207,7 +201,7 @@ const WishlistStatusesModal = ({ open, onClose }) => {
                 onClick={handleSaveAll}
                 variant="contained"
                 disabled={isSaving}
-                sx={{ 
+                sx={{
                   background: 'linear-gradient(135deg, #08273b, #365468)',
                   '&:hover': { background: 'linear-gradient(135deg, #051926, #20314a)' }
                 }}
@@ -222,7 +216,7 @@ const WishlistStatusesModal = ({ open, onClose }) => {
         <DialogTitle>Підтвердити видалення</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Ви впевнені, що хочете видалити статус 
+            Ви впевнені, що хочете видалити статус
             "<strong>{statusToDelete?.name}</strong>"?
             <br />
             Ця дія не може бути скасована.
@@ -230,9 +224,9 @@ const WishlistStatusesModal = ({ open, onClose }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirmOpen(false)}>Скасувати</Button>
-          <Button 
-            onClick={handleConfirmDelete} 
-            variant="contained" 
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
             color="error"
             disabled={isSaving}
           >

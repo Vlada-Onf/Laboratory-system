@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  IconButton, Box, Button
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Box, Button} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useLinkModal } from '../../../hooks/links/useLinkModal';
 import LinkForm from './LinkForm';

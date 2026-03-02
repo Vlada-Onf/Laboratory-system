@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import BedtimeIcon from '@mui/icons-material/Bedtime';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';

@@ -1,26 +1,14 @@
 import {Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { eventBus } from '../../utils/eventBus';
 
 const ConfirmDeleteModal = ({
   open,
   onClose,
   onConfirm,
   entityName,
-  entityTypeId = 4,
   entityTypeName = 'Компонент'
 }) => {
   const handleConfirm = () => {
-    eventBus.emit('entity:deleted', {
-      userId: 'currentUser',
-      userName: 'Дарина',
-      actionName: 'Видалено',
-      entityTypeId,
-      entityTypeName,
-      entityId: null,
-      entityName
-    });
-
     onConfirm();
     onClose();
   };

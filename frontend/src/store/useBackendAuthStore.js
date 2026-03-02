@@ -27,7 +27,6 @@ export const useBackendAuthStore = create((set, get) => ({
         isLoaded: true,
         userId: user.id
       });
-      
       return user;
     } catch (error) {
       console.log('Sync skipped:', error.message);

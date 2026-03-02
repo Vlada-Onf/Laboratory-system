@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Header from './header/Header';
 import Sidebar from './sidebar/Sidebar';
 import { useProfileStore } from '../../store/useProfileStore';
-import { useAuth } from '@clerk/clerk-react'; 
+import { useAuth } from '@clerk/clerk-react';
 const HEADER_HEIGHT = 17;
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 64;

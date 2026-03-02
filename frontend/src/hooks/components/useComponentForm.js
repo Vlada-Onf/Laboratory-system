@@ -5,13 +5,13 @@ import { useTagsStore } from '@store/useTagsStore';
 export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) => {
   const categories = useCategoriesStore(state => state.categories);
   const tagsStore = useTagsStore();
-  
+
   const [selectedFile, setSelectedFile] = useState(null);
   const [form, setForm] = useState({});
   const [tags, setTags] = useState([]);
 
-  const categoryOptions = useMemo(() => 
-    categories.map(cat => ({ value: cat.id, label: cat.title || cat.name })), 
+  const categoryOptions = useMemo(() =>
+    categories.map(cat => ({ value: cat.id, label: cat.title || cat.name })),
   [categories]);
 
   const defaultForm = useMemo(() => ({
@@ -40,7 +40,7 @@ export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) =>
         return String(tag);
       }).filter(Boolean);
     }
-    
+
     return [];
   }, [isEditing, component]);
 
@@ -75,9 +75,21 @@ export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) =>
     }
   }, [form.tagInput, tags]);
 
-  const removeTag = useCallback((tagToRemove) => {
+  const removeTag = useCallback(async (tagToRemove) => {
+  try {
+    const tag = await tagsStore.createTag(tagToRemove);
+
+    if (tag?.id) {
+      await tagsStore.deleteTag(tag.id);
+    }
     setTags(prev => prev.filter(tag => tag !== tagToRemove));
-  }, []);
+
+  } catch (error) {
+    console.error('Помилка видалення тега:', error);
+    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  }
+}, [tagsStore]);
+
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
@@ -95,7 +107,7 @@ export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) =>
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    
+
     try {
       const safeTags = Array.isArray(tags) ? tags : [];
       const tagIds = await Promise.all(
@@ -109,7 +121,7 @@ export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) =>
           }
         })
       );
-      
+
       const validTagIds = tagIds.filter(id => id != null);
 
       const formData = {
@@ -133,11 +145,11 @@ export const useComponentForm = ({ component, isEditing, onClose, onSubmit }) =>
 const isValid = useMemo(() => {
   const hasName = Boolean(form.name?.trim());
   const hasCategory = Boolean(form.categoryId);
-  
+
   if (isEditing) {
     return hasName && hasCategory;
   }
-  
+
   return hasName && hasCategory && Boolean(selectedFile);
 }, [form.name, form.categoryId, selectedFile, isEditing]);
 

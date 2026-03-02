@@ -1,10 +1,8 @@
-import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PageWrapper from '../layout/PaperWrapper';
 import DashboardCard from './DashboardCard';
 import { useDashboardData } from '../../hooks/dashboard/useDashboardData';
-
 import ComponentsCostByCategoryChart from './ComponentsCostByCategoryChart';
 import ComponentsCountPieChart from './ComponentsCountPieChart';
 import ComponentsCostSparkLine from './SparkLineCard/ComponentsCostSparkLine';
@@ -32,19 +30,19 @@ const DashboardResponsive = () => {
         </Button>
       </Box>
 
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', lg: 'row' }, 
-        width: '100%', 
-        gap: 1, 
-        overflowY: 'auto' 
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', lg: 'row' },
+        width: '100%',
+        gap: 1,
+        overflowY: 'auto'
       }}>
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', md: 'row' }, 
-            gap: 1, 
-            width: '100%' 
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 1,
+            width: '100%'
           }}>
             <DashboardCard sx={{ flex: 1, minHeight: 100 }}>
               <ComponentsCostSparkLine />
@@ -62,11 +60,11 @@ const DashboardResponsive = () => {
           </DashboardCard>
         </Box>
 
-        <Box sx={{ 
-          width: { xs: '100%', lg: 400 }, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: 1 
+        <Box sx={{
+          width: { xs: '100%', lg: 400 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1
         }}>
           <DashboardCard sx={{ flex: 1, minHeight: 300 }}>
             <Typography sx={{ mb: 2, fontSize: 18, fontWeight: 500 }}>

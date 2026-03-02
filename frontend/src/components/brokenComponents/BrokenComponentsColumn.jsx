@@ -1,9 +1,9 @@
-import React from 'react';
-import { Typography } from '@mui/material';
+import { Typography, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ComponentCell from './../general/ComponentCell';
 import MoveToNeedsButton from './MoveToNeedsButton';
 
-export const brokenComponentsColumns = (handleOpenModal) => [
+export const brokenComponentsColumns = (handleOpenModal, handleDelete) => [
   {
     field: 'component',
     headerName: 'Компонент',
@@ -73,10 +73,10 @@ export const brokenComponentsColumns = (handleOpenModal) => [
       );
     },
   },
-  {
+   {
     field: 'actions',
     headerName: '',
-    width: 140,
+    width: 180,
     sortable: false,
     renderCell: ({ row }) => (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -84,6 +84,14 @@ export const brokenComponentsColumns = (handleOpenModal) => [
           onMoveToNeeds={() => handleOpenModal(row)}
           label="До потреб"
         />
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => handleDelete(row.id)}
+          title="Видалити запис"
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
       </div>
     ),
   },

@@ -36,7 +36,7 @@ export const useAdminUsersStore = create(
 updateUser: async (userData) => {
   const state = get();
   set({ loading: true, error: null });
-  
+
   try {
     const currentUser = state.adminUsers.find(u => u.id === userData.id);
     const requestBody = {
@@ -45,27 +45,25 @@ updateUser: async (userData) => {
       roleId: userData.roleId,
       isActive: currentUser?.isActive ?? true
     };
-    
+
     const { data } = await apiClient.put(`/users/${userData.id}`, requestBody);
-    
+
     console.log('BACKEND RESPONSE:', {
       roleId: data.roleId,
       roleName: data.roleName,
       requestRoleId: userData.roleId
     });
-    
+
     set((state) => ({
       adminUsers: state.adminUsers.map(user =>
-        user.id === userData.id 
+        user.id === userData.id
           ? { ...user, roleId: data.roleId, roleName: data.roleName }
           : user
       )
     }));
-    
+
     await get().fetchAdminUsers();
-    
     return data;
-    
   } catch (error) {
     console.error('NETWORK ERROR:', error);
     throw error;
@@ -80,7 +78,7 @@ updateUser: async (userData) => {
         const endpoint = isActive ? 'unblock' : 'block';
         console.log(`${endpoint.toUpperCase()} USER:`, id);
         await apiClient.post(`/admin/users/${id}/${endpoint}`);
-        
+
         set((state) => ({
           adminUsers: state.adminUsers.map(user =>
             user.id === id ? { ...user, isActive } : user
@@ -100,25 +98,25 @@ toggleUserStatus: async (userId, isActive) => {
   try {
     console.log(`PATCH /users/${userId}/status → ${isActive ? 'ACTIVE' : 'BLOCKED'}`);
 
-    const { data } = await apiClient.patch(`/users/${userId}/status`, { 
-      isActive 
+    const { data } = await apiClient.patch(`/users/${userId}/status`, {
+      isActive
     });
-    
+
     set((state) => ({
       adminUsers: state.adminUsers.map(user =>
-        user.id === userId 
+        user.id === userId
           ? { ...user, isActive: data.isActive }
           : user
       ),
       loading: false
     }));
-    
+
     return data;
   } catch (error) {
     console.error('STATUS ERROR:', error.response?.data);
-    set({ 
-      error: error.response?.data?.message || 'Помилка блокування', 
-      loading: false 
+    set({
+      error: error.response?.data?.message || 'Помилка блокування',
+      loading: false
     });
     throw error;
   }
@@ -128,7 +126,7 @@ toggleUserStatus: async (userId, isActive) => {
       try {
         console.log('DELETING USER:', id);
         await apiClient.delete(`/users/${id}`);
-        
+
         set((state) => ({
           adminUsers: state.adminUsers.filter(user => user.id !== id),
           loading: false
@@ -146,6 +144,6 @@ toggleUserStatus: async (userId, isActive) => {
     refreshUsers: async () => {
       await get().fetchAdminUsers();
     }
-  }), 
+  }),
   { name: 'useAdminUsersStore' }
 ));

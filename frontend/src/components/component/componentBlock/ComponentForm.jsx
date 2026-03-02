@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, FormControl, Select, MenuItem, TextField, Typography } from '@mui/material';
 import PhotoUpload from './PhotoUpload';
 import TagsInput from './TagsInput';
@@ -52,7 +51,7 @@ const ComponentForm = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-      
+
       <PhotoUpload
         selectedFile={selectedFile}
         photoName={form.photoName}

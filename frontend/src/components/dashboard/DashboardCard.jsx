@@ -1,14 +1,13 @@
-import React from 'react';
 import { Paper } from '@mui/material';
 import { useTheme } from '../../context/useTheme';
 
-const DashboardCard = ({ 
-  children, 
-  sx, 
-  chart = false 
+const DashboardCard = ({
+  children,
+  sx,
+  chart = false
 }) => {
   const { isDarkMode } = useTheme();
-  
+
   return (
     <Paper
       elevation={0}

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import SettingsLayout from '../../components/settings/SettingsLayout';
 

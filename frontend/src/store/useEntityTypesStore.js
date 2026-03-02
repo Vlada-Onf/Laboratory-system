@@ -4,11 +4,11 @@ import apiClient from '../api/client';
 export const useEntityTypesStore = create((set, get) => ({
   entityTypes: [],
   isLoading: false,
-  
+
   fetchEntityTypes: async () => {
     const { isLoading } = get();
     if (isLoading) return;
-    
+
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get('/entity-types');

@@ -10,8 +10,6 @@ export const useAuthSync = () => {
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user && !hasSynced.current) {
-      console.log('User logged in:', user.id);
-      
       const syncOnce = async () => {
         try {
           await syncWithBackend(getToken);
@@ -20,7 +18,6 @@ export const useAuthSync = () => {
           console.error('Auth sync failed:', error);
         }
       };
-      
       syncOnce();
     }
   }, [isLoaded, isSignedIn, user?.id]);

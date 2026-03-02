@@ -1,5 +1,4 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box} from '@mui/material';
 
 const ImagePreview = ({ imageUrl, size = 32 }) => (
   <Box

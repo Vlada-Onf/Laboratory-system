@@ -3,7 +3,6 @@ import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
 
 const PriorityChip = ({ priorityId, onPriorityClick }) => {
   const { importances } = useNeedImportancesStore();
-  
   const priorityName = importances.find(i => i.id === priorityId)?.name || '—';
 
   return (

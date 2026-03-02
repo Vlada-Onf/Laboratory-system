@@ -1,16 +1,15 @@
 import { create } from 'zustand';
 import apiClient from '../api/client';
+import { useProfileStore } from './useProfileStore';
 
-const HARDCODE_USER_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
-const HARDCODE_REASON_ID = "d1f539e7-c137-42e3-81d9-920b1fb8ecd7";
-
-export const useDamagedComponentsStore = create((set) => ({
+export const useDamagedComponentsStore = create((set, get) => ({
   damagedComponents: [],
   isLoading: false,
 
+  getCurrentUserId: () => useProfileStore.getState().profile?.id || null,
+
   fetchDamagedComponents: async () => {
     set({ isLoading: true });
-
     try {
       const { data } = await apiClient.get('/damaged-components');
       set({ damagedComponents: data || [] });
@@ -23,26 +22,26 @@ export const useDamagedComponentsStore = create((set) => ({
   },
 
   addDamagedComponent: async (componentId, reasonId, quantity) => {
+    const userId = get().getCurrentUserId();
+    if (!userId) throw new Error('❌ Авторизуйтесь для запису пошкоджень!');
 
     const damagedData = {
-      componentId: componentId,
-      reasonId: HARDCODE_REASON_ID,
+      componentId,
+      reasonId,
       quantity: Number(quantity) || 0,
-      recordedBy: HARDCODE_USER_ID
+      recordedBy: userId,
+      performedBy: userId
     };
 
     try {
       const { data } = await apiClient.post('/damaged-components', damagedData);
-      
       set((state) => ({
         damagedComponents: [data, ...state.damagedComponents]
       }));
-      
       return data;
     } catch (error) {
-      console.error('[DAMAGED] ERROR DETAILS:', {
+      console.error('[DAMAGED] ERROR:', {
         status: error.response?.status,
-        errors: error.response?.data?.errors,
         dataSent: damagedData
       });
       throw error;
@@ -50,39 +49,53 @@ export const useDamagedComponentsStore = create((set) => ({
   },
 
   updateDamagedComponent: async (id, componentId, reasonId, quantity) => {
-  const updateData = {
-    id,
-    componentId,
-    reasonId: HARDCODE_REASON_ID,
-    quantity: Number(quantity) || 0,
-    updatedBy: HARDCODE_USER_ID
-  };
+    const userId = get().getCurrentUserId();
+    if (!userId){
+      throw new Error('Авторизуйтесь для редагування!');
+    }
 
-  try {
-    const { data } = await apiClient.put('/damaged-components', updateData);
-    set((state) => ({
-      damagedComponents: state.damagedComponents.map(item => 
-        item.id === id ? data : item
-      )
-    }));
-    return data;
-  } catch (error) {
-    console.error('UPDATE ERROR:', error);
-    throw error;
-  }
-},
+    const updateData = {
+      id,
+      componentId,
+      reasonId,
+      quantity: Number(quantity) || 0,
+      updatedBy: userId,
+      performedBy: userId
+    };
 
-  deleteDamagedComponent: async (id) => {
     try {
-      await apiClient.delete(`/damaged-components/${id}`);
+      const { data } = await apiClient.put('/damaged-components', updateData);
       set((state) => ({
-        damagedComponents: state.damagedComponents.filter(item => item.id !== id)
+        damagedComponents: state.damagedComponents.map(item =>
+          item.id === id ? data : item
+        )
       }));
+      return data;
     } catch (error) {
-      console.error('DELETE ERROR:', error);
+      console.error('UPDATE ERROR:', error);
       throw error;
     }
   },
 
-  clearDamagedComponents: () => set({ damagedComponents: [] })
+  deleteDamagedComponent: async (id) => {
+    const userId = get().getCurrentUserId();
+    if (!userId){
+      throw new Error('Авторизуйтесь для видалення!');
+    }
+
+    try {
+      const url = `/damaged-components/${id}?deletedBy=${userId}`;
+      await apiClient.delete(url);
+    } catch (error) {
+      if (error.response?.status === 500) {
+        console.log('Backend 500 = deleted, only logging failed');
+      } else {
+        throw error;
+      }
+    }
+
+    set((state) => ({
+      damagedComponents: state.damagedComponents.filter(item => item.id !== id)
+    }));
+  },
 }));

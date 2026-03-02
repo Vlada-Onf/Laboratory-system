@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
@@ -29,15 +28,15 @@ const WishlistTable = () => {
   const columns = [
     { field: 'name', headerName: 'Компонент', flex: 1.5 , minWidth: 160},
     { 
-      field: 'quantityNeeded', 
-      headerName: 'Кількість', 
+      field: 'quantityNeeded',
+      headerName: 'Кількість',
       flex: 0.8,
       minWidth: 100,
       renderCell: ({ value }) => <Typography fontWeight={600}>{value} шт</Typography>
     },
-    { 
-      field: 'priority', 
-      headerName: 'Важливість', 
+    {
+      field: 'priority',
+      headerName: 'Пріоритет',
       flex: 1,
       minWidth: 100,
       renderCell: ({ row }) => (
@@ -47,18 +46,17 @@ const WishlistTable = () => {
     { field: 'description', headerName: 'Опис', flex: 2, minWidth: 200 },
     {
       field: 'status',
-      headerName: 'Статус', 
+      headerName: 'Статус',
       flex: 1,
       minWidth: 100,
       renderCell: ({ row }) => (
-        <StatusChip 
+        <StatusChip
           statusId={row.statusId}
           wishlistId={row.id}
           onStatusClick={() => wishlistModals.openStatusModalHandler(row.id, row.statusId)}
         />
       )
     },
-    
     {
       field: 'actions',
       type: 'actions',
@@ -86,7 +84,6 @@ const WishlistTable = () => {
   return (
     <Box>
       <WishlistTableToolbar onAddClick={() => wishlistModals.openAddModal({ id: 'new' })} />
-      
       <WishlistDataGrid
         wishlistRows={wishlistTableData.wishlistRows}
         columns={columns}
@@ -97,12 +94,12 @@ const WishlistTable = () => {
         modals={wishlistModals}
       />
 
-      <AddWishlistModal 
+      <AddWishlistModal
         open={wishlistModals.addModal.open}
         onClose={wishlistModals.closeAddModal}
-        row={wishlistModals.addModal.selectedRow} 
+        row={wishlistModals.addModal.selectedRow}
       />
-      
+
       <ConfirmDeleteModal
         open={wishlistModals.deleteModal.open}
         onClose={wishlistModals.closeDeleteModal}
@@ -110,7 +107,7 @@ const WishlistTable = () => {
         entityName={wishlistModals.deleteModal.selectedRow?.name || 'запис'}
         entityTypeName="Запис у списку бажань"
       />
-      
+
       <ChangeStatusModal
         openStatusModal={wishlistModals.statusModal.open}
         statuses={wishlistModals.statusModal.statuses}

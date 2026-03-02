@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Avatar, Box, Typography } from '@mui/material';
 
 const ComponentCell = memo(({ image, name }) => {

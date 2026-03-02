@@ -30,7 +30,7 @@ const ComponentsCostByCategoryChart = React.memo(() => {
       .map(([categoryId, count]) => {
         const proportion = count / totalComponents;
         const categoryCost = Math.round(totalCost * proportion);
-        
+
         return {
           category: (categoriesMap.get(categoryId) || 'Без категорії').slice(0, 25),
           totalCost: categoryCost
@@ -45,12 +45,12 @@ const ComponentsCostByCategoryChart = React.memo(() => {
 
   if (categoryCosts.length === 0) {
     return (
-      <Box sx={{ 
-        width: '100%', 
-        height: 390, 
-        display: 'flex', 
+      <Box sx={{
+        width: '100%',
+        height: 390,
+        display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', 
+        alignItems: 'center',
         justifyContent: 'center',
         gap: 1
       }}>
@@ -72,8 +72,8 @@ const ComponentsCostByCategoryChart = React.memo(() => {
             scaleType: 'band',
             tickPlacement: 'middle',
             tickLabelPlacement: 'middle',
-            tickLabelStyle: { 
-              fontSize: 15, 
+            tickLabelStyle: {
+              fontSize: 15,
               fill: 'white',
               textAnchor: 'middle'
             },

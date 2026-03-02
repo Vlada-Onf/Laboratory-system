@@ -1,22 +1,18 @@
 import React, { useState, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Menu,
-  MenuItem
-} from '@mui/material';
+import {Box, Typography, IconButton, Menu, MenuItem} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-const SchematicCard = ({ id, title, photoUrl, schematic, onEdit, onDelete }) => {
+const SchematicCard = ({ id, title, photoUrl, schematic, onEdit, onDelete, isLabRole = false }) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const showEditMenu = !isLabRole;
 
   const handleMenuClick = useCallback((event) => {
     event.stopPropagation();
@@ -79,35 +75,39 @@ const SchematicCard = ({ id, title, photoUrl, schematic, onEdit, onDelete }) => 
       }}
       onClick={handleClick}
     >
-      <IconButton
-        onClick={handleMenuClick}
-        sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          color: '#fff',
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          padding: 0.5,
-          width: 32,
-          height: 32,
-          zIndex: 10,
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            transform: 'scale(1.1)',
-          },
-        }}
-      >
-        <MoreVertIcon fontSize="small" />
-      </IconButton>
+      {showEditMenu && (
+        <>
+          <IconButton
+            onClick={handleMenuClick}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: '#fff',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              padding: 0.5,
+              width: 32,
+              height: 32,
+              zIndex: 10,
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                transform: 'scale(1.1)',
+              },
+            }}
+          >
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleEdit}>Редагувати</MenuItem>
-        <MenuItem onClick={handleDelete}>Видалити</MenuItem>
-      </Menu>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleEdit}>Редагувати</MenuItem>
+            <MenuItem onClick={handleDelete}>Видалити</MenuItem>
+          </Menu>
+        </>
+      )}
 
       <Box
         component="img"

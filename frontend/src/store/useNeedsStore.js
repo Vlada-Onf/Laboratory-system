@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import apiClient from '../api/client';
 import { useNeedImportancesStore } from './useNeedImportancesStore';
 import { useNeedStatusesStore } from './useNeedStatusesStore';
-
-const USER_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+import { useProfileStore } from './useProfileStore';
 
 export const useNeedsStore = create((set, get) => ({
   needs: [],
@@ -70,15 +69,26 @@ export const useNeedsStore = create((set, get) => ({
         throw new Error('quantityNeeded має бути > 0');
       }
 
+      const profileStore = useProfileStore.getState();
+      const currentUserId = profileStore.profile?.id;
+
+      console.log('Profile для потреби:', {
+        hasProfile: !!profileStore.profile,
+        userId: currentUserId
+      });
+      if (!currentUserId) {
+        throw new Error('Авторизуйтесь для створення потреби!');
+      }
+
       const payload = {
         componentId: componentId,
         quantityNeeded: quantityNeeded,
-        requestedBy: USER_ID,
+        requestedBy: currentUserId,
         description: formData.description?.trim() || '',
         statusId: formData.statusId,
         importanceId: formData.importanceId,
         completionReason: formData.completionReason?.trim() || '',
-        performedBy: USER_ID,
+        performedBy: currentUserId,
       };
 
       const { data: newNeed } = await apiClient.post('/needs', payload);
@@ -97,6 +107,18 @@ export const useNeedsStore = create((set, get) => ({
 
   updateNeedDetails: async (needId, details) => {
     try {
+       const profileStore = useProfileStore.getState();
+      let currentUserId = profileStore.profile?.id;
+      let attempts = 0;
+      while (!currentUserId && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        currentUserId = useProfileStore.getState().profile?.id;
+        attempts++;
+      }
+      if (!currentUserId) {
+        throw new Error('Авторизуйтесь для редагування деталей!');
+      }
+
       const payload = {
         id: needId,
         quantityNeeded: Number(details.quantityNeeded || details.quantity) || 0,
@@ -104,7 +126,7 @@ export const useNeedsStore = create((set, get) => ({
         importanceId: details.importanceId,
         completionReason: details.completionReason?.trim() || '',
         statusId: details.statusId,
-        performedBy: USER_ID,
+        performedBy: currentUserId,
       };
 
       const { data } = await apiClient.put('/needs/details', payload);
@@ -118,11 +140,17 @@ export const useNeedsStore = create((set, get) => ({
   updateNeedStatus: async (needId, statusId) => {
     try {
       const currentNeed = get().needs.find(n => n.id === needId);
+      const profileStore = useProfileStore.getState();
+      const currentUserId = profileStore.profile?.id;
+      if (!currentUserId) {
+        throw new Error('Авторизуйтесь для зміни статусу!');
+      }
+
       const payload = {
         id: needId,
         statusId,
         importanceId: currentNeed?.importanceId,
-        performedBy: USER_ID,
+        performedBy: currentUserId,
       };
 
       const { data } = await apiClient.put('/needs/status', payload);
@@ -136,10 +164,16 @@ export const useNeedsStore = create((set, get) => ({
 
   updateNeedImportance: async (needId, importanceId) => {
     try {
+      const profileStore = useProfileStore.getState();
+      const currentUserId = profileStore.profile?.id;
+      if (!currentUserId) {
+        throw new Error('Авторизуйтесь для зміни пріоритету!');
+      }
+
       const payload = {
         id: needId,
         importanceId,
-        performedBy: USER_ID,
+        performedBy: currentUserId,
       };
       const { data } = await apiClient.put('/needs/importance', payload);
       await get().fetchNeeds();
@@ -150,13 +184,25 @@ export const useNeedsStore = create((set, get) => ({
     }
   },
 
-  deleteNeed: async (needId) => {
-    try {
-      await apiClient.delete(`/needs/${needId}`);
-      await get().fetchNeeds();
-    } catch (error) {
+ deleteNeed: async (needId) => {
+  const profileStore = useProfileStore.getState();
+  const currentUserId = profileStore.profile?.id;
+
+  if (!currentUserId) {
+    throw new Error('Авторизуйтесь для видалення потреби!');
+  }
+
+  try {
+    await apiClient.delete(`/needs/${needId}?performedBy=${currentUserId}`);
+    await get().fetchNeeds();
+  } catch (error) {
+    if (error.response?.status === 500) {
+      console.log('500 = Backend logging fail, record deleted');
+    } else {
       console.error('Помилка видалення:', error);
       throw error;
     }
-  },
+  }
+},
+
 }));

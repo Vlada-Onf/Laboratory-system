@@ -22,16 +22,16 @@ export const useProfileStore = create(
         set({ profile: data, loading: false });
         return data;
       } catch (error) {
-        set({ 
-          error: `Profile: ${error.response?.status}`, 
-          loading: false 
+        set({
+          error: `Profile: ${error.response?.status}`,
+          loading: false
         });
       }
     },
 
 updateProfile: async (firstName, lastName, file = null) => {
   console.log('updateProfile:', { firstName, lastName, hasFile: !!file });
-  
+
   const formData = new FormData();
   formData.append('firstName', firstName);
   formData.append('lastName', lastName);
@@ -45,7 +45,7 @@ updateProfile: async (firstName, lastName, file = null) => {
 
     set({ profile: data, loading: false });
 
-    
+
     useAuthStore.getState().updateProfile(data);
     useCommentsStore.getState().refreshCurrentUserData(data);
     return data;
@@ -60,7 +60,7 @@ logout: async () => {
   set({ loading: true });
   try {
     await apiClient.post('/me/logout');
-    
+
     if (window.Clerk) {
       await window.Clerk.signOut({
         redirectUrl: '/sign-in'
@@ -68,41 +68,40 @@ logout: async () => {
     } else {
       window.location.href = '/sign-in';
     }
-    
+
     localStorage.clear();
     sessionStorage.clear();
-    
+
   } catch (error) {
     console.error('Logout error:', error);
   }
 },
 
-
     deactivateAccount: async () => {
       set({ loading: true, error: null });
       try {
         await apiClient.delete('/me');
-        set({ 
-          profile: null, 
-          loading: false, 
-          error: null 
+        set({
+          profile: null,
+          loading: false,
+          error: null
         });
-        
+
         localStorage.removeItem('token');
         window.location.href = '/login';
-        
+
         return true;
       } catch (error) {
         console.error('DEACTIVATION FAILED:', error);
-        set({ 
-          error: error.response?.data?.message || 'Помилка видалення акаунту', 
-          loading: false 
+        set({
+          error: error.response?.data?.message || 'Помилка видалення акаунту',
+          loading: false
         });
         return false;
       }
     },
 
     clearError: () => set({ error: null })
-  }), 
+  }),
   { name: 'useProfileStore' }
 ));

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {Box, TextField, Button, Stack, Typography, FormControl, Select, MenuItem, InputLabel} from '@mui/material';
 import { useWishlistImportancesStore } from '@store/useWishlistImportancesStore';
 import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';

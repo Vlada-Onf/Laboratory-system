@@ -94,7 +94,7 @@ export const useNeedImportancesStore = create((set, get) => ({
       }
 
       const url = `/need-importances/${id}?performedBy=${userId}`;
-      
+
       await apiClient.delete(url);
 
       set((state) => ({

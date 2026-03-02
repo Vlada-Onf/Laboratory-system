@@ -12,9 +12,9 @@ const ComponentsCountPieChart = React.memo(() => {
 
   if (categoryCounts.length === 0) {
     return (
-      <Box sx={{ 
-        width: '100%', height: 250, 
-        display: 'flex', alignItems: 'center', 
+      <Box sx={{
+        width: '100%', height: 250,
+        display: 'flex', alignItems: 'center',
         justifyContent: 'center'
       }}>
         <Typography color="rgba(255, 255, 255, 0.7)">
@@ -25,10 +25,10 @@ const ComponentsCountPieChart = React.memo(() => {
   }
 
   return (
-    <Box sx={{ 
-      width: '100%', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <Box sx={{
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
       gap: 1
     }}>

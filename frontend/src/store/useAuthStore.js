@@ -11,26 +11,27 @@ export const useAuthStore = create(
 
     fetchCurrentUser: async () => {
       set({ loading: true, error: null });
-      try {
-        const { data } = await apiClient.get('/me');
-        const token = localStorage.getItem('authToken');
+     try {
+    const { data } = await apiClient.get('/me');
+    const token = localStorage.getItem('authToken');
     if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('ТОЧНА РОЛЬ З JWT:', payload.role || payload.roles);
-        console.log('JWT EMAIL:', payload.email || payload.sub);
-        console.log('JWT EXP:', new Date(payload.exp * 1000));
-      
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('ТОЧНА РОЛЬ З JWT:', payload.role || payload.roles);
+      console.log('JWT EMAIL:', payload.email || payload.sub);
+      console.log('JWT EXP:', new Date(payload.exp * 1000));
+
+      data.role = payload.role || payload.roles || data.role;
     }
-        set({ 
-          user: data, 
-          isAuthenticated: true, 
-          loading: false 
+        set({
+          user: data,
+          isAuthenticated: true,
+          loading: false
         });
       } catch (error) {
         console.error('Fetch user error:', error.response?.status);
-        set({ 
-          user: null, 
-          isAuthenticated: false, 
+        set({
+          user: null,
+          isAuthenticated: false,
           loading: false,
           error: 'Помилка завантаження профілю'
         });
@@ -50,7 +51,7 @@ export const useAuthStore = create(
       } catch (error) {
         set({ 
           error: error.response?.data?.message || 'Помилка оновлення',
-          loading: false 
+          loading: false
         });
         throw error;
       }
@@ -59,11 +60,11 @@ export const useAuthStore = create(
     logout: () => {
       localStorage.removeItem('authToken');
       sessionStorage.clear();
-      set({ 
-        user: null, 
-        isAuthenticated: false, 
-        loading: false, 
-        error: null 
+      set({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null
       });
     },
 

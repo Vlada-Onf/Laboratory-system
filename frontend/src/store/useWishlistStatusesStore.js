@@ -5,7 +5,7 @@ import { useProfileStore } from './useProfileStore';
 export const useWishlistStatusesStore = create((set, get) => ({
   statuses: [],
   isLoading: false,
-  
+
   getCurrentUserId: () => {
     const profile = useProfileStore.getState().profile;
     return profile?.id || null;
@@ -14,7 +14,7 @@ export const useWishlistStatusesStore = create((set, get) => ({
   fetchStatuses: async () => {
     const { isLoading } = get();
     if (isLoading) return;
-    
+
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get('/wishlist-statuses');
@@ -59,9 +59,9 @@ export const useWishlistStatusesStore = create((set, get) => ({
     };
 
     const { data } = await apiClient.put(`/wishlist-statuses`, dataWithUser);
-    
+
     set((state) => ({
-      statuses: state.statuses.map(status => 
+      statuses: state.statuses.map(status =>
         status.id === id ? data : status
       )
     }));
@@ -81,7 +81,7 @@ export const useWishlistStatusesStore = create((set, get) => ({
         throw new Error('Потрібен авторизований користувач');
       }
       const url = `/wishlist-statuses/${id}?performedBy=${userId}`;
-      
+
       await apiClient.delete(url);
 
       set((state) => ({

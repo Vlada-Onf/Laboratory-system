@@ -9,24 +9,19 @@ export const useDashboardStore = create((set, get) => ({
   fetchDashboardStatistics: async () => {
     console.log('Fetching dashboard statistics...');
     set({ isLoading: true });
-    
+
     try {
       const { data } = await apiClient.get('/dashboard-statistics');
-      
-      const sortedStats = (data || []).sort((a, b) => 
+
+      const sortedStats = (data || []).sort((a, b) =>
         new Date(b.statisticDate) - new Date(a.statisticDate)
       );
-      
-      set({ 
+
+      set({
         statistics: sortedStats,
         decommissionedStats: sortedStats.map(stat => stat.totalDecommissionedCount || 0)
       });
-      
-      console.log('Dashboard stats loaded:', {
-        count: sortedStats.length,
-        latest: sortedStats[0] || null
-      });
-      
+
     } catch (error) {
       console.error('Dashboard stats error:', error.response?.data || error);
       set({ statistics: [], decommissionedStats: [] });
@@ -34,30 +29,28 @@ export const useDashboardStore = create((set, get) => ({
       set({ isLoading: false });
     }
   },
-  
+
   refreshStatistics: async () => {
     await get().fetchDashboardStatistics();
   },
   createStatistic: async (date) => {
     try {
       console.log('Creating statistic for date:', date);
-      const { data } = await apiClient.post('/dashboard-statistics', { 
-        statisticDate: date 
+      const { data } = await apiClient.post('/dashboard-statistics', {
+        statisticDate: date
       });
-      
       await get().fetchDashboardStatistics();
-      
       return data;
     } catch (error) {
       console.error('Create statistic error:', error.response?.data || error);
       throw error;
     }
   },
-  
+
   clearStatistics: () => {
     set({ statistics: [], decommissionedStats: [], isLoading: false });
   },
-  
+
   getLatestStatistic: () => {
     const { statistics } = get();
     return statistics[0] || null;

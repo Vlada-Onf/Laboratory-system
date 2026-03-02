@@ -1,203 +1,115 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Divider,
-  IconButton,
-  Chip
-} from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import {Box, Typography, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import {
   Folder as SchematicIcon,
-  Settings as ComponentIcon,
-  SearchOff as ClearIcon,
+  Widgets as ComponentIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
 import { useSearchStore } from '../../store/useSearchStore';
 
-const DRAWER_WIDTH = 240;
-
-const SearchResults = ({ results }) => {
+const SearchResults = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const clearSearch = useSearchStore(state => state.clearSearch);
+  const searchQuery = useSearchStore(state => state.searchQuery);
+  const searchResults = useSearchStore(state => state.searchResults);
   const isSearching = useSearchStore(state => state.isSearching);
-  const wasNavigation = useRef(false);
+  const clearSearch = useSearchStore(state => state.clearSearch);
 
-  useEffect(() => {
-    if (wasNavigation.current && isSearching) {
-      clearSearch();
-      wasNavigation.current = false;
-    }
-  }, [location.pathname, isSearching, clearSearch]);
+  if (!searchQuery?.trim() && !isSearching){
+    return null;
+  }
 
-  const schematics = results.filter(item => item.type === 'schematic');
-  const components = results.filter(item => item.type === 'component');
+  const schematics = searchResults.filter(item => item.type === 'schematic');
+  const components = searchResults.filter(item => item.type === 'component');
 
   const handleItemClick = (item) => {
-    wasNavigation.current = true;
-    
     if (item.type === 'schematic') {
       navigate(`/front-schematics/${item.id}`);
-    } else if (item.type === 'component') {
+    } else {
       navigate(`/front-components/${item.id}`);
     }
   };
 
-  const handleCloseResults = () => {
-    clearSearch();
-  };
-
-  const getItemIcon = (type) => {
-    return type === 'schematic' ? <SchematicIcon /> : <ComponentIcon />;
-  };
-
-  if (!results || results.length === 0) {
-    return null;
-  }
+  const handleClose = () => clearSearch();
 
   return (
-    <Paper
-      elevation={4}
-      sx={{
-        position: 'relative',
-        mb: 3,
-        maxHeight: '400px',
-        overflow: 'auto',
-        borderRadius: 2,
-        ml: `${DRAWER_WIDTH}px`,
-        mx: 'auto',
-        maxWidth: '1200px',
-        width: `calc(100% - ${DRAWER_WIDTH}px)`,
-        bgcolor: 'background.paper',
-      }}
-    >
-      <IconButton
-        onClick={handleCloseResults}
-        sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          zIndex: 1,
-          color: 'text.secondary',
-          '&:hover': { bgcolor: 'grey.200' }
-        }}
-      >
-        <CloseIcon />
+    <Box sx={{
+      position: 'relative', right: 48, zIndex: 1301,
+      bgcolor: 'rgba(8, 39, 59, 0.95)', width: { xs: '280px', sm: 380 },
+      maxHeight: 320, backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(70px)',
+      borderRadius: '0 0 16px 16px', overflow: 'hidden',
+      border: '1px solid rgba(255, 255, 255, 0.2)', borderTop: 'none',
+      overflowY: 'auto', overflowX: 'hidden'
+    }}>
+      <IconButton onClick={handleClose} size="small" sx={{
+        position: 'absolute', top: 8, right: 8, zIndex: 2, color: 'text.primary',
+        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)', transform: 'scale(1.1)' }
+      }}>
+        <CloseIcon fontSize="small" />
       </IconButton>
 
-      <Box sx={{ p: 2, pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h6" fontWeight={600}>
-            Результати пошуку
+      <Box sx={{ p: 1.5 }}>
+        <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
+          Результати ({searchResults.length})
+        </Typography>
+        {isSearching && (
+          <Typography variant="caption" color="text.secondary">
+            Шукаємо...
           </Typography>
-          <Chip 
-            label={`${results.length}`} 
-            size="small"
-            variant="outlined"
-          />
-        </Box>
+        )}
       </Box>
 
-      <Divider />
-
       {schematics.length > 0 && (
-        <Box sx={{ px: 2, pb: 1 }}>
-          <Typography variant="subtitle2"  sx={{ mb: 1 }}>
+        <Box sx={{ px: 1.5, pb: 0.5 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5, color: 'text.primary' }}>
             Схеми ({schematics.length})
           </Typography>
-          {schematics.map((sch) => (
-            <Box
-              key={sch.id}
-              onClick={() => handleItemClick(sch)}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                p: 1.5,
-                borderRadius: 1,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                '&:hover': {
-  bgcolor: 'rgba(255, 255, 255, 0.08)',
-  transform: 'translateX(4px)',
-  boxShadow: 1,
-},
-              }}
-            >
-              <IconButton size="small" edge="start">
-                {getItemIcon('schematic')}
+          {schematics.slice(0, 4).map(item => (
+            <Box key={item.id} onClick={() => handleItemClick(item)} sx={{
+              display: 'flex', alignItems: 'center', gap: 1, p: 1.25,
+              cursor: 'pointer', transition: 'all 0.2s ease',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.15)', transform: 'translateX(4px)' }
+            }}>
+              <IconButton size="small" sx={{ p: 0.5 }}>
+                <SchematicIcon />
               </IconButton>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="body1" fontWeight={500} noWrap>
-        {sch.title}
-      </Typography>
-      {sch.description && (
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {sch.description}
-        </Typography>
-      )}
-    </Box>
+              <Typography variant="body2" fontWeight={500} noWrap sx={{ flex: 1 }}>
+                {item.title || item.name}
+              </Typography>
             </Box>
           ))}
         </Box>
       )}
 
       {components.length > 0 && (
-        <>
-          <Divider />
-          <Box sx={{ px: 2, pb: 2 }}>
-            <Typography variant="subtitle2"  sx={{ mb: 1 }}>
-              Компоненти ({components.length})
-            </Typography>
-            {components.map((comp) => (
-              <Box
-                key={comp.id}
-                onClick={() => handleItemClick(comp)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 1.5,
-                  borderRadius: 1,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  '&:hover': {
-  bgcolor: 'rgba(255, 255, 255, 0.08)',
-  transform: 'translateX(4px)',
-  boxShadow: 1,
-},
-                }}
-              >
-                <IconButton size="small" edge="start">
-                  {getItemIcon('component')}
-                </IconButton>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body1" fontWeight={500} noWrap>
-                    {comp.name}
-                  </Typography>
-                  {comp.description && (
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {comp.description}
-                    </Typography>
-                  )}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </>
+        <Box sx={{ px: 1.5, pb: 1.5 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5, color: 'text.primary' }}>
+            Компоненти ({components.length})
+          </Typography>
+          {components.slice(0, 4).map(item => (
+            <Box key={item.id} onClick={() => handleItemClick(item)} sx={{
+              display: 'flex', alignItems: 'center', gap: 1, p: 1.25,
+              cursor: 'pointer', transition: 'all 0.2s ease',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.15)', transform: 'translateX(4px)' }
+            }}>
+              <IconButton size="small" sx={{ p: 0.5 }}>
+                <ComponentIcon />
+              </IconButton>
+              <Typography variant="body2" fontWeight={500} noWrap sx={{ flex: 1 }}>
+                {item.name}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       )}
 
-      {schematics.length === 0 && components.length === 0 && (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <ClearIcon sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
-          <Typography variant="body1" color="text.secondary">
-            Нічого не знайдено
+      {(!schematics.length && !components.length) && (
+        <Box sx={{ p: 2.5, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            {isSearching ? 'Шукаємо...' : 'Нічого не знайдено'}
           </Typography>
         </Box>
       )}
-    </Paper>
+    </Box>
   );
 };
 

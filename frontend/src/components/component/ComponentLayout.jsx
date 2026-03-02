@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 import ComponentCard from './componentBlock/ComponentCard';
 import Item from './Item';
@@ -13,27 +13,27 @@ import { useSchematicsStore } from '@store/useSchematicsStore';
 import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
 
 const ComponentLayout = ({ component, onEdit, onDelete, onUpdateLinks, onAddNeed }) => {
+
   const { setCurrentComponent } = useComponentsStore();
   const { openEditModal } = useSchematicsStore();
-  const { 
-    damagedComponents, 
-    fetchDamagedComponents 
-  } = useDamagedComponentsStore();
-  
-  const [openDamagedModal, setOpenDamagedModal] = useState(false);
+  const {damagedComponents, fetchDamagedComponents } = useDamagedComponentsStore();
 
+  const [openDamagedModal, setOpenDamagedModal] = useState(false);
   const componentId = component?.id;
 
   const lastDamagedRecord = useMemo(() => {
-    if (!componentId || !Array.isArray(damagedComponents)) return null;
-    
+    if (!componentId || !Array.isArray(damagedComponents)) {
+      return null;
+    }
+
     return damagedComponents
       .filter(item => item?.componentId === componentId)
       .sort((a, b) => {
         const dateA = new Date(b.recordedAt || b.lastUpdatedAt || 0).getTime();
         const dateB = new Date(a.recordedAt || a.lastUpdatedAt || 0).getTime();
         return dateA - dateB;
-      })[0];
+      })
+      .at(0) || null;
   }, [componentId, damagedComponents]);
 
   const currentDamaged = useMemo(() => ({
@@ -41,49 +41,74 @@ const ComponentLayout = ({ component, onEdit, onDelete, onUpdateLinks, onAddNeed
     description: lastDamagedRecord?.description || ''
   }), [lastDamagedRecord]);
 
-  const totalValue = useMemo(() => `${component?.quantity || 0} шт`, [component?.quantity]);
-  const burntValue = useMemo(() => `${currentDamaged.quantity} шт`, [currentDamaged.quantity]);
+  const totalValue = useMemo(() =>
+    `${component?.quantity || 0} шт`,
+    [component?.quantity]
+  );
+
+  const burntValue = useMemo(() =>
+    `${currentDamaged.quantity} шт`,
+    [currentDamaged.quantity]
+  );
+
   const burntBg = useMemo(() => 
     currentDamaged.quantity === 0
       ? 'linear-gradient(135deg, #5bc522, #a8e063)'
       : 'linear-gradient(135deg, #f16731, #f4926c)',
-  [currentDamaged.quantity]);
+    [currentDamaged.quantity]
+  );
 
-const componentForCard = useMemo(() => {
-  const photoUrl = component?.photoUrl || 
-                   component?.photo || 
-                   component?.imageUrl || 
-                   component?.image ||
-                   'https://via.placeholder.com/300x300/08273b/ffffff?text=No+Image';
-  
- 
+  const componentForCard = useMemo(() => {
+    const photoUrl = component?.photoUrl ||
+                     component?.photo ||
+                     component?.imageUrl ||
+                     component?.image ||
+                     'https://via.placeholder.com/300x300/08273b/ffffff?text=No+Image';
 
-  return {
-    ...component,
-    image: photoUrl,
-    photoUrl: photoUrl,
-    tags: Array.isArray(component?.tags) ? component.tags : [],
-    categoryId: component?.categoryId
-  };
-}, [component]);
+    return {
+      ...component,
+      image: photoUrl,
+      photoUrl: photoUrl,
+      tags: Array.isArray(component?.tags) ? component.tags : [],
+      categoryId: component?.categoryId
+    };
+  }, [component]);
 
+  const handleOpenDamagedModal = useCallback(() => {
+    setOpenDamagedModal(true);
+  }, []);
+
+  const handleCloseDamagedModal = useCallback(() => {
+    setOpenDamagedModal(false);
+  }, []);
+
+  const handleOpenAddSchematicModal = useCallback(() => {
+    openEditModal(null);
+  }, [openEditModal]);
 
   useEffect(() => {
     if (component?.id) {
+      setCurrentComponent(component);
       fetchDamagedComponents();
     }
   }, [component?.id, setCurrentComponent, fetchDamagedComponents]);
 
-  const handleOpenAddSchematicModal = () => openEditModal(null);
-  const handleOpenDamagedModal = () => setOpenDamagedModal(true);
-  const handleCloseDamagedModal = () => setOpenDamagedModal(false);
-
   if (!component) {
-    return <Box sx={{ p: 3, textAlign: 'center' }}>Завантаження...</Box>;
+    return (
+      <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+        Завантаження компонента...
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', p: 2 }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3,
+      width: '100%',
+      p: { xs: 1.5, sm: 2, md: 3 }
+    }}>
       <Box sx={{
         display: 'flex',
         flexDirection: { xs: 'column', lg: 'row' },
@@ -118,7 +143,10 @@ const componentForCard = useMemo(() => {
           </Box>
 
           <Item sx={{ flex: 1, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
-            <LinksBlock component={component} onUpdateLinks={onUpdateLinks} />
+            <LinksBlock
+              component={component}
+              onUpdateLinks={onUpdateLinks}
+            />
           </Item>
         </Box>
       </Box>
@@ -131,6 +159,7 @@ const componentForCard = useMemo(() => {
             onAddSchematic={handleOpenAddSchematicModal}
           />
         </Item>
+
         <Item>
           <SectionTitle>Коментарі</SectionTitle>
           <CommentsBlock componentId={component.id} />
@@ -147,4 +176,6 @@ const componentForCard = useMemo(() => {
   );
 };
 
-export default ComponentLayout;
+ComponentLayout.displayName = 'ComponentLayout';
+
+export default React.memo(ComponentLayout);

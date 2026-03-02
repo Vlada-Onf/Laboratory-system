@@ -1,40 +1,36 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, Typography, Box
+  TextField, Button, Typography, Box, FormControl, Select, MenuItem
 } from '@mui/material';
 import { useDamagedComponentsStore } from '../../store/useDamagedComponentsStore';
+import { useDamagedComponentReasonsStore } from '../../store/useDamagedComponentReasonsStore';
+import { useDamagedForm } from '../../hooks/broken/useDamagedForm';
 
 const AddDamagedModal = ({ open, onClose, component, lastDamagedRecord }) => {
   const { addDamagedComponent, updateDamagedComponent, fetchDamagedComponents } = useDamagedComponentsStore();
+  const { reasons, fetchReasons } = useDamagedComponentReasonsStore();
   const isEditing = !!lastDamagedRecord;
 
-  const defaultForm = useMemo(() => ({
-    quantity: isEditing && lastDamagedRecord?.quantity?.toString() || '',
-    description: isEditing && lastDamagedRecord?.description || '',
-  }), [isEditing, lastDamagedRecord]);
+  useEffect(() => {
+    if (open) {
+      fetchReasons();
+    }
+  }, [open, fetchReasons]);
 
-  const [form, setForm] = useState(defaultForm);
+  const { form, handleChange, handleReasonChange, resetForm, isValid } = useDamagedForm(
+    isEditing ? lastDamagedRecord : {}
+  );
 
-  React.useEffect(() => {
-    setForm(defaultForm);
-  }, [defaultForm]);
-
-  const handleCloseModal = () => {
-    setForm(defaultForm);
+  const handleCloseModal = useCallback(() => {
+    resetForm();
     onClose();
-  };
-
-  const handleInputChange = useCallback((field) => (e) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
-  }, []);
+  }, [resetForm, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const HARDCODE_REASON_ID = "d1f539e7-c137-42e3-81d9-920b1fb8ecd7";
-
-    if (!form.quantity?.trim() || Number(form.quantity) <= 0) {
+    if (!isValid){
       return;
     }
 
@@ -43,13 +39,13 @@ const AddDamagedModal = ({ open, onClose, component, lastDamagedRecord }) => {
         await updateDamagedComponent(
           lastDamagedRecord.id,
           component.id,
-          HARDCODE_REASON_ID,
+          form.reasonId,
           form.quantity
         );
       } else {
         await addDamagedComponent(
           component.id,
-          HARDCODE_REASON_ID,
+          form.reasonId,
           form.quantity
         );
       }
@@ -60,8 +56,6 @@ const AddDamagedModal = ({ open, onClose, component, lastDamagedRecord }) => {
       console.error('ERROR:', error);
     }
   };
-
-  const isSubmitDisabled = !form.quantity?.trim();
 
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="sm" fullWidth>
@@ -80,24 +74,55 @@ const AddDamagedModal = ({ open, onClose, component, lastDamagedRecord }) => {
               <TextField
                 type="number"
                 value={form.quantity || ''}
-                onChange={handleInputChange('quantity')}
+                onChange={handleChange('quantity')}
                 fullWidth
                 required
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 1 }}
                 autoFocus
               />
             </Box>
+
+            <Box>
+              <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                Причина
+              </Typography>
+              <FormControl fullWidth required>
+                <Select
+                  value={form.reasonId || ''}
+                  onChange={handleReasonChange}
+                >
+                  {reasons.map((reason) => (
+                    <MenuItem key={reason.id} value={reason.id}>
+                      {reason.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {isEditing && form.description && (
+              <Box>
+                <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                  Опис
+                </Typography>
+                <TextField
+                  value={form.description || ''}
+                  onChange={handleChange('description')}
+                  multiline
+                  rows={3}
+                  fullWidth
+                />
+              </Box>
+            )}
           </Box>
         </DialogContent>
 
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleCloseModal}>
-            Скасувати
-          </Button>
-          <Button 
-            type="submit" 
-            variant="contained" 
-            disabled={isSubmitDisabled}
+          <Button onClick={handleCloseModal}>Скасувати</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!isValid}
           >
             {isEditing ? 'Зберегти зміни' : 'Додати'}
           </Button>

@@ -14,7 +14,7 @@ const NotFound = () => {
   }, []);
 
   return (
-    <PageWrapper>
+    <PageWrapper className="no-search">
       <Box
         sx={{
           height: '100vh',

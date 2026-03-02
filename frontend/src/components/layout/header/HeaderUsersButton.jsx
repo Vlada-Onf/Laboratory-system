@@ -1,4 +1,3 @@
-import React from 'react';
 import { IconButton, Badge } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { useNavigate } from 'react-router-dom';

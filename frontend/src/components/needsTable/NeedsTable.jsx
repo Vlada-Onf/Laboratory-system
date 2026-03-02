@@ -56,7 +56,7 @@ const NeedsTable = () => {
       flex: 0.8,
       minWidth: 100,
       renderCell: ({ row }) => (
-        <Typography fontWeight={600} color="primary.main">
+        <Typography fontWeight={600}>
           {row.quantity} шт
         </Typography>
       ),
@@ -74,40 +74,32 @@ const NeedsTable = () => {
       ),
     },
     {
-      field: 'reason',
-      headerName: 'Причина',
-      flex: 2,
-      minWidth: 220,
-      renderCell: ({ row }) => {
-        const parts = row.description?.split(' | ') || [];
-        const reason = parts[0] || row.description || '—';
-        return (
-          <Typography variant="body2" sx={{
-            wordBreak: 'break-word',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical'
-          }}>
-            {reason}
-          </Typography>
-        );
-      },
-    },
+  field: 'reason',
+  headerName: 'Причина',
+  flex: 2,
+  minWidth: 220,
+  renderCell: ({ row }) => (
+    <Typography variant="body2" sx={{
+      wordBreak: 'break-word',
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical'
+    }}>
+      {row.completionReason || row.description || '—'}
+    </Typography>
+  ),
+},
     {
-      field: 'description',
-      headerName: 'Опис',
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: ({ row }) => {
-        const parts = row.description?.split(' | ') || [];
-        const pureDesc = parts[parts.length - 1]?.replace(/Ціна:.*$/, '') || '—';
-        return (
-          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-            {pureDesc}
-          </Typography>
-        );
-      },
-    },
+  field: 'description',
+  headerName: 'Опис',
+  flex: 1.5,
+  minWidth: 180,
+  renderCell: ({ row }) => (
+    <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+      {row.description || '—'}
+    </Typography>
+  ),
+},
     {
       field: 'status',
       headerName: 'Статус',
@@ -119,7 +111,7 @@ const NeedsTable = () => {
     },
     {
       field: 'requestedAt',
-      headerName: 'Запис додано',
+      headerName: 'Створено',
       flex: 1.2,
       minWidth: 120,
       renderCell: ({ value }) => {
@@ -145,7 +137,7 @@ const NeedsTable = () => {
           key="edit"
           icon={<EditIcon />}
           label="Редагувати"
-          onClick={() => modals.openEditModal(params.row)} 
+          onClick={() => modals.openEditModal(params.row)}
           showInMenu={false}
         />,
         <GridActionsCellItem
@@ -181,11 +173,7 @@ const NeedsTable = () => {
           },
           '& .MuiDataGrid-columnHeaders': {
             backgroundColor: '#f5f5f5',
-            borderBottom: '2px solid #e0e0e0'
           },
-          '& .MuiDataGrid-row:hover': {
-            backgroundColor: '#f8f9ff'
-          }
         }}
       />
 

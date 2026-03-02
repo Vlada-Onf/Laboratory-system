@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 export const useNeedForm = (initialData) => {
   const [form, setForm] = useState(() => ({
@@ -22,7 +22,6 @@ export const useNeedForm = (initialData) => {
     importanceId: form.importanceId,
     statusId: form.statusId,
     completionReason: form.completionReason.trim(),
-    performedBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   }), [form]);
 
   return { form, handleChange, getPayload, setForm };

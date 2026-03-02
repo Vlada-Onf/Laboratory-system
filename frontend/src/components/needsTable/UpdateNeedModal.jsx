@@ -17,7 +17,6 @@ const UpdateNeedModal = ({ open, onClose, row }) => {
         description: formData.description || '',
         importanceId: formData.importanceId,
         statusId: formData.statusId,
-        performedBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         completionReason: formData.completionReason || '',
       };
       await updateNeedDetails(row.id, payload);

@@ -7,9 +7,9 @@ export const useTableModals = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [componentToDelete, setComponentToDelete] = useState(null);
 
-  const [paginationModel, setPaginationModel] = useState({ 
-    page: 0, 
-    pageSize: 5 
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 5
   });
 
   const handleOpenModal = useCallback((row) => {
@@ -37,12 +37,12 @@ export const useTableModals = () => {
     selectedRow,
     handleOpenModal,
     handleCloseModal,
-    
+
     deleteModalOpen,
     componentToDelete,
     handleDeleteClick,
     handleCloseDeleteModal,
-    
+
     paginationModel,
     setPaginationModel
   };

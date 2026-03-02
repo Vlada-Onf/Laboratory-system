@@ -1,10 +1,5 @@
-import React from 'react';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import { Box, Typography } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PriorityChip from './PriorityChip';
-import StatusChip from './StatusChip';
+import { DataGrid } from '@mui/x-data-grid';
+import { Box} from '@mui/material';
 
 const WishlistDataGrid = ({
   wishlistRows,

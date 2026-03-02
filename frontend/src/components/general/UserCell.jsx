@@ -1,4 +1,3 @@
-import React from 'react';
 import { Avatar, Box, Typography } from '@mui/material';
 import { useProfileStore } from '@store/useProfileStore';
 
@@ -9,7 +8,9 @@ const UserCell = ({ avatar, name, email, firstName, lastName }) => {
   const displayLastName = lastName || currentUser?.lastName || '';
 
   const getInitials = (firstName = '', lastName = '') => {
-    if (!firstName && !lastName) return '';
+    if (!firstName && !lastName){
+      return '';
+    }
     const first = firstName.charAt(0)?.toUpperCase() || '';
     const last = lastName.charAt(0)?.toUpperCase() || '';
     return `${first}${last}`;

@@ -36,7 +36,7 @@ export const useActionsStore = create((set, get) => ({
     try {
       const { data } = await apiClient.put('/actions', actionData);
       set((state) => ({
-        actions: state.actions.map(action => 
+        actions: state.actions.map(action =>
           action.id === id ? data : action
         )
       }));

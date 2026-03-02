@@ -2,13 +2,13 @@ import React from 'react';
 import { TextField, IconButton, Box } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 
-const LinkForm = ({ 
-  newLinkTitle, 
-  newLinkUrl, 
-  onTitleChange, 
-  onUrlChange, 
+const LinkForm = ({
+  newLinkTitle,
+  newLinkUrl,
+  onTitleChange,
+  onUrlChange,
   onAdd,
-  disabled 
+  disabled
 }) => (
   <Box sx={{ display: 'flex', gap: 1, alignItems: 'end' }}>
     <TextField

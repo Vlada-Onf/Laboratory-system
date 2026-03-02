@@ -1,48 +1,61 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProviderWrapper } from "./context/ThemeProvider";
-import HistoryProvider from "./store/HistoryProvider";
 import AppRoutes from "./routes/AppRoutes";
 import LayoutWithSearch from './components/layout/LayoutWithSearch';
 import { useAuth } from '@clerk/clerk-react';
-
+import { useProfileStore } from './store/useProfileStore';
+import { useComponentsStore } from './store/useComponentsStore';
+import { useSearchStore } from './store/useSearchStore';
 import '@fontsource/geologica/500.css';
 
-function AppContent() {
+function App() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [, setIsDataReady] = useState(false);
+  const profile = useProfileStore(state => state.profile);
 
   useEffect(() => {
-    if (import.meta.env.DEV && isLoaded && isSignedIn) {
-      const hasForcedLogout = localStorage.getItem('forcedLogout');
-
-      if (!hasForcedLogout) {
-        localStorage.setItem('forcedLogout', 'true');
-        localStorage.clear();
-        window.location.replace('/sign-in');
-      }
+    if (!isLoaded || !isSignedIn || !profile) {
+      useSearchStore.getState().setSearchData({ components: [], schematics: [] });
+      return;
     }
-  }, [isLoaded, isSignedIn]);
+    const initData = async () => {
+      try {
+        const componentsStore = useComponentsStore.getState();
+        if (componentsStore.components?.length === 0) {
+          await useComponentsStore.getState().fetchComponents();
+        }
+        let attempts = 0;
+        while (attempts < 20) {
+          const store = useComponentsStore.getState();
+          if (store.components?.length > 0) break;
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        const store = useComponentsStore.getState();
 
-  if (!isLoaded) return <div>Завантажуємо...</div>;
+        useSearchStore.getState().setSearchData({
+          components: store.components || [],
+          schematics: []
+        });
 
-  return (
-    <LayoutWithSearch>
-      <AppRoutes />
-    </LayoutWithSearch>
-  );
-}
+        setIsDataReady(true);
+      } catch (error) {
+        console.error('APP initData FAILED:', error);
+        setIsDataReady(true);
+      }
+    };
 
+    initData();
+  }, [isLoaded, isSignedIn, profile]);
 
-function App() {
   return (
     <ThemeProviderWrapper>
-      <HistoryProvider>
-          <BrowserRouter>
-          <LayoutWithSearch>
-            <AppRoutes />
-          </LayoutWithSearch>
-        </BrowserRouter>
-      </HistoryProvider>
+      <BrowserRouter>
+        <LayoutWithSearch>
+          <AppRoutes />
+        </LayoutWithSearch>
+      </BrowserRouter>
     </ThemeProviderWrapper>
   );
 }

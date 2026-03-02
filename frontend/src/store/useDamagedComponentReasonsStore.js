@@ -5,11 +5,11 @@ import { useProfileStore } from './useProfileStore';
 export const useDamagedComponentReasonsStore = create((set, get) => ({
   reasons: [],
   isLoading: false,
-  
+
   fetchReasons: async () => {
     const { isLoading } = get();
     if (isLoading) return;
-    
+
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get('/damaged-component-reasons');
@@ -26,7 +26,7 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
     try {
       const profileStore = useProfileStore.getState();
       const currentUserId = profileStore.profile?.id;
-      
+
       if (!currentUserId) {
         throw new Error('Потрібна авторизація');
       }
@@ -50,7 +50,7 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
     try {
       const profileStore = useProfileStore.getState();
       const currentUserId = profileStore.profile?.id;
-      
+
       if (!currentUserId) {
         throw new Error('Потрібна авторизація');
       }
@@ -59,10 +59,10 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
         id,
         name: reasonData.name,
         description: reasonData.description || '',
-        performedBy: currentUserId 
+        performedBy: currentUserId
       };
 
-      
+
       const { data } = await apiClient.put(`/damaged-component-reasons`, payload);
       set((state) => ({
         reasons: state.reasons.map(reason => 
@@ -80,7 +80,7 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
  deleteReason: async (id) => {
   const profileStore = useProfileStore.getState();
   const currentUserId = profileStore.profile?.id;
-  
+
   try {
     await apiClient.delete(`/damaged-component-reasons/${id}?performedBy=${currentUserId}`);
   } catch (error) {
@@ -94,5 +94,5 @@ export const useDamagedComponentReasonsStore = create((set, get) => ({
   set((state) => state.reasons.filter(r => r.id !== id));
 }
 
-  
+
 }));

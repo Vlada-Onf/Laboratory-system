@@ -7,7 +7,9 @@ export const useComponentsCountByCategory = (categoriesMap) => {
   const { categories } = useCategoriesStore();
 
   return useMemo(() => {
-    if (!components.length) return [];
+    if (!components.length){
+      return [];
+    }
 
     const counts = components.reduce((acc, component) => {
       const categoryId = String(component.categoryId);
@@ -19,7 +21,7 @@ export const useComponentsCountByCategory = (categoriesMap) => {
       .map(([categoryId, count], index) => {
         const category = categories.find(cat => cat.id === categoryId);
         const categoryName = categoriesMap.get(categoryId) || 'Без категорії';
-        
+
         return {
           id: index,
           label: categoryName.slice(0, 25),

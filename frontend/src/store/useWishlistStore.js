@@ -2,15 +2,19 @@ import { create } from 'zustand';
 import apiClient from '../api/client';
 import { useWishlistImportancesStore } from './useWishlistImportancesStore';
 import { useWishlistStatusesStore } from './useWishlistStatusesStore';
-
-const USER_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+import { useProfileStore } from './useProfileStore';
 
 export const useWishlistStore = create((set, get) => ({
   wishlists: [],
   wishlistRows: [],
   isLoading: false,
   importancesLoaded: false,
-  statusesLoaded: false,  
+  statusesLoaded: false,
+
+  getCurrentUserId: () => {
+    const profile = useProfileStore.getState().profile;
+    return profile?.id || null;
+  },
 
   fetchAllData: async () => {
     set({ isLoading: true });
@@ -21,11 +25,9 @@ export const useWishlistStore = create((set, get) => ({
 
       const statusesStore = useWishlistStatusesStore.getState();
       await statusesStore.fetchStatuses();
-      
       set({ statusesLoaded: true });
 
       await get().fetchWishlists();
-      
     } catch (error) {
       console.error('Помилка повного завантаження:', error);
       set({ wishlists: [], wishlistRows: [] });
@@ -56,12 +58,12 @@ export const useWishlistStore = create((set, get) => ({
         importanceId: wishlist.importanceId,
         requestedAt: wishlist.requestedAt || new Date().toISOString(),
         completionReason: wishlist.completionReason || '—',
-      completedAt: wishlist.completedAt || null,
+        completedAt: wishlist.completedAt || null,
       }));
 
-      set({ 
-        wishlists: data, 
-        wishlistRows 
+      set({
+        wishlists: data,
+        wishlistRows
       });
     } catch (error) {
       console.error('Помилка завантаження wishlists:', error);
@@ -69,69 +71,105 @@ export const useWishlistStore = create((set, get) => ({
     }
   },
 
-  createWishlist: async (formData) => {
-    try {
-      const payload = {
-        name: formData.name || "string",
-        description: formData.description || "string",
-        quantityNeeded: Number(formData.quantityNeeded) || 0, 
-        requestedBy: USER_ID,
-        importanceId: formData.importanceId,
-        statusId: formData.statusId,
-      };
-
-      const { data } = await apiClient.post('/wishlists', payload);
-      await get().fetchWishlists(); 
-      return data;
-    } catch (error) {
-      console.error('Помилка створення wishlist:', error.response?.data || error.message);
-      throw error;
+ createWishlist: async (formData) => {
+  try {
+    const userId = get().getCurrentUserId();
+    if (!userId) {
+      throw new Error('Потрібен авторизований користувач');
     }
-  },
 
-  updateWishlistDetails: async (wishlistId, details) => {
-    try {
-      const payload = {
-        id: wishlistId,
-        name: details.name,
-        description: details.description,
-        quantityNeeded: Number(details.quantityNeeded) || 0,
-        importanceId: details.importanceId,
-      };
-      
-      const { data } = await apiClient.put('/wishlists/details', payload);
-      await get().fetchWishlists();
-      return data;
-    } catch (error) {
-      console.error('Помилка оновлення деталей wishlist:', error);
-      throw error;
+    const payload = {
+      name: formData.name?.trim() || '',
+      description: formData.description?.trim() || '',
+      quantityNeeded: Math.max(Number(formData.quantityNeeded) || 1, 1),
+      requestedBy: userId,
+      performedBy: userId,
+      importanceId: formData.importanceId,
+      statusId: formData.statusId,
+      request: {
+        componentId: formData.componentId || null,
+        note: formData.note || ''
+      }
+    };
+    const { data } = await apiClient.post('/wishlists', payload);
+    await get().fetchWishlists();
+    return data;
+  } catch (error) {
+    console.error('Помилка створення wishlist:', error.response?.data || error.message);
+    throw error;
+  }
+},
+
+updateWishlistDetails: async (wishlistId, details) => {
+  try {
+    const userId = get().getCurrentUserId();
+    if (!userId) {
+      throw new Error('Потрібен авторизований користувач');
     }
-  },
+
+    const payload = {
+      id: wishlistId,
+      name: details.name?.trim() || '',
+      description: details.description?.trim() || '',
+      quantityNeeded: Math.max(Number(details.quantityNeeded) || 1, 1),
+      importanceId: details.importanceId,
+      requestedBy: userId,
+      performedBy: userId,
+    };
+
+    const { data } = await apiClient.put('/wishlists/details', payload);
+    await get().fetchWishlists();
+    return data;
+  } catch (error) {
+    console.error('Помилка оновлення деталей wishlist:', error.response?.data || error);
+    throw error;
+  }
+},
 
   updateWishlistStatus: async (wishlistId, statusId, completionReason) => {
-    try {
-      const payload = {
-        id: wishlistId,
-        statusId,
-        completionReason: completionReason || '',
-      };
-      
-      const { data } = await apiClient.put('/wishlists/status', payload);
-      await get().fetchWishlists();
-      return data;
-    } catch (error) {
-      console.error('Помилка оновлення статусу wishlist:', error);
-      throw error;
-    }
-  },
+  try {
+    const userId = get().getCurrentUserId();
+    if (!userId) throw new Error('Потрібен авторизований користувач');
+
+    const payload = {
+      id: wishlistId,
+      statusId,
+      completionReason: completionReason || '',
+    };
+
+    const url = `/wishlists/status?performedBy=${userId}`;
+
+    const { data } = await apiClient.put(url, payload);
+    await get().fetchWishlists();
+    return data;
+  } catch (error) {
+    console.error('Помилка оновлення статусу wishlist:', error.response?.data || error);
+    throw error;
+  }
+},
+
 
   deleteWishlist: async (wishlistId) => {
+    set({ isLoading: true });
     try {
-      await apiClient.delete(`/wishlists/${wishlistId}`);
+      const userId = get().getCurrentUserId();
+      if (!userId) {
+        throw new Error('Потрібен авторизований користувач');
+      }
+
+      const url = `/wishlists/${wishlistId}?performedBy=${userId}`;
+      await apiClient.delete(url);
       await get().fetchWishlists();
     } catch (error) {
       console.error('Помилка видалення wishlist:', error);
+      if ([404, 500].includes(error.response?.status)) {
+        console.log('Backend error, локально видалено');
+        await get().fetchWishlists();
+        return;
+      }
       throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));

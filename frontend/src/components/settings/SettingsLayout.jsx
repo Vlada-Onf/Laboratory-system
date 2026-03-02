@@ -44,13 +44,8 @@ const SettingsLayout = ({ children }) => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1400, mx: 'auto', p: { xs: 1, md: 3 },minHeight: '100vh'}}>
-      <Typography 
-        variant="h4" 
-        sx={{ mb: 6, fontWeight: 600, textAlign: 'center' }}
-      >
-        Налаштування системи
-      </Typography>
-      
+      <Typography variant="h4" sx={{ mb: 6, fontWeight: 600, textAlign: 'center' }}>Налаштування системи</Typography>
+
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 500, fontSize: 20}}>
@@ -93,23 +88,23 @@ const SettingsLayout = ({ children }) => {
         {children}
       </Box>
 
-      <WishlistStatusesModal 
+      <WishlistStatusesModal
         open={statusesModalOpen}
         onClose={() => setStatusesModalOpen(false)}
       />
-      <WishlistImportancesModal 
+      <WishlistImportancesModal
         open={importancesModalOpen}
         onClose={() => setImportancesModalOpen(false)}
       />
-      <NeedStatusesModal 
-        open={needStatusesModalOpen} 
-        onClose={() => setNeedStatusesModalOpen(false)} 
+      <NeedStatusesModal
+        open={needStatusesModalOpen}
+        onClose={() => setNeedStatusesModalOpen(false)}
       />
-      <NeedImportancesModal 
-        open={needImportancesModalOpen} 
-        onClose={() => setNeedImportancesModalOpen(false)} 
+      <NeedImportancesModal
+        open={needImportancesModalOpen}
+        onClose={() => setNeedImportancesModalOpen(false)}
       />
-      <DamagedComponentReasonsModal 
+      <DamagedComponentReasonsModal
         open={damagedReasonsModalOpen}
         onClose={() => setDamagedReasonsModalOpen(false)}
       />

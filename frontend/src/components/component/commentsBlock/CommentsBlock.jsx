@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {Box, TextField, Button, Typography, CircularProgress} from '@mui/material';
 import { useCommentsStore } from '@store/useCommentsStore';
 import CommentCard from './CommentCard';

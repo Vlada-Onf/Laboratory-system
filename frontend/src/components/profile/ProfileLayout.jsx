@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Divider, Typography, Paper, Chip,Dialog,DialogTitle,
-  DialogContent,DialogActions,Button,CircularProgress,Alert,TextField,IconButton} from '@mui/material';
-import { CheckCircle,  Person,  Block,Close, Logout} from '@mui/icons-material'; 
+import { Box, Divider, Typography, Paper, Chip,Dialog,DialogTitle,DialogContent,DialogActions,Button,CircularProgress,Alert,TextField,IconButton} from '@mui/material';
+import { CheckCircle,  Person,  Block,Close, Logout} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ProfileHeader from './ProfileHeader';
 import ProfileCard from './ProfileCard';
@@ -9,14 +8,14 @@ import { useProfileStore } from '@store/useProfileStore';
 
 const ProfileLayout = () => {
   const navigate = useNavigate();
-  const { 
-    profile, 
-    loading: profileLoading, 
-    error, 
+  const {
+    profile,
+    loading: profileLoading,
+    error,
     fetchProfile,
     updateProfile,
     logout,
-    clearError 
+    clearError
   } = useProfileStore();
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -100,17 +99,16 @@ const ProfileLayout = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 5, px: { xs: 5, sm: 8, md: 12, lg: 20 } }}>
         <ProfileHeader user={profile} onEdit={handleOpenEdit} />
         <Divider sx={{ my: 2 }} />
-        
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box sx={{ flex: 1 }}>
             <ProfileCard user={profile} />
           </Box>
 
           <Paper sx={{ p: 3 }}>
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: 'repeat(2, 1fr)' }, 
-              gap: 3 
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: 'repeat(2, 1fr)' },
+              gap: 3
             }}>
               <Box sx={{ textAlign: 'center', py: 2 }}>
                 <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -120,7 +118,7 @@ const ProfileLayout = () => {
                   <Person sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle' }} />Дата реєстрації
                 </Typography>
               </Box>
-              
+
               <Box sx={{ textAlign: 'center', py: 2 }}>
                 <Chip
                   icon={profile.isActive ? <CheckCircle /> : <Block />}
@@ -138,11 +136,11 @@ const ProfileLayout = () => {
         </Box>
       </Box>
 
-      <Box 
-        sx={{ 
-          position: 'fixed', 
-          bottom: 20, 
-          right: 20, 
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
           zIndex: 1300,
           display: 'flex',
           alignItems: 'center',
@@ -159,7 +157,7 @@ const ProfileLayout = () => {
             transform: 'scale(1.05)',
             boxShadow: 8
           }
-        }} 
+        }}
         onClick={handleLogoutClick}
       >
         <IconButton sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }} size="small">
@@ -181,9 +179,9 @@ const ProfileLayout = () => {
           <Button onClick={handleLogoutCancel} disabled={logoutLoading}>
             Скасувати
           </Button>
-          <Button 
-            onClick={handleLogoutConfirm} 
-            variant="contained" 
+          <Button
+            onClick={handleLogoutConfirm}
+            variant="contained"
             color="error"
             disabled={logoutLoading}
             startIcon={logoutLoading ? <CircularProgress size={20} /> : null}
@@ -196,21 +194,21 @@ const ProfileLayout = () => {
       <Dialog open={openEditModal} onClose={handleCloseEdit} maxWidth="sm" fullWidth>
         <DialogTitle>
           Редагувати профіль
-          <Button 
-            onClick={handleCloseEdit} 
+          <Button
+            onClick={handleCloseEdit}
             sx={{ position: 'absolute', right: 16, top: 12, minWidth: 'auto', padding: 0.5 }}
           >
             <Close />
           </Button>
         </DialogTitle>
-        
+
         <DialogContent>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
               {error}
             </Alert>
           )}
-          
+
           <Box sx={{ mt: 1 }}>
             <TextField
               label="Ім'я"
@@ -239,11 +237,11 @@ const ProfileLayout = () => {
             />
           </Box>
         </DialogContent>
-        
+
         <DialogActions>
           <Button onClick={handleCloseEdit}>Скасувати</Button>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             variant="contained"
             disabled={profileLoading}
             startIcon={profileLoading ? <CircularProgress size={20} /> : null}

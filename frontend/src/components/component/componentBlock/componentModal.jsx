@@ -11,25 +11,25 @@ const ComponentModal = ({open, onClose, onSubmit, component, isEditing = false
     categoryOptions,
     isValid,
     handlers
-  } = useComponentForm({ 
-    component, 
-    isEditing, 
-    onClose, 
-    onSubmit 
+  } = useComponentForm({
+    component,
+    isEditing,
+    onClose,
+    onSubmit
   });
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handlers.handleCloseModal} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={handlers.handleCloseModal}
+      maxWidth="md"
       fullWidth
     >
       <form onSubmit={handlers.handleSubmit}>
         <DialogTitle>
           {isEditing ? 'Редагувати компонент' : 'Додати компонент'}
         </DialogTitle>
-        
+
         <DialogContent>
           <ComponentForm
             form={form}
@@ -50,9 +50,9 @@ const ComponentModal = ({open, onClose, onSubmit, component, isEditing = false
           <Button onClick={handlers.handleCloseModal}>
             Скасувати
           </Button>
-          <Button 
-            type="submit" 
-            variant="contained" 
+          <Button
+            type="submit"
+            variant="contained"
             disabled={!isValid}
           >
             {isEditing ? 'Зберегти зміни' : 'Додати'}

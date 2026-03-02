@@ -4,11 +4,11 @@ import { useDashboardStore } from '@store/useDashboardStore';
 
 export default function BrokenComponentsCostSparkLine() {
   const { statistics } = useDashboardStore();
-  
+
   const data = useMemo(() =>
     statistics.map(stat =>
       Math.round((stat.totalComponentsCost || 0) * 0.1)
-    ).reverse(), 
+    ).reverse(),
     [statistics]
   );
 

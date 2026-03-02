@@ -1,67 +1,57 @@
 import { create } from 'zustand';
 import apiClient from '../api/client';
 
-const COLORS = [
-  '#3b82f6', 
-  '#10b981', 
-  '#f59e0b', 
-  '#ef4444', 
-  '#8b5cf6', 
-  '#06b6d4', 
-  '#84cc16', 
-  '#ec4899'
-];
-
 export const useCategoriesStore = create((set, get) => ({
   categories: [],
   isLoading: false,
 
   normalizeCategory: (cat, index = 0) => {
-    
     try {
       const result = {
         ...cat,
-        name: cat.name === 'string' || !cat.name ? `Категорія ${index + 1}` : cat.name,
-        description: cat.description === 'string' || !cat.description 
-          ? `Категорія "${cat.name || 'без назви'}"` : cat.description,
-        
-        photoUrl: !cat.photoUrl || cat.photoUrl === 'string' || cat.photoUrl === '0' 
-          ? ``
-          : cat.photoUrl,
-        
-        cardColor: cat.cardColor === 'string' || !cat.cardColor || cat.cardColor === 'trings'
-          ? COLORS[index % COLORS.length]
-          : cat.cardColor
+        name: !cat.name || cat.name.trim() === '' ? `Категорія ${index + 1}` : cat.name.trim(),
+
+        description: !cat.description || cat.description.trim() === ''
+          ? `Категорія "${cat.name || 'без назви'}"` : cat.description.trim(),
+
+        image: (() => {
+          if (cat.photoUrl) return cat.photoUrl;
+          if (cat.image) return cat.image;
+          if (cat.image?.startsWith('data:')) return cat.image;
+          return '/placeholder-category.png';
+        })(),
+
+        cardColor: cat.cardColor || '#3b82f6'
       };
-      
+
+      console.log(`#${index} NORMALIZED:`, {
+        rawName: cat.name,
+        finalName: result.name,
+        rawDesc: cat.description,
+        finalDesc: result.description
+      });
+
       return result;
-      
     } catch (error) {
       console.error(`Помилка нормалізації #${index}:`, error);
-      return cat; // Fallback
+      return cat;
     }
   },
 
   fetchCategories: async () => {
     set({ isLoading: true });
-    
     try {
       const { data } = await apiClient.get('/categories');
 
-      
-      const normalizedCategories = (data || []).map((cat, index) => {
-        return get().normalizeCategory(cat, index);
-      });
+      const normalizedCategories = await Promise.all(
+        (data || []).map((cat, index) =>
+          Promise.resolve(get().normalizeCategory(cat, index))
+        )
+      );
 
-      
       set({ categories: normalizedCategories });
-      
     } catch (error) {
-      console.error('💥 9. КРИТИЧНА ПОМИЛКА fetchCategories:');
-      console.error('   Status:', error.response?.status);
-      console.error('   Data:', error.response?.data);
-      console.error('   Message:', error.message);
-      console.error('   Stack:', error.stack);
+      console.error('fetchCategories ERROR:', error);
       set({ categories: [] });
     } finally {
       set({ isLoading: false });
@@ -69,83 +59,116 @@ export const useCategoriesStore = create((set, get) => ({
   },
 
   addCategory: async (newCategory) => {
+    console.log('addCategory ОТРИМАВ:', {
+      name: newCategory.name,
+      description: newCategory.description,
+      cardColor: newCategory.cardColor,
+      fileExists: !!newCategory.photo,
+      isFile: newCategory.photo instanceof File
+    });
+
+    set({ isLoading: true });
+
     try {
-      const dataToSend = { ...newCategory, createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6" };
-      const response = await apiClient.post('/categories', dataToSend);
-      
-      const normalized = get().normalizeCategory(response.data, get().categories.length);
-      set((state) => ({ categories: [...state.categories, normalized] }));
+      if (!newCategory.photo || !(newCategory.photo instanceof File)) {
+        throw new Error('Фото обов\'язкове! (File object)');
+      }
+
+      const formData = new FormData();
+      formData.append('Name', newCategory.name);
+      formData.append('Description', newCategory.description || '');
+      formData.append('CardColor', newCategory.cardColor);
+      formData.append('image', newCategory.photo);
+
+      console.log('FormData entries:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, typeof value === 'object' ? value.name || 'File' : value);
+      }
+
+      const { data } = await apiClient.post('/categories', formData);
+      const normalized = get().normalizeCategory(data, get().categories.length);
+      set((state) => ({ categories: [normalized, ...state.categories] }));
+      console.log('Створено:', normalized);
       return normalized;
+
     } catch (error) {
-      console.error('addCategory ERROR:', error);
+      console.error('addCategory FAILED:', error.response?.data);
       throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 
   updateCategory: async (categoryId, updatedCategory) => {
-  
-  try {
-    const dataToSend = {
-      id: categoryId,
-      name: updatedCategory.name,
-      description: updatedCategory.description,
-      photoUrl: updatedCategory.photoUrl || null,
-      cardColor: updatedCategory.cardColor,
-      lastUpdatedBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-    };
-    
-    
-    const { data } = await apiClient.put('/categories', dataToSend);
-    
-    set((state) => ({
-      categories: state.categories.map(cat =>
-        cat.id === categoryId ? data : cat
-      )
-    }));
-    
-    return data;
-  } catch (error) {
-    console.error('updateCategory:', error.response?.status);
-    throw error;
-  }
-},
+    set({ isLoading: true });
+
+    try {
+      const formData = new FormData();
+      formData.append('Id', categoryId);
+      formData.append('Name', updatedCategory.name);
+      formData.append('Description', updatedCategory.description || '');
+      formData.append('CardColor', updatedCategory.cardColor);
+
+      if (updatedCategory.photo instanceof File) {
+        formData.append('image', updatedCategory.photo);
+      }
+
+      console.log('UPDATE FormData:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, typeof value === 'object' ? value.name || 'File' : value);
+      }
+
+      const { data } = await apiClient.put('/categories', formData);
+
+      const normalized = {
+        ...data,
+        image: data.photoUrl || data.image || ''
+      };
+
+      set((state) => ({
+        categories: state.categories.map(cat =>
+          cat.id === categoryId ? normalized : cat
+        )
+      }));
+
+      return normalized;
+
+    } catch (error) {
+      console.error('updateCategory FAILED:', error.response?.data);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   deleteCategory: async (id) => {
-    
+    set({ isLoading: true });
     try {
       await apiClient.delete(`/categories/${id}`);
-      
-      set((state) => {
-        const remainingCategories = state.categories.filter(cat => cat.id !== id);
-        return { categories: remainingCategories };
-      });
-      
-      console.log('deleteCategory УСПІХ!');
-      
+      set((state) => ({
+        categories: state.categories.filter(cat => cat.id !== id)
+      }));
+      console.log('Категорію видалено:', id);
     } catch (error) {
-      console.error('deleteCategory ПОМИЛКА:');
-      console.error('   Status:', error.response?.status);
-      console.error('   Data:', error.response?.data);
+      console.error('deleteCategory FAILED:', error.response?.data || error.message);
       throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 
   setCategories: (categories) => {
-    
     const normalizedCategories = (categories || []).map((cat, index) => 
       get().normalizeCategory(cat, index)
     );
-    
     set({ categories: normalizedCategories });
   },
 
   getCategoryNames: () => {
     const categories = get().categories;
-    const categoryNames = categories.map(cat => ({
+    return categories.map(cat => ({
       value: cat.id,
       label: cat.name || 'Без назви'
     }));
-    
-    return categoryNames;
   }
 }));

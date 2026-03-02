@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 import WishlistTable from '../../components/wishlistTable/WishlistTable';
 import { useNeedsStore } from '../../store/useNeedsStore';

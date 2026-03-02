@@ -5,7 +5,7 @@ import { useProfileStore } from './useProfileStore';
 export const useWishlistImportancesStore = create((set, get) => ({
   importances: [],
   isLoading: false,
-  
+
   getCurrentUserId: () => {
     const profile = useProfileStore.getState().profile;
     return profile?.id || null;
@@ -14,7 +14,7 @@ export const useWishlistImportancesStore = create((set, get) => ({
   fetchImportances: async () => {
     const { importances, isLoading } = get();
     if (isLoading || importances.length > 0) return;
-    
+
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get('/wishlist-importances');
@@ -62,9 +62,9 @@ export const useWishlistImportancesStore = create((set, get) => ({
 
       console.log('PUT /wishlist-importances:', dataWithUser);
       const { data } = await apiClient.put(`/wishlist-importances`, dataWithUser);
-      
+
       set((state) => ({
-        importances: state.importances.map(imp => 
+        importances: state.importances.map(imp =>
           imp.id === id ? data : imp
         )
       }));
@@ -85,7 +85,7 @@ export const useWishlistImportancesStore = create((set, get) => ({
       }
 
       const url = `/wishlist-importances/${id}?performedBy=${userId}`;
-      
+
       console.log('DELETE URL:', url);
 
       await apiClient.delete(url);

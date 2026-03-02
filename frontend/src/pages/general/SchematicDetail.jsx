@@ -4,55 +4,54 @@ import { useComponentsStore } from '../../store/useComponentsStore';
 import { useSchematicsStore } from '../../store/useSchematicsStore';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import PageWrapper from '../../components/layout/PaperWrapper';
-
 import SchematicHeader from '../../components/component/schematicsBlock/SchematicHeader';
-import SchematicImage from '../../components/component/schematicsBlock//SchematicImage';
+import SchematicImage from '../../components/component/schematicsBlock/SchematicImage';
+import SchematicDocumentBlock from '../../components/component/schematicsBlock/SchematicDocumentBlock';
 import SchematicLinksBlock from '../../components/component/schematicsBlock/SchematicLinksBlock';
 
 const SchematicDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { currentComponent } = useComponentsStore();
-  const { schematics } = useSchematicsStore();
+  const { currentComponent, fetchComponents } = useComponentsStore();
+  const { schematics, fetchSingleSchematic, isLoading } = useSchematicsStore();
 
-  const schematic = schematics.find(s => s.id == id);
+  React.useEffect(() => {
+    if (id) {
+      fetchSingleSchematic(id).catch(console.error);
+      fetchComponents();
+    }
+  }, [id, fetchSingleSchematic, fetchComponents]);
 
-  const loading = schematics.length === 0;
+  const schematic = schematics.find(s => s.id === id) || (currentComponent?.schematics || []).find(s => s.id === id);
 
-  if (loading) {
-    return <Box display="flex" justifyContent="center" mt={8}><CircularProgress /></Box>;
-  }
-
-  if (!schematic) {
+  if (isLoading || !schematic) {
     return (
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="50vh">
-        <Typography variant="h5">Схема не знайдена (ID: {id})</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Доступні ID: {schematics.map(s => `${s.id}(${typeof s.id})`).join(', ')}
-        </Typography>
+        <CircularProgress />
+        <Typography mt={2}>Завантажуємо схему...</Typography>
       </Box>
     );
   }
 
   return (
     <PageWrapper>
-<Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 3 }, py: 4 }}>
-      <SchematicHeader
-        schematic={schematic}
-        currentComponent={currentComponent}
-        navigate={navigate}
-      />
+      <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 3 }, py: 4 }}>
+        <SchematicHeader
+          schematic={schematic}
+          currentComponent={currentComponent}
+          navigate={navigate}
+        />
 
-      <SchematicImage
-        photoUrl={schematic.photoUrl}
-        title={schematic.title}
-      />
+        <SchematicImage
+          photoUrl={schematic.photoUrl}
+          title={schematic.title}
+        />
 
-      <SchematicLinksBlock schematic={schematic} />
-    </Box>
+        <SchematicDocumentBlock schematic={schematic} />
+        <SchematicLinksBlock schematic={schematic} />
+      </Box>
     </PageWrapper>
-
   );
 };
 
