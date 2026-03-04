@@ -20,7 +20,7 @@ namespace Application.NeedsImportance.Commands.Update
                 .MaximumLength(200).WithMessage("Назва не може бути довшою за 200 символів");
 
             RuleFor(x => x.Level)
-                .InclusiveBetween(1, 4).WithMessage("Рівень мусить бути від 1 до 4");
+                .InclusiveBetween(1, 10).WithMessage("Рівень мусить бути від 1 до 10");
         }
     }
 }
