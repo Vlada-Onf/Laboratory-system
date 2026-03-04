@@ -8,7 +8,7 @@ const LayoutWithSearch = memo(({ children }) => {
       <Box sx={{
         position: 'relative',
         minHeight: '100vh',
-        pt: '72px'
+        pt: '40px'
       }}>
         {children}
       </Box>

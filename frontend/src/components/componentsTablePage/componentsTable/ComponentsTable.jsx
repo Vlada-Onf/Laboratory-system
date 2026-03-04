@@ -136,7 +136,7 @@ const ComponentsTable = ({ onAddNeed }) => {
         />
       )}
 
-      <Box sx={{ height: 550, width: '100%' }}>
+      <Box sx={{ height: 545, width: '100%' }}>
 <DataGrid
   rows={filteredComponents}
   columns={columns}
@@ -146,39 +146,17 @@ const ComponentsTable = ({ onAddNeed }) => {
   onPaginationModelChange={handlePaginationChange}
   pageSizeOptions={pageSizeOptions}
   disableRowSelectionOnClick
-  columnReordering
   sx={{
     '& .MuiDataGrid-cell': {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'flex-start',
       whiteSpace: 'normal',
       wordBreak: 'break-word',
       lineHeight: 1.4,
-      py: 1
-    },
-    '& .MuiDataGrid-cell[data-field="rowActions"]': {
-      justifyContent: 'center'
     },
     '& .MuiDataGrid-columnHeaders': {
       backgroundColor: '#f5f5f5',
-      borderBottom: '2px solid #e0e0e0',
-      alignItems: 'center'
     },
-    '& .MuiDataGrid-pagination': {
-      justifyContent: 'center',
-      '& .MuiPaginationItem-root': {
-        margin: '0 2px',
-        minWidth: '40px'
-      },
-      '& .MuiPaginationItem-active': {
-        backgroundColor: '#1976d2',
-        color: 'white'
-      }
-    },
-    '& .MuiDataGrid-row:hover': {
-      backgroundColor: 'action.hover'
-    }
   }}
 />
 

@@ -5,7 +5,6 @@ const ConfirmDeleteModal = ({
   open,
   onClose,
   onConfirm,
-  entityName,
   entityTypeName = 'Компонент'
 }) => {
   const handleConfirm = () => {
@@ -18,8 +17,7 @@ const ConfirmDeleteModal = ({
       <DialogTitle>Видалити {entityTypeName}?</DialogTitle>
       <DialogContent>
         <Typography>
-          Цей {entityTypeName.toLowerCase()} "<strong>{entityName}</strong>" буде 
-          <strong> безповоротно видалено</strong>. Цю дію не можна скасувати.
+          Ви впевненні що хочете видалити? Цю дію не можна скасувати.
         </Typography>
       </DialogContent>
       <DialogActions>

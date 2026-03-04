@@ -113,7 +113,7 @@ const NeedImportancesModal = ({ open, onClose }) => {
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
-          Рівні важливості потреб
+          Пріоритети потреб
           <IconButton
             onClick={onClose}
             sx={{ position: 'absolute', right: 8, top: 8 }}

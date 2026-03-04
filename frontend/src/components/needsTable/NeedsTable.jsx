@@ -153,7 +153,7 @@ const NeedsTable = () => {
   ];
 
   return (
-    <Box sx={{ width: '100%', height: 555 }}>
+    <Box sx={{ width: '100%', height: 550 }}>
       <DataGrid
         rows={tableData.needsRows}
         columns={columns}

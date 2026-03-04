@@ -9,7 +9,7 @@ const WishlistDataGrid = ({
   isLoading,
 }) => {
   return (
-    <Box sx={{ height: 510, width: '100%' }}>
+    <Box sx={{ height: 500, width: '100%' }}>
       <DataGrid
         rows={wishlistRows}
         getRowId={(row) => row.id}

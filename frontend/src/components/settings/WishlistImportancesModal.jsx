@@ -123,7 +123,7 @@ const WishlistImportancesModal = ({ open, onClose }) => {
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>
-          Рівні важливості списку бажаного
+          Пріоритети списку бажаного
           <IconButton
             onClick={handleClose}
             sx={{ position: 'absolute', right: 8, top: 8 }}

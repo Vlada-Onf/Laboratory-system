@@ -37,8 +37,8 @@ const CategoriesGrid = () => {
   const showAddCategoryCard = !isLabRole;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Grid container spacing={3} justifyContent="center">
+    <Box sx={{ p: 1}}>
+      <Grid container spacing={2} justifyContent="center" >
         {categories.length > 0 && categories.map((cat) => (
           <Grid item key={cat.id} xs={12} sm={6} md={4}>
             <CategoryCard

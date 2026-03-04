@@ -3,7 +3,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const ComponentsTableToolbar = ({ onAddComponent, onExportExcel }) => {
   return (
-    <Box display="flex" justifyContent="space-between" mb={2}>
+    <Box display="flex" justifyContent="space-between" mb={2} gap={{ xs: 2, sm: 0 }}>
       <Button
         variant="contained"
         onClick={onAddComponent}

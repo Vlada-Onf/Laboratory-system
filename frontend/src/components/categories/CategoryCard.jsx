@@ -23,7 +23,8 @@ const CategoryCard = ({
       <Card
         onClick={onCategoryClick ? handleCardClick : undefined}
         sx={{
-          width: 300, height: 240,
+          width: { xs: 260, sm: 300 },
+          height: { xs: 230, sm: 240 },
           display: 'flex', flexDirection: 'column',
           overflow: 'hidden', position: 'relative',
           borderRadius: 2, transition: 'all 0.3s ease-in-out',

@@ -28,10 +28,33 @@ export default function SparkLineCard({
   const displayLabel = highlightIndex !== null ? labels[highlightIndex] : title;
   const displayValue = highlightIndex !== null ? data[highlightIndex] : data[length - 1];
 
-  const formattedValue = useMemo(
-    () => formatValue(displayValue, valueType),
-    [displayValue, valueType]
-  );
+  const showCurrency = valueType === 'currency';
+
+  const formatLargeNumber = useMemo(() => {
+    return (value) => {
+      if (!value || value < 1000) return String(value);
+      
+      const suffix = showCurrency ? '₴' : '';
+      
+      if (value >= 1000000) {
+        return `${(value / 1000000).toFixed(1)}млн${suffix}`;
+      }
+      if (value >= 10000) {
+        return `${Math.round(value / 1000)}тис.${suffix}`;
+      }
+      return `${(value / 1000).toFixed(1)}тис.${suffix}`;
+    };
+  }, [showCurrency]);
+
+  const formattedValue = useMemo(() => {
+    const rawValue = formatValue(displayValue, valueType);
+    const numValue = Number(rawValue.replace(/[^\d,]/g, '').replace(',', '.'));
+    
+    if (numValue < 1000) {
+      return rawValue;
+    }
+    return formatLargeNumber(numValue);
+  }, [displayValue, valueType, formatLargeNumber]);
 
   const hasData = length > 0;
 
@@ -49,7 +72,7 @@ export default function SparkLineCard({
     >
       {hasData ? (
         <Stack direction="column" width="100%" maxWidth={450}>
-          <Typography sx={{ fontWeight: 500, fontSize: 18}}>
+          <Typography sx={{ fontWeight: 500, fontSize: { xs: 15, sm: 18 }}}>
             {displayLabel}
           </Typography>
 
@@ -61,13 +84,13 @@ export default function SparkLineCard({
           >
             <Typography
               aria-live="polite"
-              sx={{ fontSize: '2rem', fontWeight: 500 }}
+              sx={{ fontSize: { xs: 20, sm: 32 }, fontWeight: 500 }}
             >
               {formattedValue}
             </Typography>
 
             <SparkLineChart
-              height={80}
+              height={70}
               width={195}
               area
               showHighlight

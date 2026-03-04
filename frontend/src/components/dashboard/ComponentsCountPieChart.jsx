@@ -13,7 +13,7 @@ const ComponentsCountPieChart = React.memo(() => {
   if (categoryCounts.length === 0) {
     return (
       <Box sx={{
-        width: '100%', height: 250,
+        width: '100%', height: 230,
         display: 'flex', alignItems: 'center',
         justifyContent: 'center'
       }}>
@@ -28,13 +28,14 @@ const ComponentsCountPieChart = React.memo(() => {
     <Box sx={{
       width: '100%',
       display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 1
+      gap: { xs: 2, sm: 1 }
     }}>
       <PieChart
-        width={230}
-        height={230}
+        width={220}
+        height={220}
         series={[{
           data: categoryCounts,
           valueFormatter: (datum) => `${datum.value} шт.`,
@@ -46,14 +47,23 @@ const ComponentsCountPieChart = React.memo(() => {
         slotProps={{ legend: { style: { display: 'none' } } }}
       />
 
-      <Stack direction="column" spacing={1}>
+      <Stack
+        direction="column"
+        spacing={{ xs: 1.25, sm: 1 }}
+        sx={{
+          width: { xs: 'auto', sm: 'auto' },
+          maxWidth: { xs: '100%', sm: 200 }
+        }}
+      >
         {categoryCounts.map((item) => (
-          <Stack key={item.id} direction="row" alignItems="center" spacing={1}>
+          <Stack key={item.id} direction="row" alignItems="center" spacing={1.25}>
             <Box
               sx={{
-                width: 16, height: 16,
+                width: 16,
+                height: 16,
                 bgcolor: item.color,
                 borderRadius: 0.5,
+                flexShrink: 0
               }}
             />
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>

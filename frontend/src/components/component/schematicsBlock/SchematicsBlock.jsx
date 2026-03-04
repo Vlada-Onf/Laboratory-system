@@ -100,7 +100,6 @@ const SchematicsBlock = ({ componentId, onAddSchematic }) => {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
             gap: 2,
-            p: 2, pt: 3
           }}>
             {componentSchematics.map((schematic) => (
               <SchematicCard

@@ -27,8 +27,8 @@ const AddCategoryCard = () => {
     <>
       <Card
         sx={{
-          width: 300,
-          height: 240,
+          width: { xs: 260, sm: 300 },
+          height: { xs: 230, sm: 240 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',

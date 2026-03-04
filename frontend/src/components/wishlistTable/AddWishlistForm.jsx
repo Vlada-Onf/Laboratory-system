@@ -124,11 +124,9 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
             Важливість *
           </Typography>
           <FormControl fullWidth error={!!errors.importanceId} required>
-            <InputLabel>Важливість</InputLabel>
             <Select
               value={form.importanceId}
               onChange={handleChange('importanceId')}
-              label="Важливість"
             >
               {importances.map((imp) => (
                 <MenuItem key={imp.id} value={imp.id}>{imp.name}</MenuItem>
@@ -142,11 +140,9 @@ const AddNeedForm = ({ initialData, onSubmit, onCancel }) => {
             Статус *
           </Typography>
           <FormControl fullWidth error={!!errors.statusId} required>
-            <InputLabel>Статус</InputLabel>
             <Select
               value={form.statusId}
               onChange={handleChange('statusId')}
-              label="Статус"
             >
               {statuses.map((status) => (
                 <MenuItem key={status.id} value={status.id}>{status.name}</MenuItem>

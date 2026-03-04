@@ -61,7 +61,7 @@ const DashboardResponsive = () => {
         </Box>
 
         <Box sx={{
-          width: { xs: '100%', lg: 400 },
+          width: { xs: '100%', lg: 450 },
           display: 'flex',
           flexDirection: 'column',
           gap: 1
@@ -73,11 +73,11 @@ const DashboardResponsive = () => {
             <ComponentsCountPieChart />
           </DashboardCard>
 
-          <DashboardCard sx={{ flex: 1, minHeight: 100 }}>
+          <DashboardCard sx={{ flex: 1 }}>
             <BrokenComponentsCostSparkLine />
           </DashboardCard>
 
-          <DashboardCard sx={{ flex: 1, minHeight: 100 }}>
+          <DashboardCard sx={{ flex: 1}}>
             <BrokenComponentsCountSparkLine />
           </DashboardCard>
         </Box>

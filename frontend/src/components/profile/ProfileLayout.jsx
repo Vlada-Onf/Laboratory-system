@@ -210,24 +210,26 @@ const ProfileLayout = () => {
           )}
 
           <Box sx={{ mt: 1 }}>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>
+        Ім'я
+      </Typography>
             <TextField
-              label="Ім'я"
               name="firstName"
               value={editForm.firstName}
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
             />
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>Прізвище</Typography>
             <TextField
-              label="Прізвище"
               name="lastName"
               value={editForm.lastName}
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
             />
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>Фото профілю</Typography>
             <TextField
-              label="Фото профілю"
               type="file"
               name="image"
               onChange={handleInputChange}

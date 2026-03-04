@@ -22,7 +22,8 @@ const HistoryItemWidget = ({ record }) => {
         p: 1.5,
         borderRadius: 2,
         cursor: 'pointer',
-        alignItems: 'center',
+        alignItems: 'flex-start',
+        flexDirection: { xs: 'column', sm: 'row' },
         '&:hover': {
           backdropFilter: 'blur(6px)',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',

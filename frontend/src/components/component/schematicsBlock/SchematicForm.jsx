@@ -32,7 +32,7 @@ const SchematicForm = ({
 
       <Box>
         <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-          Фото схеми {!isEditing && '(обов\'язкове)'}
+          Фото схеми *
         </Typography>
         <Button
           variant="outlined"
@@ -41,7 +41,7 @@ const SchematicForm = ({
           sx={{ textTransform: 'none', py: 1.5, justifyContent: 'flex-start' }}
           startIcon={<AttachFileIcon />}
         >
-          {form.photo ? form.photo.name : '📷 Вибрати фото'}
+          {form.photo ? form.photo.name : 'Вибрати фото'}
           <input
             type="file"
             accept="image/*"
@@ -76,7 +76,7 @@ const SchematicForm = ({
 
       <Box>
         <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-          Документ (PDF, опціонально)
+          Документ
         </Typography>
         <Button
           variant="outlined"
@@ -85,7 +85,7 @@ const SchematicForm = ({
           sx={{ textTransform: 'none', py: 1.5, justifyContent: 'flex-start' }}
           startIcon={<PictureAsPdfIcon />}
         >
-          {form.document ? form.document.name : '📄 Вибрати PDF/документ'}
+          {form.document ? form.document.name : 'Вибрати PDF/документ'}
           <input
             type="file"
             accept=".pdf,.doc,.docx"

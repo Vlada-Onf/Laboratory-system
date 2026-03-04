@@ -10,8 +10,8 @@ const AddSchematicCard = ({ onAdd }) => {
   return (
     <Card
       sx={{
-        width: 320,
-        height: 200,
+        width: { xs: 260, sm: 320 },
+          height: { xs: 230, sm: 240 },
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
