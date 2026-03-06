@@ -7,9 +7,8 @@ export const useExcelExport = (data, getCategoryName) => {
       alert('Немає даних для експорту');
       return;
     }
-const ExcelJS = (await import('exceljs')).default;
-
-  const workbook = new ExcelJS.Workbook();
+const ExcelJS = (await import('exceljs/dist/exceljs.min.js')).default;
+const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Компоненти');
   workbook.creator = 'Компоненти';
   workbook.created = new Date();
