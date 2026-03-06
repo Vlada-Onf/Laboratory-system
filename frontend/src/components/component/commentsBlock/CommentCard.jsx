@@ -63,10 +63,10 @@ const CommentCard = ({ comment, onUpdate, onDelete }) => {
               size="small" sx={{ mb: 1 }} autoFocus
             />
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" color="primary" onClick={handleSave} disabled={!isValid}>
+              <Button size="small" variant="outlined" color="#ffff" onClick={handleSave} disabled={!isValid}>
                 Зберегти
               </Button>
-              <Button size="small" color="primary" onClick={cancel}>Скасувати</Button>
+              <Button size="small" color="#ffff" onClick={cancel}>Скасувати</Button>
             </Box>
           </>
         ) : (
@@ -76,7 +76,7 @@ const CommentCard = ({ comment, onUpdate, onDelete }) => {
             </Typography>
             {isCurrentUserComment && (
               <Box sx={{ display: 'flex', gap: 1, pt: 0.5 }}>
-                <Button size="small" color="primary" onClick={startEdit} sx={{ fontSize: '0.75rem' }}>
+                <Button size="small" color="#ffff" onClick={startEdit} sx={{ fontSize: '0.75rem' }}>
                   Редагувати
                 </Button>
                 <Button size="small" color="error" onClick={handleDelete} sx={{ fontSize: '0.75rem' }}>

@@ -23,7 +23,7 @@ export const useDamagedComponentsStore = create((set, get) => ({
 
   addDamagedComponent: async (componentId, reasonId, quantity) => {
     const userId = get().getCurrentUserId();
-    if (!userId) throw new Error('❌ Авторизуйтесь для запису пошкоджень!');
+    if (!userId) throw new Error('Авторизуйтесь для запису пошкоджень!');
 
     const damagedData = {
       componentId,

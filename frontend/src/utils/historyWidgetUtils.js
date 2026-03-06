@@ -22,7 +22,7 @@ const formatRelativeTime = (timestamp) => {
   if (diffMs < 60 * 60 * 1000){
     return `${Math.floor(diffMs / 60000)} хв тому`;
   }
-  
+
   if (diffMs < 24 * 60 * 60 * 1000){
     return `${Math.floor(diffMs / 3600000)} год тому`;
 }

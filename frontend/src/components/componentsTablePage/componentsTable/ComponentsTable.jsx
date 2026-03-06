@@ -12,7 +12,7 @@ import ComponentsColumns  from './ComponentsColumns';
 import ComponentsTableToolbar from '../ComponentsTableToolbar';
 import AddNeedModal from '../../needsTable/AddNeedModal';
 import ComponentModal from '../../component/componentBlock/ComponentModal';
-import ConfirmDeleteModal from '../../general/confirmDeleteModal';
+import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const ComponentsTable = ({ onAddNeed }) => {
   const navigate = useNavigate();
