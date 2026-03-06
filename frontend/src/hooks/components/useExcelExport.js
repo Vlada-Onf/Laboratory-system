@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
 export const useExcelExport = (data, getCategoryName) => {
@@ -8,11 +7,12 @@ export const useExcelExport = (data, getCategoryName) => {
       alert('Немає даних для експорту');
       return;
     }
+const ExcelJS = (await import('exceljs')).default;
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Компоненти');
-    workbook.creator = 'Компоненти';
-    workbook.created = new Date();
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Компоненти');
+  workbook.creator = 'Компоненти';
+  workbook.created = new Date();
 
     const headers = ['Компонент', 'Категорія', 'Опис', 'Документація', 'К-сть', 'Ціна', 'Теги'];
     const headerRow = worksheet.addRow(headers);
