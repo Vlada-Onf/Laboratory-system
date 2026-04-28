@@ -66,14 +66,13 @@ namespace Api.Controllers
             return result;
         }
 
-        [HttpGet("by-entity-and-type")]
-        public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetByEntityAndType(
-            [FromQuery] Guid entityTypeId,
-            [FromQuery] string entityId,
+        [HttpGet("by-type/{entityTypeId:guid}")]
+        public async Task<ActionResult<IReadOnlyList<HistoryEntryDto>>> GetByType(
+            [FromRoute] Guid entityTypeId,
             CancellationToken cancellationToken)
         {
             var entries = await _sender.Send(
-                new GetHistoryByEntityAndTypeQuery(entityTypeId, entityId),
+                new GetHistoryByTypeQuery(entityTypeId),
                 cancellationToken);
 
             var result = new List<HistoryEntryDto>(entries.Count);

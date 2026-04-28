@@ -41,11 +41,13 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<History>> GetByEntityAndTypeAsync(EntityTypeId entityTypeId, string entityId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<History>> GetByTypeAsync(
+            EntityTypeId entityTypeId,
+            CancellationToken cancellationToken)
         {
             return await context.History
                 .AsNoTracking()
-                .Where(h => h.EntityTypeId == entityTypeId && h.EntityId == entityId)
+                .Where(h => h.EntityTypeId == entityTypeId)
                 .OrderByDescending(h => h.Time)
                 .ToListAsync(cancellationToken);
         }

@@ -9,7 +9,7 @@ namespace Application.Common.Interfaces.Queries
     {
         Task<IReadOnlyList<History>> GetByUserAsync(UserId userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<History>> GetByEntityAsync(string entityId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<History>> GetByEntityAndTypeAsync(EntityTypeId entityTypeId, string entityId, CancellationToken cancellationToken);
         Task<IReadOnlyList<History>> GetAllAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyList<History>> GetByTypeAsync(EntityTypeId entityTypeId, CancellationToken cancellationToken);
     }
 }

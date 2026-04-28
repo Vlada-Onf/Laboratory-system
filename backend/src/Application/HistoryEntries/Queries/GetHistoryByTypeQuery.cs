@@ -5,22 +5,21 @@ using Domain.History;
 
 namespace Application.HistoryEntries.Queries
 {
-    public sealed record GetHistoryByEntityAndTypeQuery(
-        Guid EntityTypeId,
-        string EntityId)
+    public sealed record GetHistoryByTypeQuery(Guid EntityTypeId)
         : IRequest<IReadOnlyList<History>>;
-    public sealed class GetHistoryByEntityAndTypeQueryHandler(
+
+    public sealed class GetHistoryByTypeQueryHandler(
         IHistoryQueries queries)
-        : IRequestHandler<GetHistoryByEntityAndTypeQuery, IReadOnlyList<History>>
+        : IRequestHandler<GetHistoryByTypeQuery, IReadOnlyList<History>>
     {
         public async Task<IReadOnlyList<History>> Handle(
-            GetHistoryByEntityAndTypeQuery request,
+            GetHistoryByTypeQuery request,
             CancellationToken cancellationToken)
         {
             var entityTypeId = new EntityTypeId(request.EntityTypeId);
-            return await queries.GetByEntityAndTypeAsync(
+
+            return await queries.GetByTypeAsync(
                 entityTypeId,
-                request.EntityId,
                 cancellationToken);
         }
     }
