@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { Box, Typography, CircularProgress, Pagination } from '@mui/material';
 import HistoryItem from './HistoryItem';
 import { useHistoryStore } from '@store/useHistoryStore';
 import { useAuthStore } from '@store/useAuthStore';
@@ -14,31 +14,24 @@ const HistoryList = ({
   isLoading: externalLoading = false
 }) => {
   const { user, isAuthenticated } = useAuthStore();
+  const topRef = useRef(null);
 
   const {
     history,
     myHistory,
     isLoading: storeLoading,
-    fetchHistoryByEntity,
-    fetchHistoryByEntityAndType,
+    page,
+    hasMore,
+    fetchAllHistory,
     fetchMyHistory,
     fetchHistoryByUser,
-    fetchAllHistory
+    fetchHistoryByEntity,
+    fetchHistoryByEntityAndType
   } = useHistoryStore();
 
   const isLab = useMemo(() => {
-    if (!user){
-      return false;
-    }
-
-    const roles = [];
-    if (user.roleId){
-      roles.push(user.roleId);
-    }
-    if (user.roles && Array.isArray(user.roles)){
-      roles.push(...user.roles);
-    }
-
+    if (!user) return false;
+    const roles = [user.roleId, ...(user.roles || [])];
     return roles.includes(LAB_ROLE_ID) || user.role === 'Lab';
   }, [user]);
 
@@ -46,85 +39,97 @@ const HistoryList = ({
   const displayHistory = effectiveType === 'my' ? myHistory : history;
   const isLoading = externalLoading || storeLoading;
 
- useEffect(() => {
-  if (!isAuthenticated || !user) {
-    console.warn('Пропускаємо fetch, користувач відсутній');
-    return;
-  }
+  const loadPage = useCallback((targetPage, isReset = true) => {
+    if (!isAuthenticated || !user) return;
 
-  let loadFn = null;
+    const args = [isReset, targetPage];
 
-  switch (effectiveType) {
-    case 'my':
-      loadFn = fetchMyHistory;
-      break;
+    switch (effectiveType) {
+      case 'my':
+        fetchMyHistory(...args);
+        break;
+      case 'all':
+        if (!isLab) fetchAllHistory(...args);
+        break;
+      case 'user':
+        if (!isLab && userId) fetchHistoryByUser(userId, ...args);
+        break;
+      case 'entity':
+        if (!isLab) {
+          if (entityId && entityTypeId) fetchHistoryByEntityAndType(entityId, entityTypeId, ...args);
+          else if (entityId) fetchHistoryByEntity(entityId, ...args);
+        }
+        break;
+      default:
+        if (isLab) fetchMyHistory(...args);
+        else fetchAllHistory(...args);
+    }
+  }, [
+    isAuthenticated, user, effectiveType, isLab, userId, entityId, entityTypeId,
+    fetchMyHistory, fetchAllHistory, fetchHistoryByUser, fetchHistoryByEntity, fetchHistoryByEntityAndType
+  ]);
 
-    case 'all':
-      if (!isLab) loadFn = fetchAllHistory;
-      break;
+  useEffect(() => {
+    loadPage(1, true);
+  }, [loadPage]);
 
-    case 'user':
-      if (!isLab && userId) loadFn = () => fetchHistoryByUser(userId);
-      break;
+  const handlePageChange = (event, value) => {
+    loadPage(value, true);
 
-    case 'entity':
-      if (!isLab) {
-        if (entityId && entityTypeId) loadFn = () => fetchHistoryByEntityAndType(entityId, entityTypeId);
-        else if (entityId) loadFn = () => fetchHistoryByEntity(entityId);
+    setTimeout(() => {
+      if (topRef.current) {
+        topRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
       }
-      break;
+    }, 50);
+  };
 
-    default:
-      loadFn = isLab ? fetchMyHistory : fetchAllHistory;
-  }
-
-  if (loadFn) {
-    loadFn();
-  }
-}, [
-  effectiveType,
-  entityId,
-  entityTypeId,
-  userId,
-  isAuthenticated,
-  user,
-  isLab,
-  fetchMyHistory,
-  fetchAllHistory,
-  fetchHistoryByUser,
-  fetchHistoryByEntity,
-  fetchHistoryByEntityAndType
-]);
-
-  if (isLoading) {
+  if (isLoading && displayHistory.length === 0) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <CircularProgress size={24} />
-        <Typography variant="body2" sx={{ mt: 1 }} color="text.secondary">
-          Завантаження історії...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (!displayHistory || displayHistory.length === 0) {
-    console.log('displayHistory порожній');
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography color="text.secondary">
-          {effectiveType === 'my'
-            ? 'Ваша історія поки порожня'
-            : 'Історія змін порожня'}
-        </Typography>
+      <Box sx={{ p: 5, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress size={30} />
       </Box>
     );
   }
 
   return (
-    <Box>
-      {displayHistory.map((record) => (
-        <HistoryItem key={record.id} record={record} />
-      ))}
+    <Box sx={{ position: 'relative' }}>
+      <Box
+        ref={topRef}
+        sx={{
+          position: 'absolute',
+          top: -120,
+          left: 0,
+          visibility: 'hidden'
+        }}
+      />
+
+      <Box sx={{ minHeight: '400px' }}>
+        {displayHistory.map((record) => (
+          <HistoryItem key={record.id} record={record} />
+        ))}
+
+        {!isLoading && displayHistory.length === 0 && (
+          <Typography sx={{ textAlign: 'center', py: 5 }} color="text.secondary">
+            {effectiveType === 'my' ? 'Ваша історія порожня' : 'Історія змін порожня'}
+          </Typography>
+        )}
+      </Box>
+
+      {(displayHistory.length > 0 || page > 1) && (
+        <Box sx={{ mt: 4, mb: 2, display: 'flex', justifyContent: 'center' }}>
+          <Pagination
+            count={hasMore ? page + 1 : page}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            disabled={isLoading}
+            hideNextButton={!hasMore}
+          />
+        </Box>
+      )}
     </Box>
   );
 };
