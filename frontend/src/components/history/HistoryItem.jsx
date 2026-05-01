@@ -10,7 +10,7 @@ const HistoryItem = ({ record }) => {
   const { actions } = useActionsStore();
 
   return (
-    <Card sx={{ mb: 2, boxShadow: 1 }}>
+    <Card sx={{ mb: 2, boxShadow: 1 , borderRadius: 4}}>
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
           <Avatar

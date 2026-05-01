@@ -19,6 +19,7 @@ export const useHistoryStore = create((set, get) => ({
   recentHistory: new Map(),
   page: 1,
   hasMore: true,
+  currentFetchKey: null,
 
   enrichHistory: (rawHistory) => {
     if (!rawHistory?.length) return [];
@@ -47,19 +48,6 @@ export const useHistoryStore = create((set, get) => ({
         if (val?.trim() && !isDateField(val)) {
           specificEntityName = val;
           break;
-        }
-      }
-
-      if (specificEntityName === entityType?.name) {
-        const allChanges = { ...oldValues, ...newValues };
-        for (const [key, value] of Object.entries(allChanges)) {
-          if (!key.toLowerCase().includes('id') &&
-              typeof value === 'string' &&
-              value.trim().length > 2 &&
-              !isDateField(value)) {
-            specificEntityName = value.trim().slice(0, 50);
-            break;
-          }
         }
       }
 
@@ -114,54 +102,63 @@ export const useHistoryStore = create((set, get) => ({
     if (tasks.length > 0) await Promise.all(tasks);
   },
 
-  _handleFetch: async (fetchFn, isAppend = false, targetPage = 1) => {
-    const now = Date.now();
-    const COOLDOWN_MS = 800;
+  _handleFetch: async (fetchFn, isAppend = false, targetPage = 1, fetchKey = 'default') => {
+  if (get().isLoading) return;
 
-    if (get().isLoading) return;
+  const isNewRequest = get().currentFetchKey !== fetchKey;
 
-    const shouldFetchFromApi = targetPage === 1 || get().allRawData.length === 0;
+  if (isNewRequest) {
+    set({ allRawData: [], history: [], myHistory: [], page: 1, currentFetchKey: fetchKey });
+  }
 
-    set({ isLoading: true, lastHistoryAttempt: now });
+  const shouldFetchFromApi = get().allRawData.length === 0;
 
-    try {
-      await get().ensureDependenciesLoaded();
+  set({ isLoading: true, lastHistoryAttempt: Date.now() });
 
-      let currentFullData = [];
+  try {
+    await get().ensureDependenciesLoaded();
 
-      if (shouldFetchFromApi) {
-        const responseData = await fetchFn();
-        currentFullData = responseData || [];
-        set({ allRawData: currentFullData });
-      } else {
-        currentFullData = get().allRawData;
-      }
+    let currentFullData = [];
 
-      const start = (targetPage - 1) * PAGE_SIZE;
-      const end = start + PAGE_SIZE;
-      const pageChunk = currentFullData.slice(start, end);
-      const enriched = get().enrichHistory(pageChunk);
+    if (shouldFetchFromApi) {
+      const responseData = await fetchFn();
 
-      set((state) => ({
-        history: isAppend ? [...state.history, ...enriched] : enriched,
-        myHistory: isAppend ? [...state.myHistory, ...enriched] : enriched,
-        page: targetPage,
-        hasMore: end < currentFullData.length,
-        isLoading: false
-      }));
-
-    } catch (error) {
-      console.error('History Store Error:', error);
-      set({ isLoading: false, lastHistoryAttempt: 0 });
+      currentFullData = responseData || [];
+      set({ allRawData: currentFullData });
+    } else {
+      currentFullData = get().allRawData;
     }
-  },
+
+    const start = (targetPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+
+    const pageChunk = currentFullData.slice(start, end);
+    const enriched = get().enrichHistory(pageChunk);
+
+    const result = {
+      history: isAppend ? [...get().history, ...enriched] : enriched,
+      myHistory: isAppend ? [...get().myHistory, ...enriched] : enriched,
+      page: targetPage,
+      hasMore: end < currentFullData.length,
+      isLoading: false
+    };
+
+    set(result);
+    return enriched;
+
+  } catch (error) {
+    console.error('History Store Error:', error);
+    set({ isLoading: false, lastHistoryAttempt: 0 });
+    return [];
+  }
+},
 
   fetchHistoryByUser: async (userId, reset = true, targetPage = 1) => {
     const pageToLoad = reset ? targetPage : get().page + 1;
     await get()._handleFetch(async () => {
       const response = await apiClient.get(`/history/by-user/${userId}`);
       return response.data;
-    }, !reset, pageToLoad);
+    }, !reset, pageToLoad, `user-${userId}`);
   },
 
   fetchMyHistory: async (reset = true, targetPage = 1) => {
@@ -172,24 +169,32 @@ export const useHistoryStore = create((set, get) => ({
     await get()._handleFetch(async () => {
       const response = await apiClient.get('/history/my', { params: { userId: myUserId } });
       return response.data;
-    }, !reset, pageToLoad);
+    }, !reset, pageToLoad, 'my-history');
   },
 
   fetchHistoryByEntity: async (entityId, reset = true, targetPage = 1) => {
-    const pageToLoad = reset ? targetPage : get().page + 1;
-    await get()._handleFetch(async () => {
-      const response = await apiClient.get(`/history/by-entity/${entityId}`);
-      return response.data;
-    }, !reset, pageToLoad);
-  },
+  const pageToLoad = reset ? targetPage : get().page + 1;
 
-  fetchHistoryByEntityAndType: async (entityId, entityTypeId, reset = true, targetPage = 1) => {
+  return await get()._handleFetch(async () => {
+    const response = await apiClient.get(
+      `/history/by-type/${entityId.trim()}`
+    );
+
+    return response.data;
+  }, !reset, pageToLoad, `entity-${entityId}`);
+},
+
+fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
+    if (!entityId) return;
+
     const pageToLoad = reset ? targetPage : get().page + 1;
-    await get()._handleFetch(async () => {
-      const response = await apiClient.get(`/history/by-entity-and-type/${entityId}/${entityTypeId}`);
+    return await get()._handleFetch(async () => {
+      const response = await apiClient.get(
+        `/history/by-entity/${String(entityId).trim()}`
+      );
       return response.data;
-    }, !reset, pageToLoad);
-  },
+    }, !reset, pageToLoad, `entity-id-${entityId}`);
+},
 
   fetchAllHistory: async (reset = true, targetPage = 1) => {
     const { user } = useAuthStore.getState();
@@ -201,7 +206,7 @@ export const useHistoryStore = create((set, get) => ({
     await get()._handleFetch(async () => {
       const response = await apiClient.get('/history/all');
       return response.data;
-    }, !reset, pageToLoad);
+    }, !reset, pageToLoad, 'all-history');
   },
 
   fetchWidgetHistory: async () => {
@@ -232,6 +237,6 @@ export const useHistoryStore = create((set, get) => ({
   getHistoryCount: () => get().allRawData.length,
   getMyHistoryCount: () => get().myHistory.length,
   isEmpty: () => get().allRawData.length === 0,
-  clearHistory: () => set({ history: [], myHistory: [], allRawData: [], page: 1, hasMore: true }),
-  clearMyHistory: () => set({ myHistory: [], allRawData: [], page: 1, hasMore: true })
+  clearHistory: () => set({ history: [], myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null }),
+  clearMyHistory: () => set({ myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null })
 }));
