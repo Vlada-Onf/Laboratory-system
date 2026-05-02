@@ -8,9 +8,7 @@ import { useUsefulLinksStore } from '@store/useUsefulLinksStore';
 import { useSchematicsStore } from '@store/useSchematicsStore';
 import { useSchematicLinksStore } from '@store/useSchematicLinksStore';
 import { useNeedStatusesStore } from '@store/useNeedStatusesStore';
-import { useNeedsStore } from '@store/useNeedsStore';
 import { useNeedImportancesStore } from '@store/useNeedImportancesStore';
-import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
 import { useDamagedComponentReasonsStore } from '@store/useDamagedComponentReasonsStore';
 
 
@@ -36,9 +34,7 @@ export const useHistoryFilters = ({
   const { schematics, fetchAllSchematicsForSearch } = useSchematicsStore();
   const { linksBySchematic } = useSchematicLinksStore();
   const { statuses, fetchStatuses } = useNeedStatusesStore();
-  const { needs, fetchNeeds } = useNeedsStore();
   const { needImportances, fetchImportances } = useNeedImportancesStore();
-  const { damagedComponents, fetchDamagedComponents } = useDamagedComponentsStore();
   const { damagedComponentReasons, fetchReasons } = useDamagedComponentReasonsStore();
 
   useEffect(() => {
@@ -91,21 +87,9 @@ export const useHistoryFilters = ({
 
   useEffect(() => {
     if (!isLab && currentTab === 'single-entity') {
-      fetchNeeds();
-    }
-  }, [currentTab, isLab, fetchNeeds]);
-
-  useEffect(() => {
-    if (!isLab && currentTab === 'single-entity') {
       fetchImportances();
     }
   }, [currentTab, isLab, fetchImportances]);
-
-  useEffect(() => {
-    if (!isLab && currentTab === 'single-entity') {
-      fetchDamagedComponents();
-    }
-  }, [currentTab, isLab, fetchDamagedComponents]);
 
   useEffect(() => {
     if (!isLab && currentTab === 'single-entity') {
@@ -149,9 +133,7 @@ export const useHistoryFilters = ({
         ...(schematics || []),
         ...allSchematicLinks,
         ...(statuses || []),
-        ...(needs || []),
         ...(needImportances || []),
-        ...(damagedComponents || []),
         ...(damagedComponentReasons || [])
       ];
 

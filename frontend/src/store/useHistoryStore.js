@@ -4,9 +4,9 @@ import { useProfileStore } from './useProfileStore';
 import { useActionsStore } from './useActionsStore';
 import { useEntityTypesStore } from './useEntityTypesStore';
 import { useAuthStore } from './useAuthStore';
-import { useWishlistStatusesStore } from './useWishlistStatusesStore';
-import { safeParse, formatChanges, isDateField, dateFormatter, NAME_FIELDS } from '../utils/historyHelpers';
-
+import { NAME_FIELDS } from '../utils/historyHelpers';
+import { useComponentsStore } from './useComponentsStore';
+import { enrichHistory } from '../utils/enrichHistory';
 const LAB_ROLE_ID = "bbc9c32e-8c47-43f4-bc68-c29f81754dac";
 const PAGE_SIZE = 25;
 
@@ -21,83 +21,22 @@ export const useHistoryStore = create((set, get) => ({
   hasMore: true,
   currentFetchKey: null,
 
-  enrichHistory: (rawHistory) => {
-    if (!rawHistory?.length) return [];
-
-    const profileStore = useProfileStore.getState();
-    const actionsMap = new Map(useActionsStore.getState().actions.map(a => [a.id, a]));
-    const entityTypes = useEntityTypesStore.getState().entityTypes;
-    const entityTypesMap = new Map(entityTypes.map(t => [t.id, t]));
-    const statusesMap = new Map(useWishlistStatusesStore.getState().statuses.map(s => [s.id, s]));
-
-    const allEntitiesMap = new Map();
-    entityTypes.forEach(type => {
-      type.entities?.forEach(e => allEntitiesMap.set(e.id, e.name || e.title));
-    });
-
-    return rawHistory.map((record) => {
-      const action = actionsMap.get(record.actionId);
-      const entityType = entityTypesMap.get(record.entityTypeId);
-      const oldValues = safeParse(record.oldValues);
-      const newValues = safeParse(record.newValues);
-
-      let specificEntityName = entityType?.name || 'Сутність';
-
-      for (const field of NAME_FIELDS) {
-        const val = oldValues[field] || newValues[field];
-        if (val?.trim() && !isDateField(val)) {
-          specificEntityName = val;
-          break;
-        }
-      }
-
-      if (specificEntityName === entityType?.name && record.entityId) {
-        const nameFromMap = allEntitiesMap.get(record.entityId) || statusesMap.get(record.entityId)?.name;
-        if (nameFromMap) specificEntityName = nameFromMap;
-      }
-
-      if (specificEntityName === entityType?.name) {
-        specificEntityName = `${entityType?.name} #${record.entityId?.slice(-8)}`;
-      }
-
-      const isMe = profileStore.profile?.id === record.userId;
-      let userName, userAvatar;
-
-      if (record.authorFirstName) {
-        userName = `${record.authorFirstName}${record.authorLastName ? ` ${record.authorLastName}` : ''}`;
-        userAvatar = record.authorPhotoUrl || null;
-      } else if (isMe) {
-        const p = profileStore.profile;
-        userName = `${p.firstName || p.name || 'Я'}${p.lastName ? ` ${p.lastName}` : ''}`;
-        userAvatar = p.photoUrl || p.avatar || null;
-      } else {
-        userName = `Користувач ${record.userId?.slice(-6)}`;
-        userAvatar = null;
-      }
-
-      return {
-        ...record,
-        actionName: action?.name || 'Дія',
-        entityName: specificEntityName,
-        userName,
-        userAvatar,
-        changesText: formatChanges(record.oldValues, record.newValues),
-        timeFormatted: dateFormatter.format(new Date(record.time))
-      };
-    });
-  },
+ enrichHistory: (rawHistory) => enrichHistory(rawHistory),
 
   ensureDependenciesLoaded: async () => {
     const profileStore = useProfileStore.getState();
     const actionsStore = useActionsStore.getState();
     const entityTypesStore = useEntityTypesStore.getState();
-    const wishlistStatusesStore = useWishlistStatusesStore.getState();
+    const componentsStore = useComponentsStore.getState();
 
     const tasks = [];
     if (!profileStore.profile) tasks.push(profileStore.fetchProfile());
     if (actionsStore.actions.length === 0) tasks.push(actionsStore.fetchActions());
     if (entityTypesStore.entityTypes.length === 0) tasks.push(entityTypesStore.fetchEntityTypes());
-    if (wishlistStatusesStore.statuses.length === 0) tasks.push(wishlistStatusesStore.fetchStatuses());
+
+    if (componentsStore.components.length === 0) {
+      tasks.push(componentsStore.fetchComponents());
+    }
 
     if (tasks.length > 0) await Promise.all(tasks);
   },
@@ -238,5 +177,16 @@ fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
   getMyHistoryCount: () => get().myHistory.length,
   isEmpty: () => get().allRawData.length === 0,
   clearHistory: () => set({ history: [], myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null }),
-  clearMyHistory: () => set({ myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null })
+  clearMyHistory: () => set({ myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null }),
+  getSearchOptions: () => {
+  const { history, allRawData } = get();
+
+  const source = history.length ? history : allRawData;
+
+  return source.map(item => ({
+    id: item.entityId,
+    type: item.entityTypeName,
+    label: item.searchLabel,
+  }));
+},
 }));

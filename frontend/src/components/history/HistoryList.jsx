@@ -3,6 +3,8 @@ import { Box, Typography, CircularProgress, Pagination } from '@mui/material';
 import HistoryItem from './HistoryItem';
 import { useHistoryStore } from '@store/useHistoryStore';
 import { useAuthStore } from '@store/useAuthStore';
+import { useNeedsStore } from '@store/useNeedsStore';
+import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
 
 const LAB_ROLE_ID = "bbc9c32e-8c47-43f4-bc68-c29f81754dac";
 
@@ -71,6 +73,8 @@ const HistoryList = ({
 
   useEffect(() => {
     loadPage(1, true);
+    useNeedsStore.getState().fetchNeeds?.();
+    useDamagedComponentsStore.getState().fetchDamagedComponents?.();
   }, [loadPage]);
 
   const handlePageChange = (event, value) => {
