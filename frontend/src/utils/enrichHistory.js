@@ -6,6 +6,7 @@ import { useComponentsStore } from '@store/useComponentsStore';
 import { useDamagedComponentsStore } from '@store/useDamagedComponentsStore';
 import { useNeedsStore } from '@store/useNeedsStore';
 import { useWishlistStatusesStore } from '@store/useWishlistStatusesStore';
+import { useWishlistStore } from '@store/useWishlistStore';
 
 export const enrichHistory = (rawHistory) => {
   if (!rawHistory?.length) return [];
@@ -34,6 +35,13 @@ export const enrichHistory = (rawHistory) => {
   needs.forEach(n => {
     needsMap.set(normalizeId(n.id), n.componentId || n.component?.id);
   });
+
+  const wishlists = useWishlistStore?.getState?.().wishlists || useWishlistStore?.getState?.().wishlist || [];
+  const wishlistMap = new Map();
+  wishlists.forEach(w => {
+    wishlistMap.set(normalizeId(w.id), w.componentId || w.component?.id);
+  });
+
   const extractId = (val) => {
     if (!val) return undefined;
 
@@ -74,11 +82,11 @@ export const enrichHistory = (rawHistory) => {
       )
     );
 
-  const allEntitiesMap = new Map();
+  const allMapEntities = new Map();
 
   entityTypes.forEach(type => {
     type.entities?.forEach(e => {
-      allEntitiesMap.set(normalizeId(e.id), e.name || e.title);
+      allMapEntities.set(normalizeId(e.id), e.name || e.title);
     });
   });
 
@@ -86,20 +94,26 @@ export const enrichHistory = (rawHistory) => {
 
   if (components?.length) {
     components.forEach(c => {
-      allEntitiesMap.set(normalizeId(c.id), c.name || c.title);
+      allMapEntities.set(normalizeId(c.id), c.name || c.title);
     });
   }
 
   const wishlistStatuses =
-  useWishlistStatusesStore.getState().statuses || [];
+    useWishlistStatusesStore.getState().statuses || [];
 
-wishlistStatuses.forEach(s => {
-  allEntitiesMap.set(
-    normalizeId(s.id),
-    s.name || s.title
-  );
-});
+  const statusWishlistMap = new Map();
 
+  wishlistStatuses.forEach(s => {
+    if (s.wishlistId) {
+      statusWishlistMap.set(normalizeId(s.id), s.wishlistId);
+    }
+    allMapEntities.set(
+      normalizeId(s.id),
+      s.name || s.title
+    );
+  });
+
+  const ENTITY_ALIAS = {wishliststatus: 'wishlist', wishlist_status: 'wishlist',};
 
   return rawHistory.map((record) => {
     const action = actionsMap.get(record.actionId);
@@ -113,51 +127,129 @@ wishlistStatuses.forEach(s => {
 
     const typeNameLow = typeNameRaw.toLowerCase();
 
-    let specificEntityName = typeNameRaw;
+    const effectiveTypeNameLow =
+      ENTITY_ALIAS[typeNameLow] || typeNameLow;
+
+    const effectiveTypeName =
+      effectiveTypeNameLow === 'wishlist'
+        ? 'Wishlist'
+        : typeNameRaw;
+
+    let specificEntityName = effectiveTypeName;
 
     const typeHandlers = {
-      comment: typeNameLow.includes('comment') || typeNameLow.includes('комент'),
-      damaged: typeNameLow.includes('damaged') && !typeNameLow.includes('reason'),
-      need: (typeNameLow.includes('need') || typeNameLow.includes('потреба')) &&
-            !typeNameLow.includes('importance') &&
-            !typeNameLow.includes('status'),
+      comment: effectiveTypeNameLow.includes('comment') || effectiveTypeNameLow.includes('комент'),
+      damaged: effectiveTypeNameLow.includes('damaged') && !effectiveTypeNameLow.includes('reason'),
+      need: (effectiveTypeNameLow.includes('need') || effectiveTypeNameLow.includes('потреба')) &&
+            !effectiveTypeNameLow.includes('importance') &&
+            !effectiveTypeNameLow.includes('status'),
     };
 
-    const isStatus = typeNameLow.includes('status') || typeNameLow.includes('статус');
+    const isStatus =
+      (typeNameLow.includes('status') ||
+       typeNameLow.includes('статус') ||
+       effectiveTypeNameLow.includes('status') ||
+       effectiveTypeNameLow.includes('статус')) &&
+      !typeHandlers.damaged &&
+      !typeHandlers.need &&
+      !typeHandlers.comment;
 
     const getComponentName = (componentId) =>
-      allEntitiesMap.get(normalizeId(componentId));
+      allMapEntities.get(normalizeId(componentId));
 
     const componentId = resolveComponentId(newValues, oldValues, record);
+    const statusId = normalizeId(record.entityId);
 
-    const fallbackComponentId =
-      damagedMap.get(normalizeId(record.entityId)) ||
-      needsMap.get(normalizeId(record.entityId)) ||
-      componentId;
+    let fallbackComponentId = damagedMap.get(statusId) ||needsMap.get(statusId);
 
-    const finalComponentId = fallbackComponentId;
-    const componentName = getComponentName(finalComponentId);
+    if (!fallbackComponentId) {
+      const wishlistByStatus = wishlists.find(
+        (w) => normalizeId(w.statusId) === statusId
+      );
+
+      if (wishlistByStatus) {
+        fallbackComponentId =
+          wishlistByStatus.componentId || wishlistByStatus.component?.id;
+      } else {
+        const linkedWishlistId =
+          statusWishlistMap.get(statusId) ||
+          newValues.wishlistid ||
+          oldValues.wishlistid ||
+          newValues.wishlistId ||
+          oldValues.wishlistId;
+
+        if (linkedWishlistId) {
+          fallbackComponentId = wishlistMap.get(normalizeId(linkedWishlistId));
+        }
+      }
+    }
+
+    if (!fallbackComponentId) {
+      fallbackComponentId = componentId;
+    }
+
+    const componentName = getComponentName(fallbackComponentId);
 
     if (typeHandlers.comment || typeHandlers.damaged || typeHandlers.need || isStatus) {
       let prefix = 'Сутність';
+
       if (typeHandlers.comment) prefix = 'Коментар до';
       else if (typeHandlers.damaged) prefix = 'Пошкодження';
       else if (typeHandlers.need) prefix = 'Потреба';
-      else if (isStatus) prefix = 'Статус';
+      else if (isStatus) {
+        if (typeNameLow.includes('wishlist') || effectiveTypeNameLow.includes('wishlist')) {
+          prefix = 'Wishlist';
+        } else {
+          prefix = 'Статус';
+        }
+      }
 
       if (componentName) {
         specificEntityName = `${prefix}: ${componentName}`;
       } else {
         const resolvedStatusId =
-  record.entityId ||
-  newValues.statusId ||
-  newValues.wishlistStatusId ||
-  newValues.status?.id ||
-  oldValues.status?.id ||
-  oldValues.statusId;
+          record.entityId ||
+          newValues.statusId ||
+          newValues.wishlistStatusId ||
+          newValues.status?.id ||
+          oldValues.status?.id ||
+          oldValues.statusId;
 
-const nameFromMap =
-  allEntitiesMap.get(normalizeId(resolvedStatusId));
+        let wishlistForStatus = wishlists.find(
+          (w) => normalizeId(w.statusId) === normalizeId(resolvedStatusId)
+        );
+
+        if (!wishlistForStatus) {
+          const wishlistId =
+            newValues.wishlistId ||
+            oldValues.wishlistId ||
+            newValues.wishlistid ||
+            oldValues.wishlistid;
+
+          if (wishlistId) {
+            wishlistForStatus = wishlists.find(
+              (w) => normalizeId(w.id) === normalizeId(wishlistId)
+            );
+          }
+        }
+
+        if (!wishlistForStatus) {
+          wishlistForStatus = wishlists.find(
+            (w) => normalizeId(w.id) === normalizeId(record.entityId)
+          );
+        }
+
+        if (!wishlistForStatus && fallbackComponentId) {
+          wishlistForStatus = wishlists.find(
+            (w) => normalizeId(w.componentId || w.component?.id) === normalizeId(fallbackComponentId)
+          );
+        }
+
+        const nameFromMap =
+          wishlistForStatus?.name ||
+          wishlistForStatus?.title ||
+          allMapEntities.get(normalizeId(resolvedStatusId));
+
         if (nameFromMap) {
           specificEntityName = `${prefix}: ${nameFromMap}`;
         } else {
@@ -229,7 +321,7 @@ const nameFromMap =
 
     if (specificEntityName === typeNameRaw && record.entityId) {
       const nameFromMap =
-        allEntitiesMap.get(normalizeId(record.entityId));
+        allMapEntities.get(normalizeId(record.entityId));
 
       if (nameFromMap) {
         specificEntityName = nameFromMap;
@@ -261,12 +353,12 @@ const nameFromMap =
     }
 
     const searchLabel =
-  newValues.name ||
-  oldValues.name ||
-  newValues.title ||
-  oldValues.title ||
-  record.content ||
-  specificEntityName;
+      newValues.name ||
+      oldValues.name ||
+      newValues.title ||
+      oldValues.title ||
+      record.content ||
+      specificEntityName;
 
     return {
       ...record,

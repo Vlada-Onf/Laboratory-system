@@ -12,17 +12,7 @@ export default function HeaderUsersButton() {
       color="inherit"
       onClick={() => navigate('/front-users')}
     >
-      <Badge
-        badgeContent={4}
-        sx={{
-          '& .MuiBadge-badge': {
-            backgroundColor: '#841a1c',
-            color: '#fff',
-          },
-        }}
-      >
         <GroupsIcon />
-      </Badge>
     </IconButton>
   );
 }

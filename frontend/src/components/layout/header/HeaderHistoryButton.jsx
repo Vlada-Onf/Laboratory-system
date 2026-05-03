@@ -12,17 +12,7 @@ export default function HeaderHistoryButton() {
       color="inherit"
       onClick={() => navigate('/front-history')}
     >
-      <Badge
-        badgeContent={17}
-        sx={{
-          '& .MuiBadge-badge': {
-            backgroundColor: '#841a1c',
-            color: '#fff',
-          },
-        }}
-      >
         <HistoryIcon />
-      </Badge>
     </IconButton>
   );
 }

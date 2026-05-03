@@ -7,6 +7,7 @@ import { useAuthStore } from './useAuthStore';
 import { NAME_FIELDS } from '../utils/historyHelpers';
 import { useComponentsStore } from './useComponentsStore';
 import { enrichHistory } from '../utils/enrichHistory';
+import { useWishlistStatusesStore } from './useWishlistStatusesStore';
 const LAB_ROLE_ID = "bbc9c32e-8c47-43f4-bc68-c29f81754dac";
 const PAGE_SIZE = 25;
 
@@ -24,22 +25,24 @@ export const useHistoryStore = create((set, get) => ({
  enrichHistory: (rawHistory) => enrichHistory(rawHistory),
 
   ensureDependenciesLoaded: async () => {
-    const profileStore = useProfileStore.getState();
-    const actionsStore = useActionsStore.getState();
-    const entityTypesStore = useEntityTypesStore.getState();
-    const componentsStore = useComponentsStore.getState();
+  const profileStore = useProfileStore.getState();
+  const actionsStore = useActionsStore.getState();
+  const entityTypesStore = useEntityTypesStore.getState();
+  const componentsStore = useComponentsStore.getState();
+  const wishlistStatusesStore = useWishlistStatusesStore.getState();
 
-    const tasks = [];
-    if (!profileStore.profile) tasks.push(profileStore.fetchProfile());
-    if (actionsStore.actions.length === 0) tasks.push(actionsStore.fetchActions());
-    if (entityTypesStore.entityTypes.length === 0) tasks.push(entityTypesStore.fetchEntityTypes());
+  const tasks = [];
+  if (!profileStore.profile) tasks.push(profileStore.fetchProfile());
+  if (actionsStore.actions.length === 0) tasks.push(actionsStore.fetchActions());
+  if (entityTypesStore.entityTypes.length === 0) tasks.push(entityTypesStore.fetchEntityTypes());
+  if (componentsStore.components.length === 0) tasks.push(componentsStore.fetchComponents());
 
-    if (componentsStore.components.length === 0) {
-      tasks.push(componentsStore.fetchComponents());
-    }
+  if (!wishlistStatusesStore.statuses || wishlistStatusesStore.statuses.length === 0) {
+    tasks.push(wishlistStatusesStore.fetchStatuses());
+  }
 
-    if (tasks.length > 0) await Promise.all(tasks);
-  },
+  if (tasks.length > 0) await Promise.all(tasks);
+},
 
   _handleFetch: async (fetchFn, isAppend = false, targetPage = 1, fetchKey = 'default') => {
   if (get().isLoading) return;
