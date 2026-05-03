@@ -1,5 +1,6 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Snackbar, Alert } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { useState } from 'react';
 import PageWrapper from '../layout/PaperWrapper';
 import DashboardCard from './DashboardCard';
 import { useDashboardData } from '../../hooks/dashboard/useDashboardData';
@@ -13,13 +14,38 @@ import BrokenComponentsCountSparkLine from './SparkLineCard/BrokenComponentsCoun
 const DashboardResponsive = () => {
   const { handleRefreshStatistics } = useDashboardData();
 
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const [lastUpdated, setLastUpdated] = useState(() => {
+  const saved = localStorage.getItem('lastStatsUpdate');
+  return saved ? new Date(saved) : null;
+});
+
+  const handleClickRefresh = () => {
+    const now = new Date();
+
+    if (lastUpdated) {
+      const sameDay =
+        now.toDateString() === new Date(lastUpdated).toDateString();
+
+      if (sameDay) {
+        setOpenSnackbar(true);
+        return;
+      }
+    }
+
+    handleRefreshStatistics();
+    setLastUpdated(now);
+    localStorage.setItem('lastStatsUpdate', now.toISOString());
+  };
+
   return (
     <PageWrapper>
       <Box sx={{ mb: 1, display: 'flex', justifyContent: 'flex-end' }}>
         <Button
           variant="contained"
           startIcon={<RefreshIcon />}
-          onClick={handleRefreshStatistics}
+          onClick={handleClickRefresh}
           sx={{
             background: 'linear-gradient(135deg, #08273b, #365468)',
             color: '#fff',
@@ -82,6 +108,17 @@ const DashboardResponsive = () => {
           </DashboardCard>
         </Box>
       </Box>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="info" onClose={() => setOpenSnackbar(false)}>
+          Статистика оновлюється лише раз на добу. Сьогоднішня статистика вже актуальна.
+        </Alert>
+      </Snackbar>
     </PageWrapper>
   );
 };
