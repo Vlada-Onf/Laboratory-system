@@ -2,13 +2,22 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["Front"] # Тепер деплой буде запускатися при пуші у гілку Front
+    branches: ["Front"] # Деплой запускатиметься при пуші у гілку Front
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,7 +38,11 @@ jobs:
         run: npm run build
         working-directory: ./frontend
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: frontend/dist
+          path: 'frontend/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
