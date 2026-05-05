@@ -34,9 +34,12 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
+      - name: Create .env file
+        run: |
+          echo "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
+        working-directory: ./frontend
+
       - name: Build project
-        env:
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
         run: npm run build
         working-directory: ./frontend
 
