@@ -5,7 +5,7 @@ import { useComponentsStore } from '../../store/useComponentsStore';
 import { useCategoriesStore } from '../../store/useCategoriesStore';
 import { useNeedsStore } from '../../store/useNeedsStore';
 import PageWrapper from '../../components/layout/PaperWrapper';
-import ComponentModal from '../../components/component/componentBlock/ComponentModal';
+import ComponentModal from '../../components/component/componentBlock/ComponentModal.jsx';
 import AddNeedModal from '../../components/needsTable/AddNeedModal';
 
 const ComponentPage = () => {
