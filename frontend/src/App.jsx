@@ -51,7 +51,7 @@ function App() {
 
   return (
     <ThemeProviderWrapper>
-      <BrowserRouter>
+      <BrowserRouter basename="/Laboratory-system">
         <LayoutWithSearch>
           <AppRoutes />
         </LayoutWithSearch>
