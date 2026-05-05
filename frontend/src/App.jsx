@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import { ThemeProviderWrapper } from "./context/ThemeProvider";
 import AppRoutes from "./routes/AppRoutes";
 import LayoutWithSearch from './components/layout/LayoutWithSearch';
@@ -51,11 +51,11 @@ function App() {
 
   return (
     <ThemeProviderWrapper>
-      <BrowserRouter basename="/Laboratory-system">
+      <HashRouter>
         <LayoutWithSearch>
           <AppRoutes />
         </LayoutWithSearch>
-      </BrowserRouter>
+      </HashRouter>
     </ThemeProviderWrapper>
   );
 }
