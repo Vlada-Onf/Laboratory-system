@@ -11,7 +11,7 @@ import { useUserPermissions } from '../../../hooks/useUserPermissions';
 import ComponentsColumns  from './ComponentsColumns';
 import ComponentsTableToolbar from '../ComponentsTableToolbar';
 import AddNeedModal from '../../needsTable/AddNeedModal';
-import ComponentModal from '../../component/componentBlock/ComponentModal';
+import ComponentModal from '../../general/ComponentModal';
 import ConfirmDeleteModal from '../../general/ConfirmDeleteModal';
 
 const ComponentsTable = ({ onAddNeed }) => {
