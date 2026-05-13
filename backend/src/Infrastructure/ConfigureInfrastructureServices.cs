@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Common.Interfaces;
+using Infrastructure.AI;
 
 namespace Infrastructure
 {
@@ -16,6 +18,10 @@ namespace Infrastructure
             IConfiguration configuration)
         {
             services.AddPersistenceServices(configuration);
+            
+            services.Configure<GeminiOptions>(
+                configuration.GetSection(GeminiOptions.SectionName));
+            services.AddHttpClient<IGeminiService, GeminiService>();
         }
     }
 }
