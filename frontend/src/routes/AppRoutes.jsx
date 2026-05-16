@@ -1,10 +1,12 @@
-import Layout from "../components/layout/Layout";
+import { useEffect } from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
+import { useAuthStore } from "@store/useAuthStore";
+import Layout from "../components/layout/Layout";
 import SyncBackend from '../components/general/SyncBackend';
+import UserStatusGuard from './UserStatusGuard';
 import SignInPage from "../pages/auth/SignInPage";
 import SignUpPage from "../pages/auth/SignUpPage";
-
 import Main from "../pages/general/Main";
 import Dashboard from "../pages/general/Dashboard";
 import Categories from "../pages/general/Categories";
@@ -20,23 +22,48 @@ import BrokenComponents from '../pages/general/BrokenComponents';
 import Settings from "../pages/general/Settings";
 import Blocked from "../pages/general/Blocked";
 import NotFound from "../pages/general/NotFound";
-import UserStatusGuard from './UserStatusGuard';
 
 const ProtectedLayout = () => {
+  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
+  const { isAuthenticated, loading: isBackendLoading, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (!isClerkLoaded) {
+    console.log('ProtectedLayout: Чекаємо Clerk...');
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '15px' }}>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+        <p style={{ fontFamily: 'Geologica, sans-serif', color: '#666' }}>Перевірка автентифікації...</p>
+      </div>
+    );
+  }
+
+  if (!isClerkSignedIn) {
+    console.log('ProtectedLayout: Користувач не увійшов у Clerk');
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  if (isBackendLoading && !isAuthenticated) {
+    console.log('ProtectedLayout: Чекаємо бекенд...');
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '15px' }}>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+        <p style={{ fontFamily: 'Geologica, sans-serif', color: '#666' }}>Синхронізація профілю з лабораторією...</p>
+      </div>
+    );
+  }
+
+  console.log('Користувач в системі');
   return (
-    <>
-      <SignedIn>
-        <UserStatusGuard>
-        <SyncBackend />
-        <Layout>
-          <Outlet />
-        </Layout>
-        </UserStatusGuard>
-      </SignedIn>
-      <SignedOut>
-        <Navigate to="/sign-in" replace />
-      </SignedOut>
-    </>
+    <UserStatusGuard>
+      <SyncBackend />
+      <Layout>
+        <Outlet />
+      </Layout>
+    </UserStatusGuard>
   );
 };
 
