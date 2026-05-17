@@ -57,6 +57,6 @@ namespace Api.Dtos
         public string? DocumentationLink { get; set; }
         public List<Guid> TagIds { get; set; } = new();
         public Guid LastUpdatedBy { get; set; }
-        // public Guid PerformedBy { get; set; }
     }
+    public record ComponentImportResultDto(Guid Id, string Name);
 }

@@ -1,6 +1,6 @@
 namespace Application.Common.Interfaces;
 
-public interface IGeminiService
+public interface IGroqService
 {
     Task<string> AnalyzeInventoryImageAsync(
         byte[] fileBytes,

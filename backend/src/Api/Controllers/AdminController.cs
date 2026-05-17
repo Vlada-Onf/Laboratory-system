@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
 using Application.Users.Commands.Update;
 using Application.Users.Commands.Delete;
-using Application.Users.Queries;
 using Domain.Roles;
 using Domain.Users;
 using MediatR;
@@ -128,16 +127,12 @@ public class AdminController : ControllerBase
         var current = await GetCurrentUserAsync(cancellationToken);
         if (current is null)
             return Unauthorized("User not found");
-
         if (!IsAdminOrSuperAdmin(current))
             return Forbid();
-
         if (current.Id.Value == id)
             return BadRequest("You cannot delete yourself via this endpoint");
-
         var command = new DeleteUserCommand(id, current.Id.Value);
         var result = await _sender.Send(command, cancellationToken);
-
         return result.Match<ActionResult>(
             _ => NoContent(),
             e => BadRequest(e.Message));
@@ -151,14 +146,10 @@ public class AdminController : ControllerBase
         var current = await GetCurrentUserAsync(cancellationToken);
         if (current is null)
             return Unauthorized("User not found");
-
         if (!IsAdminOrSuperAdmin(current))
             return Forbid();
-
-        // не даємо змінювати самого себе через цей ендпоінт (опційно)
         if (current.Id.Value == id)
             return BadRequest("You cannot change your own status via this endpoint");
-
         var option = await _userQueries.GetByIdAsync(new UserId(id), cancellationToken);
         if (option.IsNone)
             return NotFound("User not found");

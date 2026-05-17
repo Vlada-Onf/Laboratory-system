@@ -18,10 +18,11 @@ namespace Infrastructure
             IConfiguration configuration)
         {
             services.AddPersistenceServices(configuration);
-            
-            services.Configure<GeminiOptions>(
-                configuration.GetSection(GeminiOptions.SectionName));
-            services.AddHttpClient<IGeminiService, GeminiService>();
+
+            services.Configure<GroqOptions>(
+                configuration.GetSection(GroqOptions.SectionName));
+
+            services.AddHttpClient<IGroqService, GroqService>();
         }
     }
 }
