@@ -7,7 +7,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { useAIImportStore } from '@/store/useAIImportStore';
+import { useAiImportStore } from '@/store/useAiImportStore';
 import { useCategoriesStore } from '@/store/useCategoriesStore';
 import { useComponentsStore } from '@store/useComponentsStore';
 
@@ -19,7 +19,7 @@ const AiImportModal = ({ open, onClose }) => {
     clearStore,
     isLoading: isAiLoading,
     error: storeError
-  } = useAIImportStore();
+  } = useAiImportStore();
 
   const {
     categories,

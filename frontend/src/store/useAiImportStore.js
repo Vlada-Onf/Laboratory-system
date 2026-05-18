@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import apiClient from '../api/client'; 
 
-export const useAIImportStore = create((set, get) => ({
+export const useAiImportStore = create((set, get) => ({
   scannedItems: [],
   isLoading: false,
   error: null,
