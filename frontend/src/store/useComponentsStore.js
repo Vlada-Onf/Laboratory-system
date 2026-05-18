@@ -175,6 +175,7 @@ export const useComponentsStore = create((set, get) => ({
     try {
       const { data } = await apiClient.get('/components');
       set({ components: data });
+      return data;
     } catch (error) {
       console.error('fetchComponents FAILED:', error);
     } finally {
