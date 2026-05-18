@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Modal, Box, Typography, Button, TextField, 
+import {
+  Modal, Box, Typography, Button, TextField,
   CircularProgress, IconButton, Divider, Stack,
   MenuItem, Select, FormControl, InputLabel, Alert, Paper
 } from '@mui/material';
@@ -65,7 +65,25 @@ const AiImportModal = ({ open, onClose }) => {
       }
 
       try {
-        await analyzeImage(selectedFile);
+        const resultItems = await analyzeImage(selectedFile);
+
+        if (resultItems && Array.isArray(resultItems)) {
+          resultItems.forEach((item, index) => {
+            const descriptionParts = [];
+
+            if (item.description?.trim()) descriptionParts.push(item.description.trim());
+            if (item.model) descriptionParts.push(`Модель: ${item.model}`);
+            if (item.inventoryNumber) descriptionParts.push(`Інв. номер: ${item.inventoryNumber}`);
+            if (item.serialNumber) descriptionParts.push(`Серійний номер: ${item.serialNumber}`);
+            if (item.state) descriptionParts.push(`Стан: ${item.state}`);
+            if (item.location) descriptionParts.push(`Локація: ${item.location}`);
+            if (item.notes) descriptionParts.push(`Нотатки: ${item.notes}`);
+
+            const initialDescription = descriptionParts.join('\n');
+
+            updateScannedItemField(index, 'description', initialDescription);
+          });
+        }
       } catch (err) {
         console.error("Помилка при аналізі фото:", err);
       }
@@ -103,24 +121,10 @@ const AiImportModal = ({ open, onClose }) => {
           throw new Error(`Не обрано категорію для об'єкта №${i + 1}`);
         }
 
-        const descriptionParts = [];
-        if (currentItem.description?.trim()) {
-          descriptionParts.push(currentItem.description.trim());
-        }
-
-        if (currentItem.model) descriptionParts.push(`Модель: ${currentItem.model}`);
-        if (currentItem.inventoryNumber) descriptionParts.push(`Інв. номер: ${currentItem.inventoryNumber}`);
-        if (currentItem.serialNumber) descriptionParts.push(`Серійний номер: ${currentItem.serialNumber}`);
-        if (currentItem.state) descriptionParts.push(`Стан: ${currentItem.state}`);
-        if (currentItem.location) descriptionParts.push(`Локація: ${currentItem.location}`);
-        if (currentItem.notes) descriptionParts.push(`Нотатки: ${currentItem.notes}`);
-
-        const finalDescription = descriptionParts.join('\n');
-
         const componentFields = {
           categoryId: targetCategoryId,
           name: currentItem.name || "",
-          description: finalDescription,
+          description: currentItem.description || "", 
           quantity: currentItem.quantity ? String(currentItem.quantity) : "",
           price: currentItem.price ? String(currentItem.price) : "",
           supplierLink: currentItem.supplierLink || "",
@@ -196,7 +200,7 @@ const AiImportModal = ({ open, onClose }) => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              '&:hover': { borderColor: '#6a11cb', bgcolor: '#f9f7ff' }
+              '&:hover': { borderColor: '#f16731' }
             }}
           >
             <input type="file" hidden accept="image/*" onChange={handleFileChange} />
@@ -225,7 +229,6 @@ const AiImportModal = ({ open, onClose }) => {
                 maxHeight: { md: 'calc(100vh - 200px)' },
                 borderRadius: 4,
                 overflow: 'hidden',
-                bgcolor: '#f5f5f5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -268,7 +271,7 @@ const AiImportModal = ({ open, onClose }) => {
                       <Paper
                         key={index}
                         variant="outlined"
-                        sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 4, bgcolor: '#fafafa', border: '1px solid #e0e0e0' }}
+                        sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 4, border: '1px solid #e0e0e0' }}
                       >
                         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
                           <Typography variant="subtitle1" sx={{ bgcolor: '#6a11cb', color: 'white', px: 2, py: 0.5, borderRadius: 2, fontWeight: '600', fontSize: '0.9rem' }}>
@@ -303,7 +306,7 @@ const AiImportModal = ({ open, onClose }) => {
                           />
 
                           <TextField
-                            fullWidth multiline rows={2} size="small" label="Опис" value={item.description || ''}
+                            fullWidth multiline rows={4} size="small" label="Опис" value={item.description || ''}
                             onChange={(e) => updateScannedItemField(index, 'description', e.target.value)}
                             disabled={isAnyLoading}
                           />
@@ -337,7 +340,19 @@ const AiImportModal = ({ open, onClose }) => {
               </Box>
 
               <Box sx={{ pt: 1, display: 'flex', gap: 2, bgcolor: 'background.paper' }}>
-                <Button size="large" fullWidth variant="outlined" onClick={handleFullClose} disabled={isAnyLoading}>
+                <Button size="large" fullWidth variant="outlined" onClick={handleFullClose} disabled={isAnyLoading} sx={{
+            fontSize: 16,
+            height: 50,
+            minWidth: 120,
+            color: '#fff',
+            background: 'linear-gradient(135deg, #08273b, #365468)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #051926, #20314a)',
+            },
+            '&:disabled': {
+              background: 'rgba(8, 39, 59, 0.5)',
+            },
+          }}>
                   Скасувати
                 </Button>
                 <Button
@@ -358,3 +373,4 @@ const AiImportModal = ({ open, onClose }) => {
 };
 
 export default AiImportModal;
+
