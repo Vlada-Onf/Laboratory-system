@@ -48,7 +48,8 @@ namespace Api.Controllers
             {
                 var json = ExtractJson(raw);
                 items = JsonSerializer.Deserialize<List<InventoryItemImportDto>>(
-                    json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (JsonException ex)
             {
@@ -73,13 +74,13 @@ namespace Api.Controllers
                 PerformedBy = request.CreatedBy,
                 Items = request.Items.Select(x => new ImportAiItemData
                 {
-                    Name = x.Name,
-                    Model = x.Model,
-                    InventoryNumber = x.InventoryNumber,
-                    SerialNumber = x.SerialNumber,
-                    State = x.State,
-                    Location = x.Location,
-                    Notes = x.Notes
+                    Name = BuildNormalizedName(x),
+                    Model = x.MappingStrategy == NameMappingStrategy.Separate ? Clean(x.Model) : string.Empty,
+                    InventoryNumber = Clean(x.InventoryNumber),
+                    SerialNumber = Clean(x.SerialNumber),
+                    State = Clean(x.State),
+                    Location = Clean(x.Location),
+                    Notes = Clean(x.Notes)
                 }).ToList()
             };
 
@@ -91,6 +92,22 @@ namespace Api.Controllers
                     .ToList()),
                 Left: e => e.ToObjectResult());
         }
+
+        private static string BuildNormalizedName(InventoryItemImportDto x)
+        {
+            var name = Clean(x.Name);
+            var model = Clean(x.Model);
+
+            return x.MappingStrategy switch
+            {
+                NameMappingStrategy.MergeIntoName => JoinNonEmpty(name, model),
+                NameMappingStrategy.SingleField => !string.IsNullOrWhiteSpace(name) ? name : model,
+                _ => name
+            };
+        }
+
+        private static string JoinNonEmpty(params string[] values)
+            => string.Join(" ", values.Where(v => !string.IsNullOrWhiteSpace(v)));
 
         private static string ExtractJson(string raw)
         {
@@ -112,7 +129,8 @@ namespace Api.Controllers
                 SerialNumber = Clean(x.SerialNumber),
                 State = Clean(x.State),
                 Location = Clean(x.Location),
-                Notes = Clean(x.Notes)
+                Notes = Clean(x.Notes),
+                MappingStrategy = x.MappingStrategy
             }).ToList();
 
         private static string Clean(string? value)

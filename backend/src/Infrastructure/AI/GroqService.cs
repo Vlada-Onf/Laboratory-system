@@ -37,14 +37,18 @@ public sealed class GroqService : IGroqService
             "Поверни виключно валідний JSON-масив без markdown і без пояснень. " +
             "Починай відповідь одразу з символу [ і завершуй символом ]. " +
             "Для кожного елемента використовуй тільки поля: " +
-            "name, model, inventoryNumber, serialNumber, state, location, notes. " +
+            "name, model, inventoryNumber, serialNumber, state, location, notes, mappingStrategy. " +
             "Не додавай жодних інших полів. " +
+            "mappingStrategy може бути тільки одним із значень: Separate, MergeIntoName, SingleField. " +
+            "Якщо name і model окремі, але разом вони формують одну назву предмета, " +
+            "використай MergeIntoName. " +
+            "Якщо є лише один змістовний стовпець для назви, використай SingleField. " +
+            "Якщо name і model мають зберігатися окремо, використай Separate. " +
             "Якщо значення відсутнє або не читається — поверни порожній рядок. " +
             "Не вигадуй значення. " +
             "Поверни всі текстові значення тільки українською мовою. " +
             "Не додавай англійський переклад. " +
             "Кожне значення повертай в один рядок без переносів.";
-
         var requestBody = new
         {
             model = _options.Model,
