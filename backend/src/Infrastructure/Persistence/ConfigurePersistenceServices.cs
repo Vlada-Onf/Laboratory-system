@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Queries;
 using Application.Common.Interfaces.Repositories;
 using Application.HistoryEntries;
 using Application.HistoryEntries.Observers;
+using Infrastructure.AI;
 using Infrastructure.Files;
 using Infrastructure.HistoryOfAction;
 using Infrastructure.Persistence.Repositories;
@@ -158,6 +159,11 @@ namespace Infrastructure.Persistence
             services.AddScoped<IWishlistStatusRepository>(p => p.GetRequiredService<WishlistStatusRepository>());
 
             services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+            services.AddScoped<IExcelService, ExcelService>();
+            services.AddHttpClient<IGroqService, GroqService>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.groq.com/openai/");
+            });
         }
     }
 }

@@ -6,4 +6,8 @@ public interface IGroqService
         byte[] fileBytes,
         string contentType,
         CancellationToken cancellationToken);
+    
+    Task<string> AnalyzeInventoryExcelTextAsync(
+        string excelJsonStructure,
+        CancellationToken cancellationToken);
 }

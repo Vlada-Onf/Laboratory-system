@@ -17,13 +17,59 @@ namespace Api.Controllers
     {
         private readonly IGroqService _groqService;
         private readonly ISender _sender;
-
-        public ImportController(IGroqService groqService, ISender sender)
+        private readonly IExcelService _excelService;
+        
+        public ImportController(IGroqService groqService, ISender sender, IExcelService excelService)
         {
             _groqService = groqService;
             _sender = sender;
+            _excelService = excelService;
         }
+        [HttpPost("analyze-excel")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<IReadOnlyList<InventoryItemImportDto>>> AnalyzeExcel(
+            IFormFile file,
+            CancellationToken cancellationToken)
+        {
+            if (file is null || file.Length == 0)
+                return BadRequest("Файл не обрано або порожній.");
 
+            var allowedExtensions = new[] { ".xlsx", ".xlsm" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+                return BadRequest("Непідтримуваний формат файлу. Дозволено тільки .xlsx та .xlsm");
+
+            try
+            {
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms, cancellationToken);
+                var fileBytes = ms.ToArray();
+                
+                var excelStructureJson = await _excelService.AnalyzeInventoryExcelAsync(
+                    fileBytes, file.FileName, cancellationToken);
+                
+                var rawAiResponse = await _groqService.AnalyzeInventoryExcelTextAsync(
+                    excelStructureJson, cancellationToken);
+                
+                var json = ExtractJson(rawAiResponse);
+                var items = JsonSerializer.Deserialize<List<InventoryItemImportDto>>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (items is null)
+                    return BadRequest("AI повернув порожній або некоректний масив даних.");
+
+                return Ok(NormalizeItems(items));
+            }
+            catch (JsonException ex)
+            {
+                return BadRequest("Не вдалося розпарсити JSON від AI: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Внутрішня помилка при обробці Excel: {ex.Message}");
+            }
+        }
         [HttpPost("analyze-image")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<IReadOnlyList<InventoryItemImportDto>>> AnalyzeImage(

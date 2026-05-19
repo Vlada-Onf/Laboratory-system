@@ -1,6 +1,10 @@
+using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Microsoft.Extensions.Options;
 
@@ -25,98 +29,102 @@ public sealed class GroqService : IGroqService
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
             throw new InvalidOperationException("Groq API key is missing.");
 
-        var mimeType = string.IsNullOrWhiteSpace(contentType)
-            ? "image/jpeg"
-            : contentType;
-
+        var mimeType = string.IsNullOrWhiteSpace(contentType) ? "image/jpeg" : contentType;
         var base64Image = Convert.ToBase64String(fileBytes);
         var imageUrl = $"data:{mimeType};base64,{base64Image}";
 
         var prompt =
             "Проаналізуй це фото лабораторної таблиці або журналу обліку техніки. " +
             "Поверни виключно валідний JSON-масив без markdown і без пояснень. " +
-            "Починай відповідь одразу з символу [ і завершуй символом ]. " +
+            "Починай відповідь одразу з символу [ і завершуй㓦 символом ]. " +
             "Для кожного елемента використовуй тільки поля: " +
             "name, model, inventoryNumber, serialNumber, state, location, notes, mappingStrategy. " +
             "Не додавай жодних інших полів. " +
             "mappingStrategy може бути тільки одним із значень: Separate, MergeIntoName, SingleField. " +
-            "Якщо name і model окремі, але разом вони формують одну назву предмета, " +
-            "використай MergeIntoName. " +
+            "Якщо name і model окремі, але разом вони формують одну назву предмета, використай MergeIntoName. " +
             "Якщо є лише один змістовний стовпець для назви, використай SingleField. " +
             "Якщо name і model мають зберігатися окремо, використай Separate. " +
             "Якщо значення відсутнє або не читається — поверни порожній рядок. " +
             "Не вигадуй значення. " +
             "Поверни всі текстові значення тільки українською мовою. " +
-            "Не додавай англійський переклад. " +
             "Кожне значення повертай в один рядок без переносів.";
+
         var requestBody = new
         {
             model = _options.Model,
             messages = new object[]
             {
-                new
-                {
-                    role = "system",
-                    content = "You are an OCR data extraction service. Return only valid JSON array."
-                },
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new
-                        {
-                            type = "text",
-                            text = prompt
-                        },
-                        new
-                        {
-                            type = "image_url",
-                            image_url = new
-                            {
-                                url = imageUrl
-                            }
-                        }
-                    }
-                }
+                new { role = "system", content = "You are an OCR data extraction service. Return only valid JSON array." },
+                new { role = "user", content = new object[] {
+                    new { type = "text", text = prompt },
+                    new { type = "image_url", image_url = new { url = imageUrl } }
+                }}
             },
             temperature = 0.1
         };
 
+        return await SendGroqRequestAsync(requestBody, cancellationToken);
+    }
+
+    public async Task<string> AnalyzeInventoryExcelTextAsync(
+        string excelJsonStructure,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+            throw new InvalidOperationException("Groq API key is missing.");
+
+        var prompt =
+            "Проаналізуй структуру та дані Excel таблиці, які надані у форматі JSON. " +
+            "Твоє завдання — розпарсити ці дані та змапити їх на стандартний список інвентарю. " +
+            "Поверни виключно валідний JSON-масив без markdown-розмітки (без початкових або кінцевих апострофів) і без жодних пояснень. " +
+            "Починай відповідь одразу з символу [ і завершуй символом ]. " +
+            "Для кожного елемента використовуй тільки поля: " +
+            "name, model, inventoryNumber, serialNumber, state, location, notes, mappingStrategy. " +
+            "Не додавай жодних інших полів. " +
+            "mappingStrategy може бути тільки одним із значень: Separate, MergeIntoName, SingleField. " +
+            "Орієнтуйся на назви колонок (headers) та значення. Якщо назва і модель рознесені, використовуй Separate або MergeIntoName за логікою. " +
+            "Поверни всі текстові значення тільки українською мовою. " +
+            "Не додавай англійський переклад. Кожне значення повертай в один рядок без переносів. " +
+            "Ось дані для аналізу:\n\n" + excelJsonStructure;
+
+        var requestBody = new
+        {
+            model = _options.Model,
+            messages = new object[]
+            {
+                new { role = "system", content = "You are an expert data migration service. Convert the provided Excel JSON structure into a clean, standardized inventory JSON array." },
+                new { role = "user", content = prompt }
+            },
+            temperature = 0.1
+        };
+
+        return await SendGroqRequestAsync(requestBody, cancellationToken);
+    }
+
+    private async Task<string> SendGroqRequestAsync(object requestBody, CancellationToken cancellationToken)
+    {
         var json = JsonSerializer.Serialize(requestBody);
 
-        using var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            "https://api.groq.com/openai/v1/chat/completions");
-
-        request.Headers.Authorization =
-            new AuthenticationHeaderValue("Bearer", _options.ApiKey);
-
-        request.Headers.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-
+        // Використовуємо ВІДНОСНИЙ шлях, оскільки HttpClient налаштований з BaseAddress
+        using var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
         using var response = await _httpClient.SendAsync(request, cancellationToken);
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException(
-                $"Groq API error: {response.StatusCode}. {responseContent}");
+            throw new InvalidOperationException($"Groq API error: {response.StatusCode}. {responseContent}");
 
         using var document = JsonDocument.Parse(responseContent);
 
-        if (!document.RootElement.TryGetProperty("choices", out var choices)
-            || choices.GetArrayLength() == 0)
-            throw new InvalidOperationException(
-                $"Groq returned no choices. Raw response: {responseContent}");
+        if (!document.RootElement.TryGetProperty("choices", out var choices) || choices.GetArrayLength() == 0)
+            throw new InvalidOperationException($"Groq returned no choices. Raw response: {responseContent}");
 
         var firstChoice = choices[0];
-
-        if (!firstChoice.TryGetProperty("message", out var message)
-            || !message.TryGetProperty("content", out var content))
-            throw new InvalidOperationException(
-                $"Groq response missing message/content. Raw response: {responseContent}");
+        if (!firstChoice.TryGetProperty("message", out var message) || !message.TryGetProperty("content", out var content))
+            throw new InvalidOperationException($"Groq response missing message/content. Raw response: {responseContent}");
 
         return content.GetString() ?? "[]";
     }
