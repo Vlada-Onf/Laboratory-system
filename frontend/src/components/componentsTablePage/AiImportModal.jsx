@@ -67,7 +67,7 @@ const AiImportModal = ({ open, onClose }) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       if (selectedFile.size > 5 * 1024 * 1024) {
-        setLocalError("Файл занадто великий. Оберіть фото до 5МБ.");
+        setLocalError("Файл занадто великий. Оберіть файл до 5МБ.");
         return;
       }
       setFile(selectedFile);
@@ -75,6 +75,8 @@ const AiImportModal = ({ open, onClose }) => {
 
       if (selectedFile.type.startsWith('image/')) {
         setPreview(URL.createObjectURL(selectedFile));
+      } else {
+        setPreview(selectedFile);
       }
 
       try {
@@ -82,7 +84,9 @@ const AiImportModal = ({ open, onClose }) => {
         if (resultItems && Array.isArray(resultItems)) {
           resultItems.forEach((item, index) => {
             const descriptionParts = [];
+
             if (item.description?.trim()) descriptionParts.push(item.description.trim());
+
             if (item.model) descriptionParts.push(`Модель: ${item.model}`);
             if (item.inventoryNumber) descriptionParts.push(`Інв. номер: ${item.inventoryNumber}`);
             if (item.serialNumber) descriptionParts.push(`Серійний номер: ${item.serialNumber}`);
@@ -91,11 +95,15 @@ const AiImportModal = ({ open, onClose }) => {
             if (item.notes) descriptionParts.push(`Нотатки: ${item.notes}`);
 
             const initialDescription = descriptionParts.join('\n');
+
             updateScannedItemField(index, 'description', initialDescription);
+
+            if (item.price) updateScannedItemField(index, 'price', item.price);
+            if (item.quantity) updateScannedItemField(index, 'quantity', item.quantity);
           });
         }
       } catch (err) {
-        console.error("Помилка при аналізі фото:", err);
+        console.error("Помилка при аналізі файлу:", err);
       }
     }
   };

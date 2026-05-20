@@ -6,7 +6,7 @@ export const useAiImportStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  analyzeImage: async (file) => {
+  analyzeImage: async (file) => { // Назву методу залишив, щоб не ламати імпорти в компонентах
     set({ isLoading: true, error: null });
 
     if (!file) {
@@ -15,12 +15,31 @@ export const useAiImportStore = create((set, get) => ({
       return;
     }
 
+    // 1. Визначаємо, що це за файл за його MIME-типом
+    const isExcelOrCsv = 
+      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+      file.type === 'application/vnd.ms-excel' || 
+      file.type === 'text/csv' ||
+      file.name.endsWith('.xlsx') || 
+      file.name.endsWith('.xls') || 
+      file.name.endsWith('.csv');
+
+    // 2. Налаштовуємо параметри залежно від типу файлу
+    let endpoint = '/import/analyze-image';
+    let formDataKey = 'image';
+    const fileName = file.name || (isExcelOrCsv ? 'table.xlsx' : 'image.jpg');
+
+    if (isExcelOrCsv) {
+      endpoint = '/import/analyze-excel';
+      formDataKey = 'file'; // Свапаємо ключ на "file", як просить swagger для таблиць
+    }
+
     const formData = new FormData();
-    const fileName = file.name || 'image.jpg';
-    formData.append('image', file, fileName);
+    formData.append(formDataKey, file, fileName);
 
     try {
-      const response = await apiClient.post('/import/analyze-image', formData, {
+      // 3. Відправляємо запит на динамічно визначений ендпоінт
+      const response = await apiClient.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
