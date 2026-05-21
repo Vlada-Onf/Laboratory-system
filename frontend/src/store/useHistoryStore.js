@@ -8,6 +8,7 @@ import { NAME_FIELDS } from '../utils/historyHelpers';
 import { useComponentsStore } from './useComponentsStore';
 import { enrichHistory } from '../utils/enrichHistory';
 import { useWishlistStatusesStore } from './useWishlistStatusesStore';
+
 const LAB_ROLE_ID = "bbc9c32e-8c47-43f4-bc68-c29f81754dac";
 const PAGE_SIZE = 25;
 
@@ -22,78 +23,77 @@ export const useHistoryStore = create((set, get) => ({
   hasMore: true,
   currentFetchKey: null,
 
- enrichHistory: (rawHistory) => enrichHistory(rawHistory),
+  enrichHistory: (rawHistory) => enrichHistory(rawHistory),
 
   ensureDependenciesLoaded: async () => {
-  const profileStore = useProfileStore.getState();
-  const actionsStore = useActionsStore.getState();
-  const entityTypesStore = useEntityTypesStore.getState();
-  const componentsStore = useComponentsStore.getState();
-  const wishlistStatusesStore = useWishlistStatusesStore.getState();
+    const profileStore = useProfileStore.getState();
+    const actionsStore = useActionsStore.getState();
+    const entityTypesStore = useEntityTypesStore.getState();
+    const componentsStore = useComponentsStore.getState();
+    const wishlistStatusesStore = useWishlistStatusesStore.getState();
 
-  const tasks = [];
-  if (!profileStore.profile) tasks.push(profileStore.fetchProfile());
-  if (actionsStore.actions.length === 0) tasks.push(actionsStore.fetchActions());
-  if (entityTypesStore.entityTypes.length === 0) tasks.push(entityTypesStore.fetchEntityTypes());
-  if (componentsStore.components.length === 0) tasks.push(componentsStore.fetchComponents());
+    const tasks = [];
+    if (!profileStore.profile) tasks.push(profileStore.fetchProfile());
+    if (actionsStore.actions.length === 0) tasks.push(actionsStore.fetchActions());
+    if (entityTypesStore.entityTypes.length === 0) tasks.push(entityTypesStore.fetchEntityTypes());
+    if (componentsStore.components.length === 0) tasks.push(componentsStore.fetchComponents());
 
-  if (!wishlistStatusesStore.statuses || wishlistStatusesStore.statuses.length === 0) {
-    tasks.push(wishlistStatusesStore.fetchStatuses());
-  }
-
-  if (tasks.length > 0) await Promise.all(tasks);
-},
-
-  _handleFetch: async (fetchFn, isAppend = false, targetPage = 1, fetchKey = 'default') => {
-  if (get().isLoading) return;
-
-  const isNewRequest = get().currentFetchKey !== fetchKey;
-
-  if (isNewRequest) {
-    set({ allRawData: [], history: [], myHistory: [], page: 1, currentFetchKey: fetchKey });
-  }
-
-  const shouldFetchFromApi = get().allRawData.length === 0;
-
-  set({ isLoading: true, lastHistoryAttempt: Date.now() });
-
-  try {
-    await get().ensureDependenciesLoaded();
-
-    let currentFullData = [];
-
-    if (shouldFetchFromApi) {
-      const responseData = await fetchFn();
-
-      currentFullData = responseData || [];
-      set({ allRawData: currentFullData });
-    } else {
-      currentFullData = get().allRawData;
+    if (!wishlistStatusesStore.statuses || wishlistStatusesStore.statuses.length === 0) {
+      tasks.push(wishlistStatusesStore.fetchStatuses());
     }
 
-    const start = (targetPage - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
+    if (tasks.length > 0) await Promise.all(tasks);
+  },
 
-    const pageChunk = currentFullData.slice(start, end);
-    const enriched = get().enrichHistory(pageChunk);
+  _handleFetch: async (fetchFn, isAppend = false, targetPage = 1, fetchKey = 'default') => {
+    if (get().isLoading) return;
 
-    const result = {
-      history: isAppend ? [...get().history, ...enriched] : enriched,
-      myHistory: isAppend ? [...get().myHistory, ...enriched] : enriched,
-      page: targetPage,
-      hasMore: end < currentFullData.length,
-      isLoading: false
-    };
+    const isNewRequest = get().currentFetchKey !== fetchKey;
 
-    set(result);
-    return enriched;
+    if (isNewRequest) {
+      set({ allRawData: [], history: [], myHistory: [], page: 1, currentFetchKey: fetchKey });
+    }
 
-  } catch (error) {
-    console.error('History Store Error:', error);
-    set({ isLoading: false, lastHistoryAttempt: 0 });
-    return [];
-  }
-},
+    const shouldFetchFromApi = get().allRawData.length === 0 || isNewRequest || targetPage === 1 || !isAppend;
+
+    set({ isLoading: true, lastHistoryAttempt: Date.now() });
+
+    try {
+      await get().ensureDependenciesLoaded();
+
+      let currentFullData = [];
+
+      if (shouldFetchFromApi) {
+        const responseData = await fetchFn();
+        currentFullData = responseData || [];
+        set({ allRawData: currentFullData });
+      } else {
+        currentFullData = get().allRawData;
+      }
+
+      const start = (targetPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+
+      const pageChunk = currentFullData.slice(start, end);
+      const enriched = get().enrichHistory(pageChunk);
+
+      const result = {
+        history: isAppend ? [...get().history, ...enriched] : enriched,
+        myHistory: isAppend ? [...get().myHistory, ...enriched] : enriched,
+        page: targetPage,
+        hasMore: end < currentFullData.length,
+        isLoading: false
+      };
+
+      set(result);
+      return enriched;
+
+    } catch (error) {
+      console.error('History Store Error:', error);
+      set({ isLoading: false, lastHistoryAttempt: 0 });
+      return [];
+    }
+  },
 
   fetchHistoryByUser: async (userId, reset = true, targetPage = 1) => {
     const pageToLoad = reset ? targetPage : get().page + 1;
@@ -115,18 +115,17 @@ export const useHistoryStore = create((set, get) => ({
   },
 
   fetchHistoryByEntity: async (entityId, reset = true, targetPage = 1) => {
-  const pageToLoad = reset ? targetPage : get().page + 1;
+    const pageToLoad = reset ? targetPage : get().page + 1;
 
-  return await get()._handleFetch(async () => {
-    const response = await apiClient.get(
-      `/history/by-type/${entityId.trim()}`
-    );
+    return await get()._handleFetch(async () => {
+      const response = await apiClient.get(
+        `/history/by-type/${entityId.trim()}`
+      );
+      return response.data;
+    }, !reset, pageToLoad, `entity-${entityId}`);
+  },
 
-    return response.data;
-  }, !reset, pageToLoad, `entity-${entityId}`);
-},
-
-fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
+  fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
     if (!entityId) return;
 
     const pageToLoad = reset ? targetPage : get().page + 1;
@@ -136,7 +135,7 @@ fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
       );
       return response.data;
     }, !reset, pageToLoad, `entity-id-${entityId}`);
-},
+  },
 
   fetchAllHistory: async (reset = true, targetPage = 1) => {
     const { user } = useAuthStore.getState();
@@ -182,14 +181,13 @@ fetchHistoryByEntityId: async (entityId, reset = true, targetPage = 1) => {
   clearHistory: () => set({ history: [], myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null }),
   clearMyHistory: () => set({ myHistory: [], allRawData: [], page: 1, hasMore: true, currentFetchKey: null }),
   getSearchOptions: () => {
-  const { history, allRawData } = get();
+    const { history, allRawData } = get();
+    const source = history.length ? history : allRawData;
 
-  const source = history.length ? history : allRawData;
-
-  return source.map(item => ({
-    id: item.entityId,
-    type: item.entityTypeName,
-    label: item.searchLabel,
-  }));
-},
+    return source.map(item => ({
+      id: item.entityId,
+      type: item.entityTypeName,
+      label: item.searchLabel,
+    }));
+  },
 }));
