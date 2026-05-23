@@ -44,6 +44,8 @@ namespace Application.Components.Commands.Update
         {
             try
             {
+                var oldQuantity = component.Quantity;
+
                 var oldValues = JsonSerializer.Serialize(new
                 {
                     component.Id,
@@ -63,7 +65,6 @@ namespace Application.Components.Commands.Update
                 });
 
                 var lastUpdatedBy = new UserId(request.LastUpdatedBy);
-
                 component.Update(
                     categoryId: categoryId,
                     name: request.Name,
@@ -104,6 +105,7 @@ namespace Application.Components.Commands.Update
                     component.LastUpdatedBy
                 });
 
+                // 3. Загальний запис "Updated"
                 await historyObserver.EntityUpdatedAsync(
                     userId: request.PerformedBy,
                     entityTypeName: "Component",
@@ -111,6 +113,32 @@ namespace Application.Components.Commands.Update
                     oldValues: oldValues,
                     newValues: newValues,
                     cancellationToken: cancellationToken);
+
+                // 4. Якщо змінилась кількість - окремий запис "Quantity changed"
+                var newQuantity = component.Quantity;
+
+                if (newQuantity != oldQuantity)
+                {
+                    var quantityOldValues = JsonSerializer.Serialize(new
+                    {
+                        component.Id,
+                        Quantity = oldQuantity
+                    });
+
+                    var quantityNewValues = JsonSerializer.Serialize(new
+                    {
+                        component.Id,
+                        Quantity = newQuantity
+                    });
+
+                    await historyObserver.EntityQuantityChangedAsync(
+                        userId: request.PerformedBy,
+                        entityTypeName: "Component",
+                        entityId: component.Id.Value.ToString(),
+                        oldValues: quantityOldValues,
+                        newValues: quantityNewValues,
+                        cancellationToken: cancellationToken);
+                }
 
                 return updated;
             }

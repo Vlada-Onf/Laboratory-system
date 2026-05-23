@@ -1,10 +1,6 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Microsoft.Extensions.Options;
 
@@ -36,7 +32,7 @@ public sealed class GroqService : IGroqService
         var prompt =
             "Проаналізуй це фото лабораторної таблиці або журналу обліку техніки. " +
             "Поверни виключно валідний JSON-масив без markdown і без пояснень. " +
-            "Починай відповідь одразу з символу [ і завершуй㓦 символом ]. " +
+            "Починай відповідь одразу з символу [ і завершуй символом ]. " +
             "Для кожного елемента використовуй тільки поля: " +
             "name, model, inventoryNumber, serialNumber, state, location, notes, mappingStrategy. " +
             "Не додавай жодних інших полів. " +
@@ -55,10 +51,15 @@ public sealed class GroqService : IGroqService
             messages = new object[]
             {
                 new { role = "system", content = "You are an OCR data extraction service. Return only valid JSON array." },
-                new { role = "user", content = new object[] {
-                    new { type = "text", text = prompt },
-                    new { type = "image_url", image_url = new { url = imageUrl } }
-                }}
+                new
+                {
+                    role = "user",
+                    content = new object[]
+                    {
+                        new { type = "text", text = prompt },
+                        new { type = "image_url", image_url = new { url = imageUrl } }
+                    }
+                }
             },
             temperature = 0.1
         };
@@ -76,7 +77,7 @@ public sealed class GroqService : IGroqService
         var prompt =
             "Проаналізуй структуру та дані Excel таблиці, які надані у форматі JSON. " +
             "Твоє завдання — розпарсити ці дані та змапити їх на стандартний список інвентарю. " +
-            "Поверни виключно валідний JSON-масив без markdown-розмітки (без початкових або кінцевих апострофів) і без жодних пояснень. " +
+            "Поверни виключно валідний JSON-масив без markdown-розмітки і без жодних пояснень. " +
             "Починай відповідь одразу з символу [ і завершуй символом ]. " +
             "Для кожного елемента використовуй тільки поля: " +
             "name, model, inventoryNumber, serialNumber, state, location, notes, mappingStrategy. " +
@@ -101,11 +102,59 @@ public sealed class GroqService : IGroqService
         return await SendGroqRequestAsync(requestBody, cancellationToken);
     }
 
+    public async Task<string> AnalyzeLowStockRiskAsync(
+        string inventoryAnalysisJson,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+            throw new InvalidOperationException("Groq API key is missing.");
+
+        var prompt =
+            "Проаналізуй JSON з компонентами складу та їхніми метриками використання. " +
+            "Визнач, які компоненти можуть скоро закінчитися. " +
+            "Поверни виключно валідний JSON-масив без markdown і без пояснень. " +
+            "Починай відповідь одразу з символу [ і завершуй символом ]. " +
+            "Для кожного елемента використовуй тільки поля: " +
+            "componentId, name, currentQuantity, riskLevel, estimatedDaysLeft, reason, recommendedAction. " +
+            "currentQuantity має відповідати вхідному currentQuantity. " +
+            "riskLevel може бути тільки одним із значень: high, medium, low. " +
+            "estimatedDaysLeft має бути числом. " +
+            "reason і recommendedAction повертай українською мовою. " +
+            "Не додавай жодних інших полів. " +
+            "Орієнтуйся на currentQuantity, averageDailyUsage, consumptionEventsCount, daysSinceLastConsumption, estimatedDaysLeft. " +
+            "Критичними вважай насамперед компоненти з малим estimatedDaysLeft або нестабільним, але частим споживанням. " +
+            "Не позначай компоненти як high risk, якщо запас великий і estimatedDaysLeft явно великий. " +
+            "Ось дані для аналізу:\n\n" + inventoryAnalysisJson;
+
+        var requestBody = new
+        {
+            model = _options.Model,
+            messages = new object[]
+            {
+                new
+                {
+                    role = "system",
+                    content = "You are an inventory risk analysis service. Return only valid JSON array."
+                },
+                new
+                {
+                    role = "user",
+                    content = prompt
+                }
+            },
+            temperature = 0.1
+        };
+
+        return await SendGroqRequestAsync(requestBody, cancellationToken);
+    }
+
     private async Task<string> SendGroqRequestAsync(object requestBody, CancellationToken cancellationToken)
     {
-        var json = JsonSerializer.Serialize(requestBody);
+        var json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
 
-        // Використовуємо ВІДНОСНИЙ шлях, оскільки HttpClient налаштований з BaseAddress
         using var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -127,5 +176,46 @@ public sealed class GroqService : IGroqService
             throw new InvalidOperationException($"Groq response missing message/content. Raw response: {responseContent}");
 
         return content.GetString() ?? "[]";
+    }
+    public async Task<string> SuggestComponentAutofillAsync(
+        string componentAutofillJson,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+            throw new InvalidOperationException("Groq API key is missing.");
+
+        var prompt =
+            "Проаналізуй дані для створення нового компонента в інвентарній системі. " +
+            "Поверни виключно валідний JSON-об'єкт без markdown і без пояснень. " +
+            "Починай відповідь одразу з символу { і завершуй символом }. " +
+            "Для відповіді використовуй тільки поля: " +
+            "suggestedCategoryId, description, tagIds, confidence. " +
+            "suggestedCategoryId має бути GUID існуючої категорії або null. " +
+            "description має бути коротким, змістовним описом українською мовою. " +
+            "tagIds має бути масивом GUID існуючих тегів або порожнім масивом. " +
+            "confidence має бути числом від 0 до 1. " +
+            "Не вигадуй нові категорії чи теги. Обирай лише з тих, що є у вхідних даних. " +
+            "Ось дані для аналізу:\n\n" + componentAutofillJson;
+
+        var requestBody = new
+        {
+            model = _options.Model,
+            messages = new object[]
+            {
+                new
+                {
+                    role = "system",
+                    content = "You are an assistant that suggests autofill values for inventory component creation. Return only valid JSON object."
+                },
+                new
+                {
+                    role = "user",
+                    content = prompt
+                }
+            },
+            temperature = 0.1
+        };
+
+        return await SendGroqRequestAsync(requestBody, cancellationToken);
     }
 }

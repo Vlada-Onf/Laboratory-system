@@ -23,6 +23,13 @@
             string entityId,
             string? oldValues,
             CancellationToken cancellationToken);
-    }
 
+        Task EntityQuantityChangedAsync(
+            Guid userId,
+            string entityTypeName,
+            string entityId,
+            string? oldValues,
+            string? newValues,
+            CancellationToken cancellationToken);
+    }
 }

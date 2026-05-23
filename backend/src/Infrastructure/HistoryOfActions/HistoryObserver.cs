@@ -74,6 +74,24 @@ namespace Infrastructure.HistoryOfAction
                 cancellationToken);
         }
 
+        public async Task EntityQuantityChangedAsync(
+            Guid userId,
+            string entityTypeName,
+            string entityId,
+            string? oldValues,
+            string? newValues,
+            CancellationToken cancellationToken)
+        {
+            await AddInternalAsync(
+                userId,
+                "Quantity changed",
+                entityTypeName,
+                entityId,
+                oldValues,
+                newValues,
+                cancellationToken);
+        }
+
         private async Task AddInternalAsync(
             Guid userId,
             string actionName,
@@ -81,7 +99,7 @@ namespace Infrastructure.HistoryOfAction
             string entityId,
             string? oldValues,
             string? newValues,
-    CancellationToken cancellationToken)
+            CancellationToken cancellationToken)
         {
             var action = await _context.Set<Action>()
                 .AsNoTracking()
@@ -101,6 +119,5 @@ namespace Infrastructure.HistoryOfAction
 
             await _historyRepository.AddAsync(entry, cancellationToken);
         }
-
     }
 }

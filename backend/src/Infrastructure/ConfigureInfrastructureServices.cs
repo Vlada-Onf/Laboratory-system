@@ -1,13 +1,10 @@
 ﻿using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Application.Common.Interfaces;
+using Application.Components.Autofill;
 using Infrastructure.AI;
+using Application.Components.Forecast;
 
 namespace Infrastructure
 {
@@ -18,11 +15,12 @@ namespace Infrastructure
             IConfiguration configuration)
         {
             services.AddPersistenceServices(configuration);
-
             services.Configure<GroqOptions>(
                 configuration.GetSection(GroqOptions.SectionName));
-
             services.AddHttpClient<IGroqService, GroqService>();
+            services.AddScoped<IComponentForecastService, ComponentForecastService>();
+            services.AddScoped<IAiComponentRiskAnalysisService, AiComponentRiskAnalysisService>();
+            services.AddScoped<IComponentAutofillService, ComponentAutofillService>();
         }
     }
 }

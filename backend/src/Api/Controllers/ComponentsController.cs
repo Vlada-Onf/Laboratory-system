@@ -2,32 +2,49 @@
 using Api.Modules.Errors;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Queries;
+using Application.Components.Autofill;
 using Application.Components.Commands.Create;
 using Application.Components.Commands.Delete;
+using Application.Components.Commands.Update;
+using Application.Components.Forecast;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("components")]
-    [Authorize]
+    [AllowAnonymous]
     public class ComponentsController : ControllerBase
     {
         private readonly IComponentQueries _componentQueries;
         private readonly ISender _sender;
         private readonly IFileStorageService _fileStorage;
+        private readonly IComponentForecastService _forecastService;
+        private readonly IAiComponentRiskAnalysisService _aiRiskAnalysisService;
+        private readonly IComponentAutofillService _componentAutofillService;
+        private readonly ICategoryQueries _categoryQueries;
+        private readonly ITagQueries _tagQueries;
 
         public ComponentsController(
             IComponentQueries componentQueries,
             ISender sender,
-            IFileStorageService fileStorage)
+            IFileStorageService fileStorage,
+            IComponentForecastService forecastService,
+            IAiComponentRiskAnalysisService aiRiskAnalysisService,
+            IComponentAutofillService componentAutofillService,
+            ICategoryQueries categoryQueries,
+            ITagQueries tagQueries)
         {
             _componentQueries = componentQueries;
             _sender = sender;
             _fileStorage = fileStorage;
+            _forecastService = forecastService;
+            _aiRiskAnalysisService = aiRiskAnalysisService;
+            _componentAutofillService = componentAutofillService;
+            _categoryQueries = categoryQueries;
+            _tagQueries = tagQueries;
         }
 
         [HttpGet]
@@ -157,6 +174,65 @@ namespace Api.Controllers
             return result.Match<ActionResult>(
                 _ => NoContent(),
                 e => e.ToObjectResult());
+        }
+
+        [HttpGet("forecast")]
+        public async Task<ActionResult<IReadOnlyList<ComponentForecastDto>>> GetForecast(
+            CancellationToken cancellationToken)
+        {
+            var forecasts = await _forecastService.GetForecastsAsync(cancellationToken);
+
+            return forecasts
+                .Select(x => new ComponentForecastDto(
+                    x.ComponentId,
+                    x.Name,
+                    x.CurrentQuantity,
+                    x.AverageDailyUsage,
+                    x.EstimatedDaysLeft,
+                    x.RiskLevel))
+                .ToList();
+        }
+
+        [HttpGet("forecast/ai")]
+        public async Task<ActionResult<IReadOnlyList<AiComponentRiskDto>>> GetAiForecast(
+            CancellationToken cancellationToken)
+        {
+            var result = await _aiRiskAnalysisService.AnalyzeAsync(cancellationToken);
+
+            return result
+                .Select(x => new AiComponentRiskDto(
+                    x.ComponentId,
+                    x.Name,
+                    x.CurrentQuantity,
+                    x.RiskLevel,
+                    x.EstimatedDaysLeft,
+                    x.Reason,
+                    x.RecommendedAction))
+                .ToList();
+        }
+
+        [HttpPost("autofill")]
+        public async Task<ActionResult<ComponentAutofillDto>> AutofillComponent(
+            [FromBody] ComponentAutofillRequest request,
+            CancellationToken cancellationToken)
+        {
+            var categories = await _categoryQueries.GetAllAsync(cancellationToken);
+            var tags = await _tagQueries.GetAllAsync(cancellationToken);
+
+            var input = new ComponentAutofillInput(
+                request.Name,
+                request.SupplierLink,
+                request.ExistingDescription,
+                categories.Select(c => new CategoryOption(c.Id.Value, c.Name, c.Description)).ToList(),
+                tags.Select(t => new TagOption(t.Id.Value, t.Name)).ToList());
+
+            var result = await _componentAutofillService.SuggestAsync(input, cancellationToken);
+
+            return new ComponentAutofillDto(
+                result.SuggestedCategoryId,
+                result.Description,
+                result.TagIds.ToList(),
+                result.Confidence);
         }
     }
 }
