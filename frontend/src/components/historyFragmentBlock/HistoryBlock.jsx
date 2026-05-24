@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import HistoryItemWidget from './HistoryItemWidget';
 import { useHistoryStore } from '@store/useHistoryStore';
@@ -38,7 +38,7 @@ const HistoryBlock = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user){
+    if (!isAuthenticated || !user) {
       return;
     }
 
@@ -57,18 +57,10 @@ const HistoryBlock = () => {
   );
 
   const handleBlockClick = () => {
-    navigate('/front-history');
+    if (!isLoading) {
+      navigate('/front-history');
+    }
   };
-
-  if (isLoading) {
-    return (
-      <Paper sx={{ p: 2, borderRadius: 2 }}>
-        <Typography sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>
-          Завантаження...
-        </Typography>
-      </Paper>
-    );
-  }
 
   return (
     <Paper
@@ -84,13 +76,13 @@ const HistoryBlock = () => {
         boxShadow: '0 8px 32px rgba(8, 39, 59, 0.45)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         overflow: 'hidden',
-        cursor: 'pointer',
+        cursor: isLoading ? 'default' : 'pointer',
         transition: 'all 0.2s ease',
-        '&:hover': {
+        '&:hover': !isLoading ? {
           transform: 'translateY(-2px)',
           boxShadow: '0 12px 40px rgba(8, 39, 59, 0.6)',
           borderColor: 'rgba(255, 255, 255, 0.15)',
-        },
+        } : {},
       }}
       onClick={handleBlockClick}
     >
@@ -113,18 +105,26 @@ const HistoryBlock = () => {
           flexDirection: 'column',
           gap: 1,
           overflow: 'hidden',
+          minHeight: '160px',
+          justifyContent: (isLoading || recentHistory.length === 0) ? 'center' : 'flex-start',
+          alignItems: (isLoading || recentHistory.length === 0) ? 'center' : 'stretch',
         }}>
-          {recentHistory.length === 0 ? (
+          {isLoading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+              <CircularProgress size={24} sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+              <Typography
+                fontSize={14}
+                sx={{ color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center' }}
+              >
+                Завантаження даних...
+              </Typography>
+            </Box>
+          ) : recentHistory.length === 0 ? (
             <Typography
               fontSize={14}
               sx={{
                 color: 'rgba(255, 255, 255, 0.5)',
                 textAlign: 'center',
-                py: 2,
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
               }}
             >
               Історія порожня
