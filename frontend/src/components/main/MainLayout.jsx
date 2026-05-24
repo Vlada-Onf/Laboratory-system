@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import PageWrapper from '../../components/layout/PaperWrapper';
 import { useTheme as useCustomTheme } from '../../context/useTheme';
 
@@ -12,98 +12,92 @@ const MainLayout = ({ title, topRightContent, bottomContent }) => {
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
-          gap: 3,
-          overflowY: 'auto',
+          gap: { xs: 3, md: 5 },
+          overflowX: 'hidden',
         }}
       >
         <Box
           sx={{
             width: '100%',
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'stretch', md: 'flex-start' },
-            justifyContent: 'space-between',
-            gap: 4,
+            justifyContent: 'center',
+            textAlign: 'center',
+            opacity: 0,
+            animation: 'fadeUp 0.8s ease-out forwards',
+            '@keyframes fadeUp': {
+              '0%': { opacity: 0, transform: 'translateY(20px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            },
           }}
         >
-          <Box
+          <Typography
+            variant="h1"
+            fontWeight={500}
             sx={{
-              flex: 1.2,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: { xs: 'center', md: 'flex-start' },
-              textAlign: { xs: 'center', md: 'left' },
-              opacity: 0,
-              animation: 'fadeUp 0.8s ease-out forwards',
-              '@keyframes fadeUp': {
-                '0%': { opacity: 0, transform: 'translateY(20px)' },
-                '100%': { opacity: 1, transform: 'translateY(0)' },
-              },
+              fontSize: { xs: '32px', sm: '56px', md: '64px', lg: '72px' },
+              lineHeight: 1.2,
+              color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
             }}
           >
-            <Typography
-              variant="h1"
-              fontWeight={500}
-              sx={{
-                fontSize: { xs: '48px', sm: '72px', md: '76px', lg: '96px' },
-                lineHeight: 1.1,
-                color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#08273b',
-              }}
-            >
-              {title}
-            </Typography>
-          </Box>
-
-          {topRightContent && (
-            <Box
-              sx={{
-                flex: 1,
-                width: '100%',
-                display: 'flex',
-                justifyContent: { xs: 'center', md: 'flex-end' },
-                opacity: 0,
-                animation: 'fadeUp 0.8s ease-out forwards',
-                animationDelay: '0.2s',
-              }}
-            >
-              <Box
-                sx={{
-                  width: '100%',
-                  maxWidth: { xs: '100%', md: '450px' },
-                  maxHeight: { xs: 'none', md: '280px' },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflowY: 'auto',
-                  pr: 0.5,
-
-                  '&::-webkit-scrollbar': {
-                    width: '5px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                    borderRadius: '4px',
-                  },
-                }}
-              >
-                {topRightContent}
-              </Box>
-            </Box>
-          )}
+            {title}
+          </Typography>
         </Box>
 
-        {bottomContent && (
-          <Box
+        <Grid
+          container
+          spacing={{ xs: 3, md: 5 }}
+          alignItems="stretch"
+          sx={{
+            width: '100%',
+            margin: 0,
+            '& .MuiGrid-item': { pl: { xs: 0, md: 5 }, pt: { xs: 3, md: 5 } }
+          }}
+        >
+          <Grid
+            item
+            xs={12}
+            md={6}
             sx={{
-              width: '100%',
+              opacity: 0,
+              animation: 'fadeUp 0.8s ease-out forwards',
+              animationDelay: '0.2s',
+            }}
+          >
+             <Box sx={{ width: { xs: '100%', md: '600px' }, height: '100%' }}>
+              {bottomContent}
+            </Box>
+          </Grid>
+
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
               opacity: 0,
               animation: 'fadeUp 0.8s ease-out forwards',
               animationDelay: '0.4s',
             }}
           >
-            {bottomContent}
-          </Box>
-        )}
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                overflowY: 'auto',
+                pr: 0.5,
+                '&::-webkit-scrollbar': { width: '5px' },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                  borderRadius: '4px',
+                },
+              }}
+            >
+              {topRightContent}
+            </Box>
+          </Grid>
+        </Grid>
+
       </Box>
     </PageWrapper>
   );
