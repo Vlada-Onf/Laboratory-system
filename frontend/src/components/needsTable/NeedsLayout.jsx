@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Stack } from '@mui/material';
 import NeedsTable from './NeedsTable';
-import AiStockPredictionCard from './AiStockPredictionCard';
+import AiStockPredictionCard from './AIStockPredictionCard';
 
 const NeedsLayout = () => {
   return (
