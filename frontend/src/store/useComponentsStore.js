@@ -7,6 +7,8 @@ export const useComponentsStore = create((set, get) => ({
   isLoading: false,
   currentComponent: null,
   editModal: { open: false, component: null },
+  statForecast: [],
+  aiForecast: [],
 
   addComponent: async (formData, file) => {
     console.log('addComponent ОТРИМАВ:', {
@@ -196,4 +198,44 @@ export const useComponentsStore = create((set, get) => ({
   openEditModal: (component) => set({ editModal: { open: true, component } }),
   closeEditModal: () => set({ editModal: { open: false, component: null } }),
   setCurrentComponent: (component) => set({ currentComponent: component }),
+
+  fetchStatForecast: async () => {
+    set({ isLoading: true });
+    try {
+      const { data } = await apiClient.get('/components/forecast');
+      set({ statForecast: data });
+      return data;
+    } catch (error) {
+      console.error('fetchStatForecast FAILED:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchAiForecast: async () => {
+    set({ isLoading: true });
+    try {
+      const { data } = await apiClient.get('/components/forecast/ai');
+      set({ aiForecast: data });
+      return data;
+    } catch (error) {
+      console.error('fetchAiForecast FAILED:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  autofillComponentData: async (payload) => {
+    set({ isLoading: true });
+    try {
+      const { data } = await apiClient.post('/components/autofill', payload);
+      console.log('ШІ Автозаповнення успішне:', data);
+      return data;
+    } catch (error) {
+      console.error('autofillComponentData FAILED:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  }
 }));
