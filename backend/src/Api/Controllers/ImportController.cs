@@ -12,7 +12,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("import")]
-    [AllowAnonymous]
+    [Authorize]
     public class ImportController : ControllerBase
     {
         private readonly IGroqService _groqService;
