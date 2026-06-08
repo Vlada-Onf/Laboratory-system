@@ -80,7 +80,7 @@ const UsersTable = () => {
           lastName={params.row.lastName}
         />
       ),
-      minWidth: 270
+      minWidth: 550
     },
     {
       field: 'role',
@@ -127,7 +127,7 @@ const UsersTable = () => {
       headerName: 'Дата реєстрації',
       flex: 2,
       valueFormatter: (value) => new Date(value).toLocaleDateString('uk-UA'),
-      minWidth: 150
+      minWidth: 100
     },
     {
       field: 'active',
